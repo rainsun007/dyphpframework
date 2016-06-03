@@ -106,7 +106,7 @@ class DyPhpConfig{
 
         $configArr = array(
             'db','cache','cookie','urlManager','params','aliasMap','hooks',
-            'errorHandler','messageHandler','loginHandler','appName','secretKey','appID','env','appPath'
+            'errorHandler','messageHandler','loginHandler','appName','secretKey','appID','env'
         );
         foreach($configArr as $key=>$val){
             if (array_key_exists($val, $config)) {
