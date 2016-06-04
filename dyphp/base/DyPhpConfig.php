@@ -7,9 +7,9 @@
  **/
 
 //默认controller配制
-define('DYPHP_DEFAULT_CONTROLLER', 'app');
+defined('DYPHP_DEFAULT_CONTROLLER') or define('DYPHP_DEFAULT_CONTROLLER', 'app');
 //默认action配制
-define('DYPHP_DEFAULT_ACTION', 'index');
+defined('DYPHP_DEFAULT_ACTION') or define('DYPHP_DEFAULT_ACTION', 'index');
 
 //简单别名
 class DyCfg extends DyPhpConfig{
