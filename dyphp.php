@@ -13,7 +13,7 @@ defined('EXT') or define('EXT', '.php');
 //简单别名
 class Dy extends DyPhpBase{}
 
-/**
+/** 
  * base class 
  **/
 class DyPhpBase{
