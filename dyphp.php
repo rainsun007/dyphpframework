@@ -128,6 +128,24 @@ class DyPhpBase{
         }
     }
 
+
+    /**
+     * @brief    注册自动加载
+     * @param    $autoload 自动加载函数
+     * @param    $replace  是否替换框架和自动加载方法
+     * @return   
+     **/
+    public static function autoloadRegister($callback,$replace=false){
+        spl_autoload_unregister(array('DyPhpBase', 'autoload'));
+        if($replace){
+            spl_autoload_register($callback);
+        }else{
+            spl_autoload_register($callback);
+            spl_autoload_register(array('DyPhpBase', 'autoload'));
+        }
+    }
+
+
     /**
      * 运行时间
      * @return float   seconds
@@ -264,9 +282,9 @@ class DyPhpBase{
         //'$_SERVER $_FILES $_COOKIE $_SESSION GD PDO mb_substr iconv_substr iconv  mcrypt';
         $result = apache_get_modules();
         if(in_array('mod_rewrite', $result)) {
-            echo 'support';
+            echo 'apache rewrite support';
         } else {
-            echo 'unsupport';
+            echo 'apache rewrite unsupport';
         }
         echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.2.2', '>=') ? 'OK' : 'minimum version of 5.2.2');
         exit;

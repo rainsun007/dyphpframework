@@ -6,7 +6,7 @@
  * @copyright Copyright 2011 dyphp.com 
  **/
 class DyPhpRoute{
-    private static $defaultController = DYPHP_DEFAULT_CONTROLLER;
+    //url重写后正则匹配到的Get参数
     private static $regularGetParams = array();
 
     /**
@@ -22,15 +22,19 @@ class DyPhpRoute{
             $action = isset($matchArr['action']) ? $matchArr['action'] : '';
             self::runToController(array('c'=>$matchArr['controller'],'a'=>$action));
         }else{
-            if(isset($_GET['ca']) && !empty(strip_tags($_GET['ca']))){
+            if(isset($_GET['ca'])){
                 $ca = strip_tags($_GET['ca']);
+                if(empty($ca)){
+                    self::runToController();
+                    return;
+                }
                 $caArr = explode('.',$ca);
                 if(count($caArr) > 2){
                     $action = substr(strrchr($ca,"."),1);
                     array_pop($caArr);
                     $controller = implode('_',$caArr);
                 }else{
-                    $controller = isset($caArr[0]) ? $caArr[0] : self::$defaultController;
+                    $controller = isset($caArr[0]) ? $caArr[0] : DYPHP_DEFAULT_CONTROLLER;
                     $action = isset($caArr[1]) ? $caArr[1] : '';
                 }
                 self::runToController(array('c'=>$controller,'a'=>$action));
@@ -50,7 +54,7 @@ class DyPhpRoute{
             die('invoke error: <controller> [<action>] [<param1> <param2> ...]');
         }
 
-        $controller = isset($_SERVER['argv'][0]) ? $_SERVER['argv'][0] : self::$defaultController;
+        $controller = isset($_SERVER['argv'][0]) ? $_SERVER['argv'][0] : DYPHP_DEFAULT_CONTROLLER;
         $action = 'index';
         $params = array();
         if(isset($_SERVER['argv'][1])){
@@ -94,7 +98,7 @@ class DyPhpRoute{
 
         $controllerArgs = self::urlCrop();
         if($controllerArgs == "" || $controllerArgs == false){
-            DyPhpController::run(self::$defaultController);
+            DyPhpController::run(DYPHP_DEFAULT_CONTROLLER);
             return;
         }
 
