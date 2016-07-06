@@ -12,6 +12,7 @@ class DyPhpRoute{
     /**
      * web路由入口
      * $_GET保留key:ca,ext_name
+     * 支持get请求以ca=module.controller.action的方式访问
      **/
     public static function runWeb(){  
         $matchArr = self::urlManager();

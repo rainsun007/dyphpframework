@@ -240,7 +240,7 @@ class DyRequest{
         }
 
         $value = $methodArr[$paramKey];
-        if (get_magic_quotes_gpc()){
+        if(get_magic_quotes_gpc()){
             $value = stripcslashes($value);
         }
         return $value;

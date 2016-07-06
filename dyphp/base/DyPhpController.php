@@ -28,7 +28,7 @@ class DyPhpController{
     //controller单例控制
     private static $incController = array();
 
-    //设置所有action未登陆禁止访问 为true时needLogin方法将无效
+    //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginUri属性不受限制）
     protected $allNeedLogin = false;
 
     //当前运行的controller及action
@@ -59,14 +59,14 @@ class DyPhpController{
 
     /**
      * 运行controller入口
-     * 支持直接调用及url调用path_nameController格式  支持直接调用path/path/nameController 格式
+     * 支持系统内部直接调用本方法
+     * 支持url以module_controller_action或module/controller/action的格式调用
      * @param string controller 
      * @param string action
      * @param array  参数
      **/
     final public static function run($controllerPname,$action='',$params=array()){
         //controller 解析 
-        //支持直接调用及url调用 path_nameController,path/nameController 格式
         $controllerPname = trim(str_replace('_','/',$controllerPname),'/'); 
         $pos = strrpos($controllerPname,'/');
         $controllerName = $pos === false ? ucfirst($controllerPname) : ucfirst(substr($controllerPname,$pos+1));
