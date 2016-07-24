@@ -16,7 +16,7 @@ class DyPhpView{
     //模板数据
     private $viewData = array();
 
-    //主题 使用该参数后DyPhpUserIdentity中的defaultTheme设置将无效
+    //主题
     public $defaultTheme = 'default';
     //默认使用的layout文件
     public $defaultLayout = 'main';

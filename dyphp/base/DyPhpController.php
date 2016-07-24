@@ -33,8 +33,9 @@ class DyPhpController{
 
     //当前运行的controller及action
     protected $cid = '';
-    protected $pcid = '';
     protected $aid = '';
+    protected $pcid = '';
+    protected $module = '';
 
     /**
      * @brief   在beforeAction之前执行,可以重写此方法实现自己的业务逻辑
@@ -85,8 +86,10 @@ class DyPhpController{
         $controllerRun = new $controller;
         $controllerRun->cid = self::lcfirst($controllerName);
         $controllerRun->pcid = self::lcfirst($controllerPname);
+        $controllerRun->module = rtrim(self::lcfirst($controllerPath),'/');
         DyPhpBase::app()->cid = $controllerRun->cid;
         DyPhpBase::app()->pcid = $controllerRun->pcid;
+        DyPhpBase::app()->module = $controllerRun->module;
         DyPhpBase::app()->runingController = $controllerRun;
         
 
@@ -106,7 +109,7 @@ class DyPhpController{
         }
 
         if(!in_array(strtolower($actionNameStr),$denyAccess) || (!DyPhpBase::app()->auth->isGuest() && in_array(strtolower($actionNameStr),$denyAccess))){
-            $controllerRun->time = isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : time();
+            $controllerRun->time = time();
             $controllerRun->datetime = date("Y-m-d H:i:s",$controllerRun->time);
             $controllerRun->date = date("Y-m-d",$controllerRun->time);
 

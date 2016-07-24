@@ -18,7 +18,6 @@ class DyPhpModel{
 
     //表名
     protected $tableName = '';
-    private $isTablePrefix = false;
 
     //当前时间戳
     protected $time = 0;
@@ -40,7 +39,7 @@ class DyPhpModel{
     private $version = '';
 
     protected function __construct(){
-        $this->time = isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : time();
+        $this->time = time();
         $this->datetime = date("Y-m-d H:i:s",$this->time);
         $this->date = date("Y-m-d",$this->time);
         $this->init();
@@ -314,12 +313,15 @@ class DyPhpModel{
             }
         }
 
-        if($this->tableName == ""){
+        if(!isset($dbConfigArr['tablePrefix'])){
+            $dbConfigArr['tablePrefix'] = '';
+        }
+
+        if(empty($this->tableName)){
             $this->tableName = !function_exists('get_called_class') ? $dbConfigArr['tablePrefix'].get_class($this) : $dbConfigArr['tablePrefix'].get_called_class();
         }else{
-            $this->tableName = $this->isTablePrefix ? $this->tableName : $dbConfigArr['tablePrefix'].$this->tableName;
+            $this->tableName = $dbConfigArr['tablePrefix'].$this->tableName;
         }
-        $this->isTablePrefix = true;
         return DyPhpModelManage::instance($dbConfigArr,$this->tableName,$this->dbType,$this->isPdo);
     }
 

@@ -298,12 +298,15 @@ final class DyPhpApp{
     //调用的controller名
     public $cid = '';
 
-    //多级调用的controller名
+    //调用的module/controller名
     public $pcid = '';
 
     //调用的action名
     public $aid = '';
 
+    //调用的module名
+    public $module = '';
+    
     //当前运行的controller实例
     public $runingController = null;
 

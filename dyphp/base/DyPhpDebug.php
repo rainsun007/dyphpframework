@@ -95,7 +95,7 @@ class DyPhpDebug{
 
         $paramsArr = array(
             'RUNTIME' => '<font color="#0080FF">'.DyPhpBase::execTime().'seconds</font> '.' <font color="#FFA0A0">Memory:'.$usageMemory.'</font> @'. $_SERVER['SERVER_SOFTWARE'],
-            'EXECUTE' => 'Controller:<font color="#0080FF">'.DyPhpBase::app()->cid.'</font> Action:<font color="#0080FF">'.DyPhpBase::app()->aid.'</font>',
+            'EXECUTE' => 'Module:<font color="#0080FF">'.DyPhpBase::app()->module.'</font> Controller:<font color="#0080FF">'.DyPhpBase::app()->cid.'</font> Action:<font color="#0080FF">'.DyPhpBase::app()->aid.'</font>',
             'SESSION' => isset($_SESSION) ? $_SESSION : array(),
             'COOKIE' => isset($_COOKIE) ? $_COOKIE : array(),
             'POST' => isset($_POST) ? $_POST : array(),
