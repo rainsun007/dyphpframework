@@ -12,14 +12,13 @@ class DyPhpDebug{
         'titleTr'=>'background:#666666;',
         'titleTd'=>'padding:3px 10px;border:1px solid #666666;',
         'tdKey'=>'padding-left:5px;padding-right:5px;width:45px;border:1px solid #3D4F52;text-align:center;',
-        'tdVal'=>'padding:0px 2px;word-break:break-all;word-wrap:break-word;',
-        'item'=>'border:1px solid #3D4F52;margin-top:1px;margin-bottom:1px;padding:2px 5px;height:30px;',
-        'item2'=>'border:1px solid #3D4F52;margin-top:1px;margin-bottom:1px;padding:2px 5px;',
-        'c1'=>'#BDB76B;',
-        'c2'=>'#87CEEB;',
-        'obj1'=>'padding-left:10px;color:#98FB98',
-        'obj2'=>'padding-left:10px;color:#0080FF',
-        'obj3'=>'padding-left:10px;color:#CD5C5C',
+        'tdVal'=>'padding:0px 2px;word-break:break-all;word-wrap:break-word;', //主体内容td
+        'item'=>'border:1px solid #3D4F52;margin-top:1px;margin-bottom:1px;padding:2px 5px;height:auto;',  //tdval样式的子样式
+        'c1'=>'#BDB76B;', //行字体颜色1
+        'c2'=>'#87CEEB;', //行字体颜色2
+        'obj1'=>'padding-left:10px;color:#98FB98', //file
+        'obj2'=>'padding-left:10px;color:#0080FF', //sql
+        'obj3'=>'padding-left:10px;color:#CD5C5C', //param
         'total'=>'padding-right:10px;text-align:right;border:1px solid #3D4F52;',
     );
 
@@ -73,7 +72,7 @@ class DyPhpDebug{
         foreach(self::$queries as $key => $query) {
             echo '<tr style="color:'.($key%2 == 1?self::$styles['c1']:self::$styles['c2']).'">';
             echo '<td style="'.self::$styles['tdKey'].'">'.$key.'</td>
-                <td style="'.self::$styles['tdVal'].'">'.'<div style="'.self::$styles['item2'].'">'.DyFilter::html($query['sql']).self::mysqlExplain($query['explain']).'</div></td>
+                <td style="'.self::$styles['tdVal'].'">'.'<div style="'.self::$styles['item'].'">'.DyFilter::html($query['sql']).self::mysqlExplain($query['explain']).'</div></td>
                 <td style="'.self::$styles['tdKey'].'width:100px;">'.self::getReadableTime($query['time']).'<br /></td>';
             echo '</tr>';
             $time += $query['time'];
@@ -111,7 +110,7 @@ class DyPhpDebug{
             echo '<td style="'.self::$styles['tdVal'].'">';
             if(is_array($val)){
                 if(empty($val)){
-                    echo '<div style="'.self::$styles['item'].'"></div>';
+                    echo '<div style="'.self::$styles['item'].'">null</div>';
                     $i++;
                     continue;
                 }
@@ -119,7 +118,7 @@ class DyPhpDebug{
                 foreach($val as $k=>$v){
                     if($cookieArr && isset($cookieArr['prefix']) && !empty($cookieArr['prefix'])){
                         if($cookieArr['prefix'] != substr($k,0,strlen($cookieArr['prefix']))){
-                            echo '<div style="'.self::$styles['item'].'"></div>';
+                            echo '<div style="'.self::$styles['item'].'">null</div>';
                             continue;
                         }
                         $v = DyCookie::get(substr($k,strlen($cookieArr['prefix'])));

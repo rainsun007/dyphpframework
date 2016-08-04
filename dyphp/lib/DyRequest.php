@@ -315,7 +315,7 @@ class DyRequest{
     }
 
     /**
-     * @brief    使用curl发送请求
+     * @brief    使用curl发送post请求
      * @param    $postUrl
      * @param    $postString
      * @param    $timeOut
