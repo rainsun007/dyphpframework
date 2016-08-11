@@ -60,7 +60,9 @@ class DyString{
             if(!isset($re[1])){
                 return '';
             }else{
-                if($re[1] == 0){
+                if(!is_numeric($re[1])){
+                    return '';
+                }elseif($re[1] == 0){
                     return $data[0];
                 }elseif($re[1] == -1){
                     return '';
