@@ -203,5 +203,20 @@ class DyTools{
         $dataArr = array('status'=>$status,'code'=>$code,'message'=>$message,'data'=>$data);
         return json_encode($dataArr);
     }
+
+    /**
+     * @brief    获取6位数字的验证码
+     * @return   
+     **/
+    public static function getVerifyCode(){
+        $numArr = range(0,9);
+        $randArr = array();
+        for($i=0;$i<6;$i++){
+            $randArr[] = array_rand($numArr);
+        }
+        shuffle($randArr);
+        return join("",$randArr);
+    }
+
 }
 
