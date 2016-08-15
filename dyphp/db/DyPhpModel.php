@@ -35,9 +35,6 @@ class DyPhpModel{
     //是否使用pdo
     private $isPdo = false;
 
-    //db版本
-    private $version = '';
-
     protected function __construct(){
         $this->time = time();
         $this->datetime = date("Y-m-d H:i:s",$this->time);
@@ -322,7 +319,7 @@ class DyPhpModel{
         }else{
             $this->tableName = $dbConfigArr['tablePrefix'].$this->tableName;
         }
-        return DyPhpModelManage::instance($dbConfigArr,$this->tableName,$this->dbType,$this->isPdo);
+        return DyPhpModelManage::instance($dbConfigArr,$this->tableName,$this->dbType,$this->isPdo,$dbms);
     }
 
     /**
@@ -443,8 +440,7 @@ class DyPhpModel{
         }
 
         if(DyPhpBase::$debug){
-            $version = $this->version ? $this->version : $this->getInstance()->getVersion();
-            $explain = version_compare($version, '5.6', '>=');
+            $explain = version_compare($this->getVersion(), '5.6', '>=');
             $this->logQuery($sql, $start,$explain);
         }
         return $result;
@@ -577,9 +573,9 @@ final class DyPhpModelManage {
     /**
      * 单列化数据库 
      **/
-    public static function instance($dbConfigArr,$prefixTableName,$dbType,$isPdo){
-        $insKey = $dbConfigArr['host'].'_'.$dbConfigArr['dbName'];
-        $mins = self::getInstance('model_'.$insKey);
+    public static function instance($dbConfigArr,$prefixTableName,$dbType,$isPdo,$dbms){
+        $insKey = $dbms.'_'.$dbConfigArr['host'].'_'.$dbConfigArr['dbName'];
+        $mins = self::getInstance($insKey);
         if($mins){
             $mins->tableName = $prefixTableName;
             return $mins;
@@ -592,7 +588,7 @@ final class DyPhpModelManage {
         $driver->dbConfigArr = $dbConfigArr;
         $driver->run();
 
-        self::setInstance('model_'.$insKey,$driver);
+        self::setInstance($insKey,$driver);
         return $driver;
     }
 
