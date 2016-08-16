@@ -174,7 +174,15 @@ class DyGDImgRealize{
             return 10;
         }
 
-        //上传出错判断 1~6
+        //上传出错判断 1~7
+        //0; 文件上传成功。
+        //1; 超过了文件大小php.ini中即系统设定的大小。
+        //2; 超过了文件大小MAX_FILE_SIZE 选项指定的值。
+        //3; 文件只有部分被上传。
+        //4; 没有文件被上传。
+        //5; 服务器临时文件夹丢失
+        //6; 找不到临时文件夹。PHP 4.3.10 和 PHP 5.0.3 引进。 
+        //7; 文件写入失败。PHP 5.1.0 引进。 
         $upPic = $_FILES[$upFileName];
         if($upPic['error'] > 0){
             return $upPic['error'];
