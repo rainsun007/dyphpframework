@@ -177,7 +177,7 @@ class DyGDImgRealize{
         //上传出错判断 1~6
         $upPic = $_FILES[$upFileName];
         if($upPic['error'] > 0){
-            return = $upPic['error'];
+            return $upPic['error'];
         }
 
         //文件大小判断(自定义阀值)
