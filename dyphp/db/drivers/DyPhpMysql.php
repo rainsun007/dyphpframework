@@ -3,7 +3,7 @@
  * mysql驱动类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright 2011 dyphp.com
  **/
 final class DyPhpMysql{
     private $host = '';
@@ -50,13 +50,13 @@ final class DyPhpMysql{
             mysql_query("SET NAMES {$this->charset}");
             return $this;
         }catch(Exception $e){
-            DyPhpBase::throwException("can't connect to Database", '('.$e->getMessage().')','mysql run error','dbException');
+            DyPhpBase::throwException("can't connect to Database", '('.$e->getMessage().')'.'--mysql run error',$e->getCode(),$e);
         }
     }
 
     /**
      * @brief    事务开启
-     * @return   
+     * @return
      **/
     public function beginTransaction(){
         mysql_query('SET autocommit=0', $this->conn);
@@ -65,7 +65,7 @@ final class DyPhpMysql{
 
     /**
      * @brief    事务提交
-     * @return   
+     * @return
      **/
     public function commit(){
         mysql_query('COMMIT', $this->conn);
@@ -74,7 +74,7 @@ final class DyPhpMysql{
 
     /**
      * @brief    事务回滚
-     * @return   
+     * @return
      **/
     public function rollBack(){
         mysql_query('ROLLBACK', $this->conn);
@@ -82,9 +82,9 @@ final class DyPhpMysql{
     }
 
     /**
-     * @brief    写入执行 
+     * @brief    写入执行
      * @param    $query
-     * @return   
+     * @return
      **/
     public function exec($query){
         $this->result = mysql_query($query, $this->conn);
@@ -98,7 +98,7 @@ final class DyPhpMysql{
     /**
      * @brief    读取执行
      * @param    $query
-     * @return   
+     * @return
      **/
     public function query($query){
         $this->result = mysql_query($query, $this->conn);
@@ -110,7 +110,7 @@ final class DyPhpMysql{
 
     /**
      * @brief    获取插入ID
-     * @return   
+     * @return
      **/
     public function lastInsertId(){
         return mysql_insert_id($this->conn);
@@ -118,7 +118,7 @@ final class DyPhpMysql{
 
     /**
      * @brief    获取单条数据
-     * @return   
+     * @return
      **/
     public function fetch(){
         return mysql_fetch_object($this->result);
@@ -126,29 +126,29 @@ final class DyPhpMysql{
 
     /**
      * @brief    获取多条记录
-     * @return   
+     * @return
      **/
     public function fetchAll(){
         $data = array();
-        while ($row = mysql_fetch_assoc($this->result)) { 
-            $data[] = (object)$row; 
+        while ($row = mysql_fetch_assoc($this->result)) {
+            $data[] = (object)$row;
         }
         return $data;
     }
 
     /**
      * @brief    获取总数
-     * @return   
+     * @return
      **/
     public function count(){
         $fetch = mysql_fetch_array($this->result);
-        return isset($fetch['dycount']) ? $fetch['dycount'] : mysql_num_rows($this->result); 
+        return isset($fetch['dycount']) ? $fetch['dycount'] : mysql_num_rows($this->result);
     }
 
 
     /**
      * @brief    获取数据大小
-     * @return   
+     * @return
      **/
     public function getDataSize(){
         $this->query("SHOW TABLE STATUS");
@@ -166,12 +166,12 @@ final class DyPhpMysql{
 
     /**
      * @brief    获取版本号
-     * @return   
+     * @return
      **/
     public function getVersion(){
         $this->query("SELECT VERSION() as dbversion");
         $version = $this->fetch();
-        return $version ? $version->dbversion : 'unknown'; 
+        return $version ? $version->dbversion : 'unknown';
     }
 
 
@@ -186,4 +186,4 @@ final class DyPhpMysql{
         }
     }
 
-}        
+}
