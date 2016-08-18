@@ -82,6 +82,7 @@ class DyPhpBase{
     public static function showMsg($params=array(),$exit = true){
         $params = is_array($params) ? $params : (array)$params;
         $msgHandler = explode('/',trim(DyPhpConfig::item('messageHandler'),'/'));
+        Dy::app()->preModule = Dy::app()->module;
         DyPhpController::run($msgHandler[0],$msgHandler[1],$params);
         if ($exit){exit;}
     }
@@ -307,6 +308,9 @@ final class DyPhpApp{
 
     //调用的module名
     public $module = '';
+
+    //此针对errorHandler，messageHandler信息接管，记录前一次运行的module
+    public $preModule = '';
 
     //当前运行的controller实例
     public $runingController = null;

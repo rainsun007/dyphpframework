@@ -3,7 +3,7 @@
  * 控制器类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright 2011 dyphp.com
  **/
 class DyPhpController{
     //默认使用的action
@@ -31,7 +31,7 @@ class DyPhpController{
     //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginUri属性不受限制）
     protected $allNeedLogin = false;
 
-    //当前运行的controller及action
+    //当前运行的module,controller,action
     protected $cid = '';
     protected $aid = '';
     protected $pcid = '';
@@ -39,14 +39,14 @@ class DyPhpController{
 
     /**
      * @brief   在beforeAction之前执行,可以重写此方法实现自己的业务逻辑
-     * @return   
+     * @return
      **/
     protected function init(){
     }
 
     /**
      * @brief   在action之前执行,可以重写此方法实现自己的业务逻辑
-     * @return   
+     * @return
      **/
     protected function beforeAction(){
     }
@@ -62,13 +62,13 @@ class DyPhpController{
      * 运行controller入口
      * 支持系统内部直接调用本方法
      * 支持url以module_controller_action或module/controller/action的格式调用
-     * @param string controller 
+     * @param string controller
      * @param string action
      * @param array  参数
      **/
     final public static function run($controllerPname,$action='',$params=array()){
-        //controller 解析 
-        $controllerPname = trim(str_replace('_','/',$controllerPname),'/'); 
+        //controller 解析
+        $controllerPname = trim(str_replace('_','/',$controllerPname),'/');
         $pos = strrpos($controllerPname,'/');
         $controllerName = $pos === false ? ucfirst($controllerPname) : ucfirst(substr($controllerPname,$pos+1));
         $controllerPath = $pos === false ? '' : substr($controllerPname,0,$pos+1);
@@ -79,7 +79,7 @@ class DyPhpController{
         }
 
         //controller单例加载
-        if(!in_array($controller,self::$incController)){ 
+        if(!in_array($controller,self::$incController)){
             include $controllerFile;
             self::$incController[] = $controller;
         }
@@ -91,7 +91,7 @@ class DyPhpController{
         DyPhpBase::app()->pcid = $controllerRun->pcid;
         DyPhpBase::app()->module = $controllerRun->module;
         DyPhpBase::app()->runingController = $controllerRun;
-        
+
 
         //action 解析
         $actionNameStr = $action ? $action : $controllerRun->defaultAction;
@@ -134,7 +134,7 @@ class DyPhpController{
     /**
      * @brief    首字母小写
      * @param    $string
-     * @return   
+     * @return
      **/
     protected static function lcfirst($string){
         if ( false === function_exists('lcfirst') ){
@@ -143,7 +143,7 @@ class DyPhpController{
                 return '';
             }
             $string{0} = strtolower($string{0});
-            return $string; 
+            return $string;
         }else{
             return lcfirst($string);
         }
@@ -153,4 +153,3 @@ class DyPhpController{
         DyPhpBase::throwException('method does not exist', $key);
     }
 }
-

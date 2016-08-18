@@ -102,6 +102,7 @@ class DyPhpException extends Exception{
             self::$errorHandlerInvoked = true;
             $errorHandlerArr = explode('/',trim(DyPhpConfig::item('errorHandler'),'/'));
             $exceptionMessage = array('dyExcType'=>$title,'errType'=>$errType,'msg'=>$message);
+            Dy::app()->preModule = Dy::app()->module;
             DyPhpController::run($errorHandlerArr[0],$errorHandlerArr[1],$exceptionMessage);
             return;
         }
