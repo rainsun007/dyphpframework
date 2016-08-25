@@ -3,7 +3,7 @@
  * 图片处理工具类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright 2011 dyphp.com
  **/
 class DyGDImg {
     private static $instance;
@@ -18,7 +18,7 @@ class DyGDImg {
 
     /**
      * 按坐标及宽高生成缩略图(此方法适合用于前端可视化切图)
-     * 
+     *
      * @param string 源图片地址 如：$_FILES['files']['tmp_name']
      * @param string 保存生成图像的地址(目录如不存在会自动创建)
      * @param string 生成图像的文件名
@@ -26,9 +26,9 @@ class DyGDImg {
      * @param int    新图的高度
      * @param int    截图距原图左上角的宽
      * @param int    截图距原图左上角的高
-     * 
+     *
      * 实例
-     * DyGDImg::resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50);
+     * DyGDImg::cut('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50);
      **/
     public static function cut($srcimg,$save_path,$save_name,$width,$heigth,$srcx=0,$srcy=0){
         self::instance()->resize($srcimg,$save_path,$save_name,$width,$heigth,$srcx,$srcy,true);
@@ -39,13 +39,13 @@ class DyGDImg {
 
     /**
      * 按照原图比例生成缩略图
-     * 
+     *
      * @param string 源图片地址 如：$_FILES['files']['tmp_name']
      * @param string 保存生成图像的地址(目录如不存在会自动创建)
      * @param string 生成图像的文件名
      * @param int    新图的宽度
      * @param int    新图的高度
-     * 
+     *
      * 实例
      * DyGDImg::resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125);
      **/
@@ -93,11 +93,11 @@ class DyGDImgRealize{
     //实际宽度
     private $width;
     //实际高度
-    private $height; 
+    private $height;
     //截图距原图左上角的宽
     private $src_x;
     //截图距原图左上角的高
-    private $src_y;    
+    private $src_y;
     //是否裁图
     private $cut;
     //源图象
@@ -111,7 +111,7 @@ class DyGDImgRealize{
     //保存切图的路径
     private $resize_save_path;
     //临时创建的图象
-    private $im;  
+    private $im;
 
     /** 上传使用参数 **/
     public $save_path = '';
@@ -127,7 +127,7 @@ class DyGDImgRealize{
 
     /**
      * 利用PHP的GD库生成缩略图。
-     * 
+     *
      * @param string 源图片地址$_FILES['files']['tmp_name']
      * @param string 保存生成图像的地址
      * @param string 生成图像的文件名
@@ -136,7 +136,7 @@ class DyGDImgRealize{
      * @param int    截图距原图左上角的宽
      * @param int    截图距原图左上角的高
      * @param bool   是否裁图，true按坐标及宽高生成缩略图(此方法适合用于前端可视化切图)，false则按照原图比例生成缩略图
-     * 
+     *
      * 实例
      * $image = new DyImage();
      * $image->resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50,true);
@@ -164,7 +164,7 @@ class DyGDImgRealize{
 
     /**
      * 上传图片
-     * 
+     *
      * @param string     表单控件名称
      * @return bool|int
      */
@@ -181,8 +181,8 @@ class DyGDImgRealize{
         //3; 文件只有部分被上传。
         //4; 没有文件被上传。
         //5; 服务器临时文件夹丢失
-        //6; 找不到临时文件夹。PHP 4.3.10 和 PHP 5.0.3 引进。 
-        //7; 文件写入失败。PHP 5.1.0 引进。 
+        //6; 找不到临时文件夹。PHP 4.3.10 和 PHP 5.0.3 引进。
+        //7; 文件写入失败。PHP 5.1.0 引进。
         $upPic = $_FILES[$upFileName];
         if($upPic['error'] > 0){
             return $upPic['error'];
@@ -225,12 +225,12 @@ class DyGDImgRealize{
         } else {
             return 14;
         }
-    }	
+    }
 
 
 
     /**
-     * resize方法 
+     * resize方法
      **/
     private function getResize(){
         //裁图
@@ -240,7 +240,7 @@ class DyGDImgRealize{
             $src_x = $this->src_x;
             $src_y = $this->src_y;
             $newimg = imagecreatetruecolor($resize_width,$resize_height);
-            imagecopy($newimg, $this->im,0,0,$src_x,$src_y,$resize_width,$resize_height);    
+            imagecopy($newimg, $this->im,0,0,$src_x,$src_y,$resize_width,$resize_height);
         }else{
             //改变后的图象的比例
             $resize_ratio = $this->resize_width/$this->resize_height;
@@ -316,7 +316,7 @@ class DyGDImgRealize{
 
     /**
      * 移动上传的临时文件到指定位置
-     * 
+     *
      * @param string $tmp_file
      * @param string $new_file
      * @return bool
@@ -337,7 +337,7 @@ class DyGDImgRealize{
 
     /**
      * 检测目录是否存在
-     * 
+     *
      * @param string $dir
      * @return bool
      */

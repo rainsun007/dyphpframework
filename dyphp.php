@@ -215,7 +215,7 @@ class DyPhpBase{
         $excMessage = isset($message[$errorMessage]) ? $message[$errorMessage] : $errorMessage;
         if($previous){
             //现行版本只对数据库异常给应用一次可catch的机会
-            throw new Exception($prefix.' '.$excMessage, $code, $previous);
+            throw new Exception($prefix.' '.$excMessage, (int)$code, $previous);
         }else{
             $dyExce = new DyPhpException($prefix.' '.$excMessage, $code, $previous);
             $dyExce->appTrace();

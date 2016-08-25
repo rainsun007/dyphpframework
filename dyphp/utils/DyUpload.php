@@ -65,7 +65,7 @@ class DyUpload{
         //4; 没有文件被上传。
         //5; 服务器临时文件夹丢失
         //6; 找不到临时文件夹。PHP 4.3.10 和 PHP 5.0.3 引进。
-        //7; 文件写入失败。PHP 5.1.0 引进。 
+        //7; 文件写入失败。PHP 5.1.0 引进。
         $upPic = $_FILES[$upFileName];
         if($upPic['error'] > 0){
             return $upPic['error'];

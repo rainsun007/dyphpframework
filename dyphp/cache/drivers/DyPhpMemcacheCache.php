@@ -60,7 +60,11 @@ class DyPhpMemcacheCache extends DyPhpCache {
      * @return bool
      */
     public function set($key, $data='', $expire=null) {
-        return $this->connection->set($key, $data, 0, $expire);
+        if ($this->isMemd) {
+          return $this->connection->set($key, $data, $expire);
+        }else{
+          return $this->connection->set($key, $data, 0, $expire);
+        }
     }
 
     /**
