@@ -224,7 +224,7 @@ class DyGDImgRealize{
         //文件移动
         if (is_uploaded_file($upPic['tmp_name'])) {
             $this->save_path = rtrim($this->save_path,'/');
-            $this->path_name = $this->save_path . '/' . $this->save_name;
+            $this->path_name = $this->save_path . '/' . $this->save_name.'.'.$fileType;
             if ($this->moveUpload($upPic['tmp_name'], $this->path_name)) {
                 $this->fileSaveName = $this->save_name.'.'.$fileType;
                 return 0;

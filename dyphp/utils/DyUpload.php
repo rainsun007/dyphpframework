@@ -86,7 +86,7 @@ class DyUpload{
         //文件移动
         if (is_uploaded_file($upPic['tmp_name'])) {
             $this->savePath = rtrim($this->savePath,'/');
-            $pathName = $this->savePath . '/' . $this->saveName;
+            $pathName = $this->savePath . '/' . $this->saveName.'.'.$fileExtension;
             if ($this->moveUpload($upPic['tmp_name'], $pathName)) {
                 $this->fileSaveName = $this->saveName.'.'.$fileExtension;
                 return 0;
