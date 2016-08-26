@@ -10,6 +10,7 @@ class DyUpload{
     public $saveName = '';
     public $maxSize = 2;  //上传文件大小限制  单位MB
     private $extensions = array();
+    private $fileSaveName;
 
     /**
      * @brief    清除所有可以上传类型
@@ -87,6 +88,7 @@ class DyUpload{
             $this->savePath = rtrim($this->savePath,'/');
             $pathName = $this->savePath . '/' . $this->saveName;
             if ($this->moveUpload($upPic['tmp_name'], $pathName)) {
+                $this->fileSaveName = $this->saveName.'.'.$fileExtension;
                 return 0;
             } else {
                 return 13;
@@ -94,6 +96,13 @@ class DyUpload{
         } else {
             return 14;
         }
+    }
+
+    /**
+     * @brief  获取保存后的文件名
+     **/
+    public static function getFileSaveName(){
+        return $this->fileSaveName;
     }
 
     /**

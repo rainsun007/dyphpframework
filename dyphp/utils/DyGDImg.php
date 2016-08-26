@@ -74,6 +74,13 @@ class DyGDImg {
     }
 
     /**
+     * @brief  获取保存后的文件名
+     **/
+    public static function getFileSaveName(){
+        return self::instance()->fileSaveName;
+    }
+
+    /**
      * 无页面刷新框架上传 callback处理
      * @param string callback
      * @param string 返回上传状态
@@ -118,6 +125,7 @@ class DyGDImgRealize{
     public $save_name = '';
     public $extensions = array('jpg','gif','bmp','png');
     public $maxSize = 2097152;
+    public $fileSaveName;
 
     public function __construct(){
         if (!extension_loaded('gd') && !extension_loaded('gd2')){
@@ -218,7 +226,8 @@ class DyGDImgRealize{
             $this->save_path = rtrim($this->save_path,'/');
             $this->path_name = $this->save_path . '/' . $this->save_name;
             if ($this->moveUpload($upPic['tmp_name'], $this->path_name)) {
-                return true;
+                $this->fileSaveName = $this->save_name.'.'.$fileType;
+                return 0;
             } else {
                 return 13;
             }
