@@ -3,29 +3,29 @@
  * 公用方法工具类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright 2011 dyphp.com
  **/
 class DyTools{
     //-------------------------格式化-----------------------
     /**
      * 格式化字节
      * @param 字节数
-     * @param  
+     * @param
      **/
     public static function formatSize($size) {
         $sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
         $retstring = '%01.2f %s';
         $lastsizestring = end($sizes);
         foreach ($sizes as $sizestring) {
-            if ($size < 1024) { 
-                break; 
+            if ($size < 1024) {
+                break;
             }
-            if ($sizestring != $lastsizestring) { 
-                $size /= 1024; 
+            if ($sizestring != $lastsizestring) {
+                $size /= 1024;
             }
         }
-        if ($sizestring == $sizes[0]) { 
-            $retstring = '%01d %s'; 
+        if ($sizestring == $sizes[0]) {
+            $retstring = '%01d %s';
         }
         return sprintf($retstring, $size, $sizestring);
     }
@@ -34,7 +34,7 @@ class DyTools{
      * 格式化时间
      * @param type $time
      * @param type $period
-     * @return string 
+     * @return string
      */
     public static function formatTime($time,$period=false,$just=60,$minute=3600,$hour=86400){
         if($period){
@@ -54,7 +54,7 @@ class DyTools{
 
     /**
      * @brief    分类格式化
-     * @param    $items  
+     * @param    $items
      * foreach($nav as $val){
      *       $classArr[$val->id] = array(
      *           'id'=>$val->id,
@@ -63,21 +63,21 @@ class DyTools{
      *           'link'=>$val->cate_link,
      *       );
      * }
-     * @return   
+     * @return
      **/
-    public static function treeFormat($items) { 
+    public static function treeFormat($items) {
         foreach ($items as $item){
-            $items[$item['pid']]['child'][$item['id']] = &$items[$item['id']]; 
-        } 
+            $items[$item['pid']]['child'][$item['id']] = &$items[$item['id']];
+        }
         return isset($items[0]['child']) ? $items[0]['child'] : array();
-    } 
+    }
 
 
     //-------------------------文件，目录-----------------------
     /**
      * 创建目录
      *
-     * @param string 
+     * @param string
      * @param ctal
      * @return boolean
      */
@@ -95,7 +95,7 @@ class DyTools{
     /**
      * log记录
      * @param string  log信息
-     * @param string  log类型 
+     * @param string  log类型
      * @param string  log保存目录
      **/
     public static function logs($message,$type='info',$logRootDir=''){
@@ -115,9 +115,9 @@ class DyTools{
         $file = $logDir.date("Y-m-d",time()).'.log';
         $fp = fopen($file, "a");
         if ($fp) {
-            flock($fp, LOCK_EX);
+            //flock($fp, LOCK_EX);
             fwrite($fp, $data);
-            flock($fp, LOCK_UN);
+            //flock($fp, LOCK_UN);
             fclose($fp);
         }
     }
@@ -128,7 +128,7 @@ class DyTools{
      * @param    $cfgArr
      * @param    $configTemplate
      * @param    $config
-     * @return   
+     * @return
      **/
     public function setConfig($cfgArr,$configTemplate,$config) {
         if(!file_exists($configTemplate) || !file_exists($config)){
@@ -168,16 +168,16 @@ class DyTools{
      **/
     public static function getAnimal($year){
         $animal = array('猴','鸡','狗','猪','鼠','牛','虎','兔','龙','蛇','马','羊');
-        return $animal[$year%12]; 
+        return $animal[$year%12];
     }
 
     /**
      * 返回两个经纬度之间的直线距离
      *
      * @param double 经度1
-     * @param double 纬度1 
-     * @param double 经度2 
-     * @param double 纬度2 
+     * @param double 纬度1
+     * @param double 经度2
+     * @param double 纬度2
      * @return 单位：千米
      */
     public static function getDistance($lng1, $lat1, $lng2, $lat2){
@@ -196,8 +196,8 @@ class DyTools{
      * @param    $status    状态
      * @param    $code      代码
      * @param    $message   信息
-     * @param    $data      
-     * @return   
+     * @param    $data
+     * @return
      **/
     public static function apiJson($status=1,$code=200,$message='',$data=''){
         $dataArr = array('status'=>$status,'code'=>$code,'message'=>$message,'data'=>$data);
@@ -206,7 +206,7 @@ class DyTools{
 
     /**
      * @brief    获取6位数字的验证码
-     * @return   
+     * @return
      **/
     public static function getVerifyCode(){
         $numArr = range(0,9);
@@ -219,4 +219,3 @@ class DyTools{
     }
 
 }
-

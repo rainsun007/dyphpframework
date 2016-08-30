@@ -6,20 +6,11 @@
  * @copyright Copyright 2011 dyphp.com
  **/
 class DyUpload{
-    public $savePath = '';
-    public $saveName = '';
-    public $maxSize = 2;  //上传文件大小限制  单位MB
+    private $savePath = '';
+    private $saveName = '';
+    private $maxSize = 2;  //上传文件大小限制  单位MB
     private $extensions = array();
     private $fileSaveName;
-
-    /**
-     * @brief    清除所有可以上传类型
-     * @return
-     **/
-    public function cleanAllowExt(){
-        $this->extensions = array();
-        return $this;
-    }
 
     /**
      * @brief    设置扩展名
@@ -28,18 +19,22 @@ class DyUpload{
      * @return
      **/
     public function setAllowExt($ext){
-        if(empty($ext)){
-            return false;
-        }
-
         if(is_array($ext)){
-            array_merge($this->extensions,$ext);
-            return;
-        }
-
-        if(!in_array($ext,$this->extensions)){
+            $this->extensions = array_merge($this->extensions,$ext);
+        }elseif(!empty($ext) && !in_array($ext,$this->extensions)){
             $this->extensions[] = $ext;
         }
+        return $this;
+    }
+
+    /**
+     * @brief    设置上传文件大小限制
+     * @param    $maxSize  单位MB
+     * @return
+     **/
+    public function setMaxSize($maxSize){
+        $this->maxSize = $maxSize > 0 ? $maxSize : $this->maxSize;
+        return $this;
     }
 
     /**
@@ -150,270 +145,4 @@ class DyUpload{
             return mkdir($dir, 0755, true);
         }
     }
-
-    /**
-     * @brief    设置扩展名
-     * @return
-     **/
-    private function setExtensions(){
-        $this->extensions = array(
-            'apk',
-            '3gp',
-            'ai',
-            'aif',
-            'aifc',
-            'aiff',
-            'asc',
-            'atom',
-            'au',
-            'avi',
-            'bcpio',
-            'bin',
-            'bmp',
-            'cdf',
-            'cgm',
-            'class',
-            'cpio',
-            'cpt',
-            'csh',
-            'css',
-            'dcr',
-            'dif',
-            'dir',
-            'djv',
-            'djvu',
-            'dll',
-            'dmg',
-            'dms',
-            'doc',
-            'dtd',
-            'dv',
-            'dvi',
-            'dxr',
-            'eps',
-            'etx',
-            'exe',
-            'ez',
-            'flv',
-            'gif',
-            'gram',
-            'grxml',
-            'gtar',
-            'gz',
-            'hdf',
-            'hqx',
-            'htm',
-            'html',
-            'ice',
-            'ico',
-            'ics',
-            'ief',
-            'ifb',
-            'iges',
-            'igs',
-            'jnlp',
-            'jp2',
-            'jpe',
-            'jpeg',
-            'jpg',
-            'js',
-            'kar',
-            'latex',
-            'lha',
-            'lzh',
-            'm3u',
-            'm4a',
-            'm4p',
-            'm4u',
-            'm4v',
-            'mac',
-            'man',
-            'mathml',
-            'me',
-            'mesh',
-            'mid',
-            'midi',
-            'mif',
-            'mov',
-            'movie',
-            'mp2',
-            'mp3',
-            'mp4',
-            'mpe',
-            'mpeg',
-            'mpg',
-            'mpga',
-            'ms',
-            'msh',
-            'mxu',
-            'nc',
-            'oda',
-            'ogg',
-            'ogv',
-            'pbm',
-            'pct',
-            'pdb',
-            'pdf',
-            'pgm',
-            'pgn',
-            'pic',
-            'pict',
-            'png',
-            'pnm',
-            'pnt',
-            'pntg',
-            'ppm',
-            'ppt',
-            'ps',
-            'qt',
-            'qti',
-            'qtif',
-            'ra',
-            'ram',
-            'ras',
-            'rdf',
-            'rgb',
-            'rm',
-            'roff',
-            'rtf',
-            'rtx',
-            'sgm',
-            'sgml',
-            'sh',
-            'shar',
-            'silo',
-            'sit',
-            'skd',
-            'skm',
-            'skp',
-            'skt',
-            'smi',
-            'smil',
-            'snd',
-            'so',
-            'spl',
-            'src',
-            'sv4cpio',
-            'sv4crc',
-            'svg',
-            'swf',
-            't',
-            'tar',
-            'tcl',
-            'tex',
-            'texi',
-            'texinfo',
-            'tif',
-            'tiff',
-            'tr',
-            'tsv',
-            'txt',
-            'ustar',
-            'vcd',
-            'vrml',
-            'vxml',
-            'wav',
-            'wbmp',
-            'wbxml',
-            'webm',
-            'wml',
-            'wmlc',
-            'wmls',
-            'wmlsc',
-            'wmv',
-            'wrl',
-            'xbm',
-            'xht',
-            'xhtml',
-            'xls',
-            'xml',
-            'xpm',
-            'xsl',
-            'xslt',
-            'xul',
-            'xwd',
-            'xyz',
-            'zip',
-            'a',
-            'asf',
-            'asm',
-            'asx',
-            'bat',
-            'bz2',
-            'c',
-            'cab',
-            'cc',
-            'chm',
-            'com',
-            'conf',
-            'cpp',
-            'crt',
-            'csv',
-            'cxx',
-            'deb',
-            'der',
-            'diff',
-            'dot',
-            'ear',
-            'eml',
-            'f',
-            'f77',
-            'f90',
-            'for',
-            'gem',
-            'gemspec',
-            'h',
-            'hh',
-            'iso',
-            'jar',
-            'java',
-            'json',
-            'log',
-            'mbox',
-            'mdoc',
-            'mime',
-            'mml',
-            'mng',
-            'mp4v',
-            'msi',
-            'odp',
-            'ods',
-            'odt',
-            'p',
-            'pas',
-            'pem',
-            'pgp',
-            'pkg',
-            'pl',
-            'pm',
-            'pps',
-            'psd',
-            'py',
-            'rake',
-            'rar',
-            'rb',
-            'rpm',
-            'rss',
-            'ru',
-            's',
-            'sig',
-            'svgz',
-            'tbz',
-            'text',
-            'torrent',
-            'vcf',
-            'vcs',
-            'war',
-            'wma',
-            'wmx',
-            'wsdl',
-            'yaml',
-            'yml',
-            'sh',
-            'exe',
-            'bat',
-            'vbs',
-        );
-    }
-
 }

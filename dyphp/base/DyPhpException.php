@@ -162,7 +162,7 @@ class DyPhpException extends Exception{
             fwrite($fp, $data);
             //flock($fp, LOCK_UN);
             fclose($fp);
-            touch($file, time());
+            //touch($file, time());
         }
     }
 
