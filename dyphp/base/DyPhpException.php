@@ -155,6 +155,12 @@ class DyPhpException extends Exception{
 
         //按app类型写log信息
         $request = DyPhpBase::$appType == 'web' ? $_SERVER["REQUEST_URI"] : 'controller:'.DyPhpBase::app()->cid.' action:'.DyPhpBase::app()->aid;
+
+        //过滤掉无用的log
+        if($request == '/favicon.ico'){
+          return;
+        }
+
         $data = $formatTime.' '.$title.'['.self::getErrType().'] '.DyTools::getClientIp().' '.$request.PHP_EOL.$message.PHP_EOL.$traceString.PHP_EOL.PHP_EOL;
         $fp = fopen($file, "a");
         if ($fp) {
