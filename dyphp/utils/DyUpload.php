@@ -11,6 +11,7 @@ class DyUpload{
     private $maxSize = 2;  //上传文件大小限制  单位MB
     private $extensions = array();
     private $fileSaveName;
+    private $fileExtension;
 
     /**
      * @brief    设置扩展名
@@ -74,6 +75,7 @@ class DyUpload{
 
         //文件类型判断
         $fileExtension = strtolower(substr(strrchr($upPic['name'],"."),1));
+        $this->fileExtension = $fileExtension;
         if(!in_array($fileExtension,$this->extensions)){
             return 12;
         }
@@ -96,8 +98,15 @@ class DyUpload{
     /**
      * @brief  获取保存后的文件名
      **/
-    public static function getFileSaveName(){
+    public function getFileSaveName(){
         return $this->fileSaveName;
+    }
+
+    /**
+     * @brief  获取保存后的文件扩展名
+     **/
+    public function getFileExt(){
+        return $this->fileExtension;
     }
 
     /**

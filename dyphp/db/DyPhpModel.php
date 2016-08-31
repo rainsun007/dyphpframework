@@ -105,7 +105,7 @@ class DyPhpModel{
 
     /**
      * 更新数据
-     * @param array  array('classid'=>classid+1)
+     * @param array  array('classid'=>'classid+1')
      * @param string
      * @param array  array('classid')
      * @return int
