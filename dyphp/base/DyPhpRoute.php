@@ -1,9 +1,9 @@
 <?php
 /**
- * 路由类 
+ * 路由类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright 2011 dyphp.com
  **/
 class DyPhpRoute{
     //url重写后正则匹配到的Get参数
@@ -14,7 +14,7 @@ class DyPhpRoute{
      * $_GET保留key:ca,ext_name
      * 支持get请求以ca=module.controller.action的方式访问
      **/
-    public static function runWeb(){  
+    public static function runWeb(){
         $matchArr = self::urlManager();
         if($matchArr){
             if(!isset($matchArr['controller'])){
@@ -47,16 +47,20 @@ class DyPhpRoute{
 
     /**
      * @brief    console路由入口
-     * @return   
+     * @return
      **/
     public static function runConsole(){
         array_shift($_SERVER['argv']);
         if(empty($_SERVER['argv'])){
-            die('invoke error: <controller> [<action>] [<param1> <param2> ...]');
+            //die('invoke error: <controller> [<action>] [<param1> <param2> ...]');
+            $message = "Welcome to use \n";
+            $message .= "DyFramework Console The default execution : ".ucfirst(DYPHP_DEFAULT_CONTROLLER)."Controller->action".ucfirst(DYPHP_DEFAULT_ACTION)."\n";
+            $message .= "Invocation Method : <controller> [<action>] [<param1> <param2> ...<paramN>] \n";
+            echo $message;
         }
 
         $controller = isset($_SERVER['argv'][0]) ? $_SERVER['argv'][0] : DYPHP_DEFAULT_CONTROLLER;
-        $action = 'index';
+        $action = DYPHP_DEFAULT_ACTION;
         $params = array();
         if(isset($_SERVER['argv'][1])){
             $action = $_SERVER['argv'][1];
@@ -74,7 +78,7 @@ class DyPhpRoute{
     /**
      * @brief    获取uri中正则匹配到的参数
      * @param    $paramKey
-     * @return   
+     * @return
      **/
     public static function getParam($paramKey=''){
         if(!isset(self::$regularGetParams[$paramKey])){
@@ -89,11 +93,11 @@ class DyPhpRoute{
     }
 
     /**
-     * url解析运行controller 
+     * url解析运行controller
      **/
     private static function runToController($ca=array()){
         if(!empty($ca)){
-            DyPhpController::run($ca['c'],$ca['a']);  
+            DyPhpController::run($ca['c'],$ca['a']);
             return;
         }
 
@@ -111,10 +115,10 @@ class DyPhpRoute{
                 return;
             }
             $controller = $controllerArgsArr[0];
-            $action = $controllerArgsArr[1];  
+            $action = $controllerArgsArr[1];
         }else{
             //非模块路由处理
-            if(count($controllerArgsArr)%2 == 0){ 
+            if(count($controllerArgsArr)%2 == 0){
                 foreach($controllerArgsArr as $key=>$val){
                     if($key>1 && $key%2 == 0 && $val != ''){
                         $_GET[$val] = isset($controllerArgsArr[($key+1)]) ? $controllerArgsArr[($key+1)] : '';
@@ -133,13 +137,13 @@ class DyPhpRoute{
                 $action = $controllerArgsArr[2];
             }
         }
-        DyPhpController::run($controller,$action);            
+        DyPhpController::run($controller,$action);
     }
 
     /**
      * URL重写处理
      * 'urlManager'=>array(
-     *   'urlStyle'=>array('hideIndex'=>'yes','restCa'=>'yes',), 
+     *   'urlStyle'=>array('hideIndex'=>'yes','restCa'=>'yes',),
      *
      *   '/error'=>array("controller"=>"home","action"=>"error",),
      *
@@ -158,14 +162,14 @@ class DyPhpRoute{
      *       ),
      *   ),
      *
-     *   '/ping/aaa/:user/ccc/ddd/:id'=>array(  
+     *   '/ping/aaa/:user/ccc/ddd/:id'=>array(
      *       "controller"=>"test",
      *       "action"=>"index",
      *       "param"=>array(
      *           ":user"=>"[a-zA-Z0-9]{4,10}",
      *           ":id"=>"\d{1,3}",
      *       ),
-     *   ),                                       
+     *   ),
      * )
      **/
     private static function urlManager(){
@@ -194,7 +198,7 @@ class DyPhpRoute{
         foreach($pathUrlArr as $key=>$val){
             if(isset($urlManager[$val])){
                 return $urlManager[$val];
-            } 
+            }
         }
 
         //正则处理
@@ -229,7 +233,7 @@ class DyPhpRoute{
     }
 
     /**
-     * url解析 获取cotroller action及rest风格的get参数及扩展名 
+     * url解析 获取cotroller action及rest风格的get参数及扩展名
      * @return string
      **/
     private static function urlCrop(){
@@ -240,4 +244,3 @@ class DyPhpRoute{
     }
 
 }
-

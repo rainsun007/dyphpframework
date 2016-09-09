@@ -34,6 +34,7 @@ class DyPhpBase{
      **/
     public static function runWebApp($config=null,$debug=false){
         self::runAppCommon($config,$debug,'web');
+        //运行自动登录逻辑
         self::app()->auth->autoLoginStatus();
         DyPhpRoute::runWeb();
         exit;
