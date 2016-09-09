@@ -70,8 +70,6 @@ class DyPhpRoute{
                 $params[] = $val;
             }
         }
-        DyPhpBase::app()->cid = $controller;
-        DyPhpBase::app()->aid = $action;
         DyPhpController::run($controller,$action,$params);
     }
 
