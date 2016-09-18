@@ -10,9 +10,9 @@
  **/
 class DyPhpController
 {
-    //未登陆跳转地址
-    protected $loginUri = '';
-    //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginUri属性不受限制）
+    //未登陆跳转地址 不能使用重写后的地址（跳转排除判断会拦截不到）
+    protected $loginHandler = '';
+    //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginHandler属性不受限制）
     protected $allNeedLogin = false;
     //handler跳过init beforeAction hooks的执行, 设置为false如应用中有handler循环调用逻辑必须自己处理跳过逻辑
     protected $handlerPass = true;
@@ -90,8 +90,8 @@ class DyPhpController
         $controllerRun->view = new DyPhpView();
 
         //handler不执行以下逻辑（防止统一拦截处理时进入重定向死循环）
-        $handlers = array(trim(DyPhpConfig::item('errorHandler'), '/'), trim(DyPhpConfig::item('messageHandler'), '/'), trim(DyPhpConfig::item('loginHandler'), '/'));
-        if (!$controllerRun->handlerPass || !in_array($controllerRun->cid.'/'.$controllerRun->aid, $handlers)) {
+        $handlers = array(trim(DyPhpConfig::item('errorHandler'), '/'), trim(DyPhpConfig::item('messageHandler'), '/'), trim(DyPhpConfig::item('loginHandler'), '/'), trim($controllerRun->loginHandler, '/'));
+        if (!$controllerRun->handlerPass || !in_array($controllerRun->pcid.'/'.$controllerRun->aid, $handlers)) {
             //init运行
             $controllerRun->init();
             //hook调用
@@ -151,9 +151,9 @@ class DyPhpController
         }
 
         //重定向到登录页
-        $loginUri = empty($controllerRun->loginUri) ? DyPhpConfig::item('loginHandler') : $controllerRun->loginUri;
-        if ($controllerRun->cid.'/'.$controllerRun->aid != trim($loginUri, '/') && DyPhpBase::app()->auth->isGuest() && ($controllerRun->allNeedLogin || in_array(ucfirst($actionNameStr), $controllerRun->needLogin()))) {
-            DyRequest::redirect($loginUri);
+        $loginHandler = empty($controllerRun->loginHandler) ? DyPhpConfig::item('loginHandler') : $controllerRun->loginHandler;
+        if ($controllerRun->pcid.'/'.$controllerRun->aid != trim($loginHandler, '/') && DyPhpBase::app()->auth->isGuest() && ($controllerRun->allNeedLogin || in_array(ucfirst($actionNameStr), $controllerRun->needLogin()))) {
+            DyRequest::redirect($loginHandler);
         }
 
         return $actionName;
