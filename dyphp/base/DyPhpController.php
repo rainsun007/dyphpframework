@@ -14,8 +14,8 @@ class DyPhpController
     protected $loginHandler = '';
     //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginHandler属性不受限制）
     protected $allNeedLogin = false;
-    //handler跳过init beforeAction hooks的执行, 设置为false如应用中有handler循环调用逻辑必须自己处理跳过逻辑
-    protected $handlerPass = true;
+    //设置为true时handler调用将跳过init，beforeAction，hooks的执行, 设置为false应用中如有handler的循环调用，必须自己处理跳过逻辑
+    protected $handlerPass = false;
 
     //默认使用的action
     protected $defaultAction = DYPHP_DEFAULT_ACTION;
