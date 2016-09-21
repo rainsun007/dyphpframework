@@ -148,7 +148,7 @@ class DyPhpView
     }
 
     /**
-     * @brief    设置模板数据
+     * @brief    设置模板变量
      *
      * @param   $key
      * @param   $value
@@ -160,6 +160,19 @@ class DyPhpView
         if (!empty($key) && !isset($this->viewData[$key])) {
             $this->viewData[$key] = $value;
         }
+    }
+
+    /**
+     * @brief    获取模板变量
+     * 主要使用场景为在renderPartial中调用了setData方法 在layout或其它view中后续执行代码中要使用设置的模板变量
+     *
+     * @param   $key
+     *
+     * @return
+     **/
+    public function getData($key = '')
+    {
+        return !empty($key) && isset($this->viewData[$key]) ? $this->viewData[$key] : '';
     }
 
     /**
