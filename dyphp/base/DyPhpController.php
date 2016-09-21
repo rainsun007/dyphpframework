@@ -67,10 +67,9 @@ class DyPhpController
 
     /**
      * 运行controller入口
-     * 支持系统内部直接调用本方法
-     * 支持url以module_controller_action或module/controller/action的格式调用.
+     * 支持直接调用本方法 但不建议直接使用如有转发需求可使用forward方法.
      *
-     * @param string controller
+     * @param string controller  以module_controller或module/controller的格式调用
      * @param string action
      * @param array  参数
      **/
@@ -102,6 +101,24 @@ class DyPhpController
 
         //action执行
         $controllerRun->$actionName();
+    }
+
+    /**
+     * 请求转发 可以理解为run方法的别名 区别在于必须继承了本类才可使用.
+     *
+     * @param string controller 以module_controller或module/controller的格式调用
+     * @param string action
+     * @param array  参数
+     **/
+    final public function forward($controllerPname = '', $action = '', $params = array())
+    {
+        if (empty($controllerPname)) {
+            DyPhpBase::throwException('controller does not exist');
+        }
+        if (empty($action)) {
+            DyPhpBase::throwException('action does not exist');
+        }
+        self::run($controllerPname, $action, $params);
     }
 
     /**

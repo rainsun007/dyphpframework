@@ -15,7 +15,7 @@ class DyPhpRoute
 
     /**
      * web路由入口
-     * $_GET保留key:ca,ext_name
+     * $_GET保留key : ca(controller和acton格式 如user.profile或admin.user.profile),ext_name(访问的后缀名 如php),page(用于分页widget)
      * 支持get请求以ca=module.controller.action的方式访问.
      **/
     public static function runWeb()
