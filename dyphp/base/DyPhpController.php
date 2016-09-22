@@ -110,7 +110,7 @@ class DyPhpController
      * @param string action
      * @param array  参数
      **/
-    final public function forward($controllerPname = '', $action = '', $params = array())
+    final protected function forward($controllerPname = '', $action = '', $params = array())
     {
         if (empty($controllerPname)) {
             DyPhpBase::throwException('controller does not exist');
@@ -119,28 +119,6 @@ class DyPhpController
             DyPhpBase::throwException('action does not exist');
         }
         self::run($controllerPname, $action, $params);
-    }
-
-    /**
-     * @brief    首字母小写
-     *
-     * @param   $string
-     *
-     * @return
-     **/
-    protected static function lcfirst($string)
-    {
-        if (false === function_exists('lcfirst')) {
-            $string = (string) $string;
-            if (empty($string)) {
-                return '';
-            }
-            $string{0} = strtolower($string{0});
-
-            return $string;
-        } else {
-            return lcfirst($string);
-        }
     }
 
     /**
@@ -213,6 +191,28 @@ class DyPhpController
         DyPhpBase::app()->runingController = $controllerRun;
 
         return $controllerRun;
+    }
+
+    /**
+     * @brief    首字母小写
+     *
+     * @param   $string
+     *
+     * @return
+     **/
+    private static function lcfirst($string)
+    {
+        if (false === function_exists('lcfirst')) {
+            $string = (string) $string;
+            if (empty($string)) {
+                return '';
+            }
+            $string{0} = strtolower($string{0});
+
+            return $string;
+        } else {
+            return lcfirst($string);
+        }
     }
 
     public function __call($key, $Args)
