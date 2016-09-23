@@ -6,9 +6,9 @@
  * @copyright Copyright 2011 dyphp.com 
  **/
 
-//默认controller配制
+//默认controller配制 实现app可自定义
 defined('DYPHP_DEFAULT_CONTROLLER') or define('DYPHP_DEFAULT_CONTROLLER', 'app');
-//默认action配制
+//默认action配制 实现app可自定义
 defined('DYPHP_DEFAULT_ACTION') or define('DYPHP_DEFAULT_ACTION', 'index');
 
 //简单别名

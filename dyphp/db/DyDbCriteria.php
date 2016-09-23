@@ -1,6 +1,6 @@
 <?php
 /**
- * 数据查询
+ * sql组装器
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
  * @copyright Copyright 2011 dyphp.com 

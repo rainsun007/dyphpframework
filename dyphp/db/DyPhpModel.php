@@ -1,7 +1,7 @@
 <?php
 /**
  * @file DyPhpModel.php
- * @brief  数据库操作  
+ * @brief  数据库操作
  * @author QingYu.Sun Email:dyphp.com@gmail.com
  * @version 1.0
  * @copyright dyphp.com
@@ -18,7 +18,6 @@ class DyPhpModel{
 
     //表名
     protected $tableName = '';
-    private $isTablePrefix = false;
 
     //当前时间戳
     protected $time = 0;
@@ -30,17 +29,14 @@ class DyPhpModel{
     //支持类型
     private $dbType = 'mysql';
     private $supportType = array(
-        'mysql', 
+        'mysql',
     );
 
     //是否使用pdo
     private $isPdo = false;
 
-    //db版本
-    private $version = '';
-
     protected function __construct(){
-        $this->time = isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : time();
+        $this->time = time();
         $this->datetime = date("Y-m-d H:i:s",$this->time);
         $this->date = date("Y-m-d",$this->time);
         $this->init();
@@ -48,17 +44,17 @@ class DyPhpModel{
 
     /**
      * @brief   在实例化时执行,可以重写此方法实现自己的业务逻辑
-     * @return   
+     * @return
      **/
     protected function init(){
     }
 
     /**
      * @brief  Load Balancing Strategy重写此方法在该方法中实现返回config中db配制项中某个slave,例如:db[default][slaves][0]
-     * @return   
+     * @return
      **/
     protected function lbs(){
-        return array(); 
+        return array();
     }
 
     /**
@@ -78,8 +74,8 @@ class DyPhpModel{
     }
 
     /**
-     * 同时写入多条记录 
-     * 
+     * 同时写入多条记录
+     *
      * @param array('user_id','user_name')
      * @param array(
      *             array('12345','rain sun 2'),
@@ -109,7 +105,7 @@ class DyPhpModel{
 
     /**
      * 更新数据
-     * @param array  array('classid'=>classid+1)
+     * @param array  array('classid'=>'classid+1')
      * @param string
      * @param array  array('classid')
      * @return int
@@ -138,7 +134,7 @@ class DyPhpModel{
      * @brief    使用id获取记录
      * @param    $id
      * @param    $select
-     * @return   
+     * @return
      **/
     public function getById($id=0,$select='*'){
         if(!is_numeric($id)){
@@ -149,7 +145,7 @@ class DyPhpModel{
     }
 
     /**
-     * 获取一条记录 
+     * 获取一条记录
      * @param obj|string DyDbCriteria类实例|完整sql语句或是where语句
      * @param 查询字段  当$criteria为where条件时有效
      **/
@@ -165,7 +161,7 @@ class DyPhpModel{
     }
 
     /**
-     * 获取多条记录 
+     * 获取多条记录
      * @param obj|string DyDbCriteria类实例|完整sql语句或是where语句
      * @param 查询字段  当$criteria为where条件时有效
      **/
@@ -178,7 +174,7 @@ class DyPhpModel{
      * @brief    执行完整的sql语句
      * @param    $query
      * @param    $fetch
-     * @return   
+     * @return
      **/
     public function query($query='',$isFetchAll=false){
         $dbms = strpos(strtolower(ltrim($query)), 'select') === 0 ? 'slave' : 'master';
@@ -199,11 +195,11 @@ class DyPhpModel{
      * @param    $criteria
      * @param    $pageSize
      * @param    $pageName
-     * @return   
+     * @return
      **/
     public function getAllForPage($criteria,$pageSize=15,$pageName='page'){
         if (!is_object($criteria)) {
-            DyPhpBase::throwException('page sql criteria error','getAllForPage error','dbException');
+            DyPhpBase::throwException('page sql criteria error','getAllForPage error',0);
         }
         $limit = $pageSize>0 ? $pageSize : 15;
         $pageName = $pageName ? $pageName : 'page';
@@ -228,7 +224,7 @@ class DyPhpModel{
 
     /**
      * @brief    获取数据大小
-     * @return   
+     * @return
      **/
     public function getDataSize(){
         return $this->getInstance('slave')->getDataSize();
@@ -236,7 +232,7 @@ class DyPhpModel{
 
     /**
      * @brief    获取版本号
-     * @return   
+     * @return
      **/
     public function getVersion(){
         return $this->getInstance('slave')->getVersion();
@@ -259,13 +255,13 @@ class DyPhpModel{
             if($result){
                 if($this->isPdo){
                     $fetch = $result->fetch();
-                    $count = isset($fetch->dycount) ? $fetch->dycount : $result->rowCount(); 
+                    $count = isset($fetch->dycount) ? $fetch->dycount : $result->rowCount();
                 }else{
                     $count =  $this->getInstance('slave')->count();
                 }
             }
         }catch(Exception $e){
-            DyPhpBase::throwException('sql criteria error',$query.'--'.$e->getMessage(),'dbException');
+            DyPhpBase::throwException('sql criteria error',$query.'--'.$e->getMessage(),$e->getCode(),$e);
         }
 
         if(DyPhpBase::$debug){
@@ -302,7 +298,7 @@ class DyPhpModel{
     /**
      * @brief    单列化数据库
      * @param    $dbms 主/从数据库
-     * @return   db instance 
+     * @return   db instance
      **/
     private function getInstance($dbms='master'){
         $dbConfigArr = $this->getDbConfigArr($dbms);
@@ -310,27 +306,30 @@ class DyPhpModel{
             $this->isPdo = strpos($dbConfigArr['dbDriver'], 'pdo_') === 0 ? true : false;
             $this->dbType = $this->isPdo ? substr($dbConfigArr['dbDriver'],4) : $dbConfigArr['dbDriver'];
             if(!in_array($this->dbType,$this->supportType)){
-                DyPhpBase::throwException('support databases',$this->dbType,'dbException');
+                DyPhpBase::throwException('support databases',$this->dbType,0);
             }
         }
 
-        if($this->tableName == ""){
+        if(!isset($dbConfigArr['tablePrefix'])){
+            $dbConfigArr['tablePrefix'] = '';
+        }
+
+        if(empty($this->tableName)){
             $this->tableName = !function_exists('get_called_class') ? $dbConfigArr['tablePrefix'].get_class($this) : $dbConfigArr['tablePrefix'].get_called_class();
         }else{
-            $this->tableName = $this->isTablePrefix ? $this->tableName : $dbConfigArr['tablePrefix'].$this->tableName;
+            $this->tableName = $dbConfigArr['tablePrefix'].$this->tableName;
         }
-        $this->isTablePrefix = true;
-        return DyPhpModelManage::instance($dbConfigArr,$this->tableName,$this->dbType,$this->isPdo);
+        return DyPhpModelManage::instance($dbConfigArr,$this->tableName,$this->dbType,$this->isPdo,$dbms);
     }
 
     /**
      * @brief  获取数据库配制数组
-     * @return array 
+     * @return array
      **/
     private function getDbConfigArr($dbms='master'){
         $dbConfig = DyPhpConfig::item('db');
         if(!isset($dbConfig[$this->dbCnf])){
-            DyPhpBase::throwException('database config undefined',$this->dbCnf,'dbException');
+            DyPhpBase::throwException('database config undefined',$this->dbCnf,0);
         }
 
         //不使用主从只使用一个数据库
@@ -340,18 +339,18 @@ class DyPhpModel{
 
         if($dbms == 'master' || $this->forceMaster){
             if(!isset($dbConfig[$this->dbCnf]['master'])){
-                DyPhpBase::throwException('database config undefined',$this->dbCnf.'[master]','dbException');
+                DyPhpBase::throwException('database config undefined',$this->dbCnf.'[master]',0);
             }
             return $dbConfig[$this->dbCnf]['master'];
         }else{
             if(!isset($dbConfig[$this->dbCnf]['slaves'])){
-                DyPhpBase::throwException('database config undefined',$this->dbCnf.'[slaves]','dbException');
+                DyPhpBase::throwException('database config undefined',$this->dbCnf.'[slaves]',0);
             }
 
             $dbLbs = $this->lbs();
             if(!is_array($dbLbs)){
                 //用户自定义lbs返回值判断
-                DyPhpBase::throwException('database lbs return error','getDbConfigArr error','dbException');
+                DyPhpBase::throwException('database lbs return error','getDbConfigArr error',0);
             }
             if(empty($dbLbs)){
                 $weight = new WeightedRoundRobin($dbConfig[$this->dbCnf]['slaves']);
@@ -384,7 +383,7 @@ class DyPhpModel{
                 $fetchResult = $this->getInstance('slave')->fetchAll();
             }
         }catch(Exception $e){
-            DyPhpBase::throwException('sql criteria error',$query.'--'.$e->getMessage(),'dbException');
+            DyPhpBase::throwException('sql criteria error',$query.'--'.$e->getMessage(),$e->getCode(),$e);
         }
 
         if(DyPhpBase::$debug){
@@ -415,7 +414,7 @@ class DyPhpModel{
                 $fetchResult = $this->getInstance('slave')->fetch();
             }
         }catch(Exception $e){
-            DyPhpBase::throwException('sql criteria error',$query.'--'.$e->getMessage(),'dbException');
+            DyPhpBase::throwException('sql criteria error',$query.'--'.$e->getMessage(),$e->getCode(),$e);
         }
 
         if(DyPhpBase::$debug){
@@ -437,12 +436,11 @@ class DyPhpModel{
         try{
             $result = $this->getInstance()->exec($sql);
         }catch(Exception $e){
-            DyPhpBase::throwException('sql criteria error',$sql.'--'.$e->getMessage(),'dbException');
+            DyPhpBase::throwException('sql criteria error',$sql.'--'.$e->getMessage(),$e->getCode(),$e);
         }
 
         if(DyPhpBase::$debug){
-            $version = $this->version ? $this->version : $this->getInstance()->getVersion();
-            $explain = version_compare($version, '5.6', '>=');
+            $explain = version_compare($this->getVersion(), '5.6', '>=');
             $this->logQuery($sql, $start,$explain);
         }
         return $result;
@@ -453,14 +451,14 @@ class DyPhpModel{
      * @param    $args
      * @param    $type
      * @param    $ftype
-     * @return   
+     * @return
      **/
     private function sqlImplode($args,$type='up',$ftype='column'){
         $ret = "";
         if($type == 'up'){
             while(list($key,$val)=each($args)){
                 //$val = $ftype == 'column' && preg_match('/^[+-][[:space:]]{0,2}\d$/i',trim($val)) ? $key.$val : "'{$val}'";
-                $val = in_array($key,$ftype) ? $val : "'{$val}'"; 
+                $val = in_array($key,$ftype) ? $val : "'{$val}'";
                 $ret .= "`{$key}`={$val},";
             }
         }elseif($type == 'in'){
@@ -469,18 +467,18 @@ class DyPhpModel{
                 $ret .= $chr.$val.$chr.',';
             }
         }
-        return substr($ret,0,-1); 
+        return substr($ret,0,-1);
     }
 
     /**
      * 获取SQL查询语句
-     * @param object/string 
+     * @param object/string
      * @param 查询字段  当$criteria为where条件时有效
      * @param bool 是否为查询总数
      **/
     private function querySql($criteria,$select='*',$isCount=false){
         if(!is_string($criteria) && !is_object($criteria)){
-            DyPhpBase::throwException('sql criteria error','querySql error','dbException');
+            DyPhpBase::throwException('sql criteria error','querySql error',0);
         }
 
         $table = $this->getInstance('slave')->tableName;
@@ -511,13 +509,13 @@ class DyPhpModel{
     }
 
     /**
-     * sql开始时间 
+     * sql开始时间
      **/
     private function getTime() {
         list($usec, $sec) = explode(" ", microtime());
         $time = (float)$usec + (float)$sec;
         return $time;
-    }   
+    }
 
 
     /**
@@ -525,7 +523,7 @@ class DyPhpModel{
      * @param    $sql      sql语句
      * @param    $start    执行开始时间
      * @param    $explain  是否使用sql分析
-     * @return   
+     * @return
      **/
     private function logQuery($sql, $start, $explain=true) {
         $time = $this->getTime() - $start;
@@ -561,7 +559,7 @@ class DyPhpModel{
 
 
 /**
- * @brief  model操作管理器  
+ * @brief  model操作管理器
  * @author QingYu.Sun Email:dyphp.com@gmail.com
  * @version 1.0
  * @copyright dyphp.com
@@ -573,11 +571,11 @@ final class DyPhpModelManage {
     private static $instances = array();
 
     /**
-     * 单列化数据库 
+     * 单列化数据库
      **/
-    public static function instance($dbConfigArr,$prefixTableName,$dbType,$isPdo){
-        $insKey = $dbConfigArr['host'].'_'.$dbConfigArr['dbName'];
-        $mins = self::getInstance('model_'.$insKey);
+    public static function instance($dbConfigArr,$prefixTableName,$dbType,$isPdo,$dbms){
+        $insKey = $dbms.'_'.$dbConfigArr['host'].'_'.$dbConfigArr['dbName'];
+        $mins = self::getInstance($insKey);
         if($mins){
             $mins->tableName = $prefixTableName;
             return $mins;
@@ -590,20 +588,20 @@ final class DyPhpModelManage {
         $driver->dbConfigArr = $dbConfigArr;
         $driver->run();
 
-        self::setInstance('model_'.$insKey,$driver);
+        self::setInstance($insKey,$driver);
         return $driver;
     }
 
     /**
      * 设置instance记录 单列存储器
-     * 
+     *
      **/
     private static function setInstance($key,$instance){
         self::$instances[$key] = $instance;
     }
 
     /**
-     * 获取instance记录 
+     * 获取instance记录
      **/
     private static function getInstance($key=''){
         $instance = self::$instances;
@@ -614,16 +612,16 @@ final class DyPhpModelManage {
     }
 
     /**
-     * @brief    pdo扩展加载检查 
+     * @brief    pdo扩展加载检查
      * @param    $dbType
-     * @return   
+     * @return
      **/
     private static function checkPdo($isPdo,$dbType){
         if(!$isPdo){
             return;
         }
         if(!extension_loaded('pdo') || !extension_loaded('pdo_'.$dbType)){
-            DyPhpBase::throwException('pdo extension loaded error','checkPdo error','dbException');
+            DyPhpBase::throwException('pdo extension loaded error','checkPdo error',0);
         }
     }
 
@@ -711,8 +709,8 @@ class WeightedRoundRobin{
         $temp = array_shift($weightArray);
         $max = $temp['weight'];
         foreach ($weightArray as $val) {
-            $max = max($val['weight'],$max);                           
-        }          
+            $max = max($val['weight'],$max);
+        }
         return $max;
     }
 
@@ -734,5 +732,3 @@ class WeightedRoundRobin{
         }
     }
 }
-
-

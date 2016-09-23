@@ -12,7 +12,6 @@ abstract class DyPhpUserIdentity{
     protected $infoPre = 'au_';
     //使用cookie保存登陆状态
     protected $isCookieUserAuth = false;
-
     //用户身份索引值
     private $userIndexValue = "";
 

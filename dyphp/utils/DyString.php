@@ -3,11 +3,11 @@
  * 字符串加密，解密工具类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright 2011 dyphp.com
  **/
 class DyString{
     /**
-     * 加密字符串 
+     * 加密字符串
      * @param string 要加密的字符串
      * @param string 加密密钥
      * @param int    加密过期时间 0为不过期 -1为加密作废
@@ -20,7 +20,7 @@ class DyString{
         if(extension_loaded('mcrypt')){
             $key = substr(md5($key),0,8);
             $expiry = $expiry > 0 ? time()+$expiry : $expiry;
-            $data = $string.'_dysc_'.mt_rand(0,9).'|'.$expiry;
+            $data = $expiry.'|'.$string.'_dysc_'.mt_rand(0,9);
             $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES,MCRYPT_MODE_ECB),MCRYPT_DEV_URANDOM);
             $string = mcrypt_encrypt(MCRYPT_DES,$key,$data,MCRYPT_MODE_ECB,$iv);
             $string = base64_encode($string);
@@ -31,7 +31,7 @@ class DyString{
     }
 
     /**
-     * 解密字符串 
+     * 解密字符串
      * @param string 要解密的字符串
      * @param string 解密密钥
      **/
@@ -42,32 +42,26 @@ class DyString{
         $key = !empty($key) ? $key : DyPhpConfig::item('secretKey');
         $string = str_replace(array('*','_'),array('+','/'),$string);
         if(extension_loaded('mcrypt')){
-            $key = substr(md5($key),0,8);
-            $string = base64_decode($string);
             $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES,MCRYPT_MODE_ECB),MCRYPT_DEV_URANDOM);
-            $decryptStr = mcrypt_decrypt(MCRYPT_DES,$key,$string,MCRYPT_MODE_ECB,$iv);
-
+            $decryptStr = mcrypt_decrypt(MCRYPT_DES,substr(md5($key),0,8),base64_decode($string),MCRYPT_MODE_ECB,$iv);
             if($decryptStr == ''){
                 return '';
             }
+      			//解密字符串转为数组用以验证是否过期
+            $re = explode('|',substr($decryptStr,0,strrpos($decryptStr,'_dysc_')));
+      			if(count($re) != 2){
+      				return '';
+      			}
+      			//判断过期时间的合法性，处理显示设置为过期的字符串
+      			if(!is_numeric($re[0]) || $re[0] == -1){
+      				return '';
+      			}
 
-            $data = explode('_dysc_',$decryptStr);
-            if(!isset($data[1])){
-                return '';
-            }
-
-            $re = explode('|',$data[1]);
-            if(!isset($re[1])){
-                return '';
-            }else{
-                if($re[1] == 0){
-                    return $data[0];
-                }elseif($re[1] == -1){
-                    return '';
-                }else{
-                    return $re[1]<time() ? '' : $data[0];
-                }
-            }   
+      			if($re[0] == 0){
+      				return $re[1]; //永不过期直接返回数据
+      			}else{
+      				return $re[0]<time() ? '' : $re[1];
+      			}
         }else{
             return self::authCode('DECODE',$string, $key);
         }
@@ -92,13 +86,13 @@ class DyString{
     /**
      * @brief    ansi转为utf8
      * @param    $str
-     * @return   
+     * @return
      **/
     public static function ansiToUtf8($str=''){
         if(empty($str) || self::isUtf8($str)){
             return $str;
         }
-        return iconv("gbk", "UTF-8", $str); 
+        return iconv("gbk", "UTF-8", $str);
     }
 
     /**
@@ -108,7 +102,7 @@ class DyString{
      * @param    $length
      * @param    $charset
      * @param    $suffix
-     * @return   
+     * @return
      **/
     public static function cutStr($str, $start=0, $length, $charset="utf-8", $suffix=false){
         if($start == 0 && self::length($str) <= $length){
@@ -117,10 +111,10 @@ class DyString{
 
         if(function_exists("mb_substr")){
             $slice = mb_substr($str, $start, $length, $charset);
-            return $suffix ? $slice."…" : $slice; 
+            return $suffix ? $slice."…" : $slice;
         }elseif(function_exists('iconv_substr')) {
             $slice = iconv_substr($str,$start,$length,$charset);
-            return $suffix ? $slice."…" : $slice; 
+            return $suffix ? $slice."…" : $slice;
         }
         $re['utf-8']  = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
         $re['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
@@ -137,7 +131,7 @@ class DyString{
     /**
      * 字符串转义
      * @param string  需要转义的字符串
-     * @param bool    是否做强行转义 
+     * @param bool    是否做强行转义
      * @param bool    是否使用stripcslashes反转义
      * @return string 转义后的字符串
      **/
@@ -156,7 +150,7 @@ class DyString{
     }
 
     /**
-     * 格式化打印 
+     * 格式化打印
      **/
     public static function dump(){
         $string = '';
@@ -171,7 +165,7 @@ class DyString{
      * @param string $str
      * @param bool  true为两个英文等于一个中文长度
      * @param string $charset
-     * @return type 
+     * @return type
      */
     public static function length($str,$en2=true,$charset='utf-8'){
         if($charset=='utf-8'){
@@ -201,7 +195,7 @@ class DyString{
      * @brief    全角半角互转
      * @param    $str
      * @param    $flip
-     * @return   
+     * @return
      **/
     public static function transfer($str,$flip=false){
         if(empty($str) || !is_string($str)){
@@ -244,7 +238,7 @@ class DyString{
      * @param string   操作类型，ENCODE：加密，DECODE：解密
      * @param string   加密的对象
      * @param string   加密附加密钥值
-     * @param int      过期时间，0为不过期            
+     * @param int      过期时间，0为不过期
      * */
     private static function authCode($operation = 'DECODE', $string, $key = '', $expiry = 0) {
         $ckey_length = 4;
@@ -295,4 +289,3 @@ class DyString{
     }
 
 }
-

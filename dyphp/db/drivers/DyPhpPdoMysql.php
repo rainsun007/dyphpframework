@@ -3,7 +3,7 @@
  * mysql pdo驱动类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright 2011 dyphp.com
  **/
 final class DyPhpPdoMysql extends PDO{
     private $host = '';
@@ -50,14 +50,14 @@ final class DyPhpPdoMysql extends PDO{
             $this->query("SET NAMES {$this->charset}");
             return $this;
         }catch(PDOException $e){
-            DyPhpBase::throwException("can't connect to Database", '('.$e->getMessage().')','pdoMysql error','dbException');
-        }   
+            DyPhpBase::throwException("can't connect to Database", '('.$e->getMessage().')'.'--pdoMysql error',$e->getCode(),$e);
+        }
     }
 
 
     /**
      * @brief    获取数据大小
-     * @return   
+     * @return
      **/
     public function getDataSize(){
         $size = $this->query("SHOW TABLE STATUS");
@@ -74,12 +74,11 @@ final class DyPhpPdoMysql extends PDO{
 
     /**
      * @brief    获取版本号
-     * @return   
+     * @return
      **/
     public function getVersion(){
         $result = $this->query("SELECT VERSION() as dbversion");
         $version = $result->fetch();
-        return $version ? $version->dbversion : 'unknown'; 
+        return $version ? $version->dbversion : 'unknown';
     }
 }
-

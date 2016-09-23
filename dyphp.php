@@ -14,7 +14,7 @@ defined('EXT') or define('EXT', '.php');
 class Dy extends DyPhpBase{}
 
 /**
- * base class 
+ * base class
  **/
 class DyPhpBase{
     //debug开关
@@ -34,6 +34,7 @@ class DyPhpBase{
      **/
     public static function runWebApp($config=null,$debug=false){
         self::runAppCommon($config,$debug,'web');
+        //运行自动登录逻辑
         self::app()->auth->autoLoginStatus();
         DyPhpRoute::runWeb();
         exit;
@@ -82,6 +83,7 @@ class DyPhpBase{
     public static function showMsg($params=array(),$exit = true){
         $params = is_array($params) ? $params : (array)$params;
         $msgHandler = explode('/',trim(DyPhpConfig::item('messageHandler'),'/'));
+        Dy::app()->preModule = Dy::app()->module;
         DyPhpController::run($msgHandler[0],$msgHandler[1],$params);
         if ($exit){exit;}
     }
@@ -95,7 +97,7 @@ class DyPhpBase{
         }elseif(DyPhpConfig::getImport($className)){
             require DyPhpConfig::getImport($className);
         }else{
-            //5.3 namespace 
+            //5.3 namespace
             if(($pos=strrpos($className,'\\'))!==false){
                 if($alias = DyPhpConfig::getAliasMap(substr($className,0,$pos))){
                     require $alias['file'];
@@ -128,6 +130,24 @@ class DyPhpBase{
         }
     }
 
+
+    /**
+     * @brief    注册自动加载
+     * @param    $autoload 自动加载函数
+     * @param    $replace  是否替换框架和自动加载方法
+     * @return
+     **/
+    public static function autoloadRegister($callback,$replace=false){
+        spl_autoload_unregister(array('DyPhpBase', 'autoload'));
+        if($replace){
+            spl_autoload_register($callback);
+        }else{
+            spl_autoload_register($callback);
+            spl_autoload_register(array('DyPhpBase', 'autoload'));
+        }
+    }
+
+
     /**
      * 运行时间
      * @return float   seconds
@@ -144,7 +164,7 @@ class DyPhpBase{
     }
 
     /**
-     * app自定义类实例器 
+     * app自定义类实例器
      * @public 类名
      **/
     public static function app(){
@@ -152,7 +172,7 @@ class DyPhpBase{
     }
 
     /**
-     * 获取框架版本 
+     * 获取框架版本
      **/
     public static function getVersion(){
         return 'Beta 1.3';
@@ -174,38 +194,39 @@ class DyPhpBase{
     private static function debug($debug=false){
         self::$debug = $debug ? true : false;
         set_error_handler(array('DyPhpException', 'errorHandler'));
+        set_exception_handler(array('DyPhpException', 'exceptionHandler'));
         register_shutdown_function(array('DyPhpException', 'shutdownHandler'));
     }
 
     /**
      * 异常抛出
-     * @param string  出错信息
-     * @param string  前缀
+     * @param string  自定义出错信息
+     * @param string  系统异常，自定义异常自信等
      * @param string  异常类型
      * @param bool    是否退出程序
      **/
-    public static function throwException($errorMessage, $prefix='',$type='default', $exit = true){
+    public static function throwException($errorMessage, $prefix='', $code=0, $previous = NULL){
         if($prefix != ''){
             $isUtf8 = DyString::isUtf8($prefix);
             if($isUtf8 === false && function_exists('iconv')){
-                $prefix = iconv("gbk", "UTF-8", $prefix); 
+                $prefix = iconv("gbk", "UTF-8", $prefix);
             }
         }
-        $message = DyPhpMessage::getLanguagePackage(DyPhpConfig::item('language')); 
+        $message = DyPhpMessage::getLanguagePackage(DyPhpConfig::item('language'));
         $excMessage = isset($message[$errorMessage]) ? $message[$errorMessage] : $errorMessage;
-        if($type == 'dbException'){
-            //数据库异常给应用一次可catch的机会
-            throw new Exception($prefix.' '.$excMessage, 0); 
+        if($previous){
+            //现行版本只对数据库异常给应用一次可catch的机会
+            throw new Exception($prefix.' '.$excMessage, (int)$code, $previous);
         }else{
-            $dyExce = new DyPhpException($prefix.' '.$excMessage, 0);
+            $dyExce = new DyPhpException($prefix.' '.$excMessage, $code, $previous);
             $dyExce->appTrace();
         }
-        if($exit){exit;}
+        exit;
     }
 
     /**
      * @brief    加载框架类
-     * @return   
+     * @return
      **/
     private static function loadCoreClass(){
         self::$coreClasses = array(
@@ -231,7 +252,7 @@ class DyPhpBase{
             'DyPhpModel'=>'/dyphp/db/DyPhpModel.php',
             'DyDbCriteria'=>'/dyphp/db/DyDbCriteria.php',
             'DyPhpPdoMysql'=>'/dyphp/db/drivers/DyPhpPdoMysql.php',
-            'DyPhpMysql'=>'/dyphp/db/drivers/DyPhpMysql.php', 
+            'DyPhpMysql'=>'/dyphp/db/drivers/DyPhpMysql.php',
 
             //lib
             'DyCookie'=>'/dyphp/lib/DyCookie.php',
@@ -258,15 +279,15 @@ class DyPhpBase{
 
     /**
      * @brief   框架支持检查
-     * @return   
+     * @return
      **/
     public static function supportCheck(){
         //'$_SERVER $_FILES $_COOKIE $_SESSION GD PDO mb_substr iconv_substr iconv  mcrypt';
         $result = apache_get_modules();
         if(in_array('mod_rewrite', $result)) {
-            echo 'support';
+            echo 'apache rewrite support';
         } else {
-            echo 'unsupport';
+            echo 'apache rewrite unsupport';
         }
         echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.2.2', '>=') ? 'OK' : 'minimum version of 5.2.2');
         exit;
@@ -280,11 +301,17 @@ final class DyPhpApp{
     //调用的controller名
     public $cid = '';
 
-    //多级调用的controller名
+    //调用的module/controller名
     public $pcid = '';
 
     //调用的action名
     public $aid = '';
+
+    //调用的module名
+    public $module = '';
+
+    //此针对errorHandler，messageHandler信息接管，记录前一次运行的module
+    public $preModule = '';
 
     //当前运行的controller实例
     public $runingController = null;
@@ -308,9 +335,9 @@ final class DyPhpApp{
 
     /**
      * @brief    实例注册
-     * @param    $name   注册名 
+     * @param    $name   注册名
      * @param    $value  注册实例
-     * @return   
+     * @return
      **/
     public function reg($name,$value=''){
         if($value){
@@ -325,7 +352,7 @@ final class DyPhpApp{
     /**
      * @brief    实例处理
      * param     注册名
-     * @return   
+     * @return
      **/
     private function instance($name){
         if(isset($this->instanceArr[$name])){
@@ -370,4 +397,3 @@ final class DyPhpApp{
 }
 
 spl_autoload_register(array('DyPhpBase', 'autoload'));
-
