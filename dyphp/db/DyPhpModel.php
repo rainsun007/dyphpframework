@@ -242,7 +242,7 @@ class DyPhpModel
             DyPhpBase::throwException('page sql criteria error', 'getAllForPage error', 0);
         }
         $limit = $pageSize > 0 ? $pageSize : 15;
-        $cpage = is_int($page) ? $page : DyRequest::getInt($pageName, 0);
+        $cpage = is_int($page) ? $page : DyRequest::getInt($page, 0);
         $offset = $cpage > 0 ? ($cpage - 1) * $limit : 0;
 
         $criteria->limit($limit);
