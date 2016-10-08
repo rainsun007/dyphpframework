@@ -19,7 +19,7 @@ class DyPhpController
 
     //默认使用的action
     protected $defaultAction = DYPHP_DEFAULT_ACTION;
-    //当前运行的module,controller,action
+    //当前运行的module,controller,action 首字母为小写
     protected $cid = '';
     protected $aid = '';
     protected $pcid = '';
@@ -58,7 +58,7 @@ class DyPhpController
     }
 
     /**
-     * 未登陆禁止访问的action 必须全部小写.
+     * 未登陆禁止访问的action 首字母为小写.
      **/
     protected function needLogin()
     {
@@ -147,7 +147,7 @@ class DyPhpController
 
         //重定向到登录页
         $loginHandler = empty($controllerRun->loginHandler) ? DyPhpConfig::item('loginHandler') : $controllerRun->loginHandler;
-        if ($controllerRun->pcid.'/'.$controllerRun->aid != trim($loginHandler, '/') && DyPhpBase::app()->auth->isGuest() && ($controllerRun->allNeedLogin || in_array(ucfirst($actionNameStr), $controllerRun->needLogin()))) {
+        if ($controllerRun->pcid.'/'.$controllerRun->aid != trim($loginHandler, '/') && DyPhpBase::app()->auth->isGuest() && ($controllerRun->allNeedLogin || in_array($controllerRun->aid, $controllerRun->needLogin()))) {
             DyRequest::redirect($loginHandler);
         }
 
