@@ -352,7 +352,18 @@ class DyRequest
     {
         return self::getOriginalParam($paramKey, 'post', $default);
     }
-
+    
+    /**
+     * @brief    获取json数据流
+     * @param    $paramKey
+     * @param    $method
+     * @param    $default
+     * @return   
+     **/
+    public static function getJosnInput(){
+        $val = file_get_contents("php://input");
+        return json_decode($val,true);
+    }
     /**
      * 发起 post 请求
      *
