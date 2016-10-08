@@ -114,10 +114,11 @@ class DyTools
      *
      * @param string  log信息
      * @param string  log类型   如info error warning debug，此参数不做限制
-     * @param string  是否生成单独文件   如需不同$type生成单独文件设置为true
      * @param string  log保存目录   默认在 application/logs/app_log下
+     * @param boolen  是否生成单独文件   如需不同$type生成单独文件设置为true
+     * @param boolen  是否切割log，默认为按天切割log, 设置为false则只生成一个log文件
      **/
-    public static function logs($message, $type = 'info', $typeAlone = false, $logCut = true, $logRootDir = '')
+    public static function logs($message, $type = 'info', $logRootDir = '', $typeAlone = false, $logCut = true)
     {
         if (function_exists('ini_get') && ini_get('date.timezone') == '' && function_exists('date_default_timezone_set')) {
             date_default_timezone_set('PRC');
