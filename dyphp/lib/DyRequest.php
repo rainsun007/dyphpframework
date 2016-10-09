@@ -355,12 +355,9 @@ class DyRequest
     
     /**
      * @brief    获取json数据流
-     * @param    $paramKey
-     * @param    $method
-     * @param    $default
      * @return   
      **/
-    public static function getJosnInput(){
+    public static function getJsonInput(){
         $val = file_get_contents("php://input");
         return json_decode($val,true);
     }
