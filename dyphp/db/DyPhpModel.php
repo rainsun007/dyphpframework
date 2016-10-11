@@ -220,7 +220,7 @@ class DyPhpModel
             if ($this->isPdo) {
                 $fetchResult = $isFetchAll ? $result->fetchAll() : $result->fetch();
             } else {
-                $fetchResult = $isFetchAll ? $this->getInstance($dbCnf)->fetchAll() : $this->getInstance($dbCnf)->fetch();
+                $fetchResult = $isFetchAll ? $this->getInstance($dbms)->fetchAll() : $this->getInstance($dbms)->fetch();
             }
         }
 
