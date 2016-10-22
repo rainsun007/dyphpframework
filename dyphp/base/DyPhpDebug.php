@@ -14,13 +14,13 @@ class DyPhpDebug
     private static $styles = array(
         'table' => 'clear:both;margin:5px 0px;border:1px solid #CCC;font-weight:bold;font-size:14px;font:800 14px/25px simsun;color:#FFF;width:100%;background:#333;',
         'titleTr' => 'background:#666666;',
-        'titleTd' => 'padding:3px 10px;border:1px solid #666666;',
+        'titleTd' => 'padding-left:5px;border:1px solid #666666;',
         'tdKey' => 'padding-left:5px;padding-right:5px;width:45px;border:1px solid #3D4F52;text-align:center;',
         'tdVal' => 'padding:0px 2px;word-break:break-all;word-wrap:break-word;', //主体内容td
         'item' => 'border:1px solid #3D4F52;margin-top:1px;margin-bottom:1px;padding:2px 5px;height:auto;',  //tdval样式的子样式
         'c1' => '#BDB76B;', //行字体颜色1
         'c2' => '#87CEEB;', //行字体颜色2
-        'obj1' => 'padding-left:10px;color:#98FB98', //file
+        'obj1' => 'padding-left:10px;color:#18c334', //file
         'obj2' => 'padding-left:10px;color:#0080FF', //sql
         'obj3' => 'padding-left:10px;color:#CD5C5C', //param
         'total' => 'padding-right:10px;text-align:right;border:1px solid #3D4F52;',
@@ -39,7 +39,7 @@ class DyPhpDebug
 
         echo '<table cellspacing="1" style="'.self::$styles['table'].'">';
         echo '<tr><td colspan="3" style="'.self::$styles['obj1'].'"><b>INCLUDE FILES</b></td></tr>';
-        echo '<tr style="'.self::$styles['titleTr'].'"><td style="'.self::$styles['titleTd'].'">Index</td><td style="'.self::$styles['titleTd'].'">File</td><td style="'.self::$styles['titleTd'].'">Size</td></tr>';
+        echo '<tr style="'.self::$styles['titleTr'].'"><td style="'.self::$styles['titleTd'].'width:60px;">Index</td><td style="'.self::$styles['titleTd'].'">File</td><td style="'.self::$styles['titleTd'].'">Size</td></tr>';
         $allSize = 0;
         $num = 0;
         $files = get_included_files();
@@ -75,7 +75,7 @@ class DyPhpDebug
         $time = 0;
         echo '<table cellspacing="1" style="'.self::$styles['table'].'">';
         echo '<tr><td colspan="3" style="'.self::$styles['obj2'].'"><b>EXPLAIN SQL</b></td></tr>';
-        echo '<tr style="'.self::$styles['titleTr'].'"><td style="'.self::$styles['titleTd'].'">Index</td><td style="'.self::$styles['titleTd'].'">SQL</td><td style="'.self::$styles['titleTd'].'">Time</td></tr>';
+        echo '<tr style="'.self::$styles['titleTr'].'"><td style="'.self::$styles['titleTd'].'width:60px;">Index</td><td style="'.self::$styles['titleTd'].'">SQL</td><td style="'.self::$styles['titleTd'].'">Time</td></tr>';
         foreach (self::$queries as $key => $query) {
             echo '<tr style="color:'.($key % 2 == 1 ? self::$styles['c1'] : self::$styles['c2']).'">';
             echo '<td style="'.self::$styles['tdKey'].'">'.$key.'</td>
@@ -102,7 +102,7 @@ class DyPhpDebug
         $usageMemory = (!function_exists('memory_get_usage')) ? '0' : round(memory_get_usage() / 1024 / 1024, 2).'MB';
 
         $paramsArr = array(
-            'RUNTIME' => '<font color="#0080FF">'.DyPhpBase::execTime().'seconds</font> '.' <font color="#FFA0A0">Memory:'.$usageMemory.'</font> @'.$_SERVER['SERVER_SOFTWARE'],
+            'RUNTIME' => '<font color="#18c334">'.DyPhpBase::execTime().'Seconds</font> '.' <font color="#0080FF">Memory:'.$usageMemory.'</font> @ '.PHP_OS.', '.$_SERVER['SERVER_SOFTWARE'].', php:'.PHP_VERSION,
             'EXECUTE' => 'Module:<font color="#0080FF">'.DyPhpBase::app()->module.'</font> Controller:<font color="#0080FF">'.DyPhpBase::app()->cid.'</font> Action:<font color="#0080FF">'.DyPhpBase::app()->aid.'</font>',
             'SESSION' => isset($_SESSION) ? $_SESSION : array(),
             'COOKIE' => isset($_COOKIE) ? $_COOKIE : array(),
@@ -119,7 +119,7 @@ class DyPhpDebug
             echo '<td style="'.self::$styles['tdVal'].'">';
             if (is_array($val)) {
                 if (empty($val)) {
-                    echo '<div style="'.self::$styles['item'].'">null</div>';
+                    echo '<div style="'.self::$styles['item'].'">NULL</div>';
                     ++$i;
                     continue;
                 }
@@ -129,7 +129,7 @@ class DyPhpDebug
                     if ($cookieArr && isset($cookieArr['prefix']) && !empty($cookieArr['prefix'])) {
                         if ($cookieArr['prefix'] != substr($k, 0, strlen($cookieArr['prefix']))) {
                             if (!$nullCookie) {
-                                echo '<div style="'.self::$styles['item'].'">null</div>';
+                                echo '<div style="'.self::$styles['item'].'">NULL</div>';
                                 $nullCookie = true;
                             }
                             continue;
