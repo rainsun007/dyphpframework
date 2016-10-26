@@ -125,7 +125,7 @@ class DyTools
         }
 
         $formatTime = date('Y-m-d H:i:s', time());
-        $data = $formatTime.' ['.$type.'] '.self::getClientIp().' '.$_SERVER['REQUEST_URI']."\n".$message."\n\n";
+        $data = $formatTime.' ['.$type.'] '.DyRequest::getClientIp().' '.$_SERVER['REQUEST_URI']."\n".$message."\n\n";
 
         $logRootDir = empty($logRootDir) ? rtrim(DyPhpConfig::item('appPath'), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'app_log' : $logRootDir;
         $logDir = rtrim($logRootDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.date('Y-m', time()).DIRECTORY_SEPARATOR;
