@@ -125,7 +125,7 @@ class DyTools
         }
 
         $formatTime = date('Y-m-d H:i:s', time());
-        $data = $formatTime.' ['.$type.'] '.self::getClientIp().' '.$_SERVER['REQUEST_URI']."\n".$message."\n\n";
+        $data = $formatTime.' ['.$type.'] '.DyRequest::getClientIp().' '.$_SERVER['REQUEST_URI']."\n".$message."\n\n";
 
         $logRootDir = empty($logRootDir) ? rtrim(DyPhpConfig::item('appPath'), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'app_log' : $logRootDir;
         $logDir = rtrim($logRootDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.date('Y-m', time()).DIRECTORY_SEPARATOR;
@@ -174,26 +174,6 @@ class DyTools
     }
 
     //-------------------------其它-----------------------
-    /**
-     * 获得客户端IP地址
-     **/
-    public static function getClientIp()
-    {
-        if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
-            $ip = getenv('HTTP_CLIENT_IP');
-        } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
-            $ip = getenv('HTTP_X_FORWARDED_FOR');
-        } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
-            $ip = getenv('REMOTE_ADDR');
-        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
-            $ip = $_SERVER['REMOTE_ADDR'];
-        } else {
-            $ip = '0.0.0.0';
-        }
-
-        return $ip;
-    }
-
     /**
      * 获取生肖.
      *
@@ -246,22 +226,5 @@ class DyTools
         $dataArr = array('status' => $status, 'code' => $code, 'message' => $message, 'data' => $data);
 
         return json_encode($dataArr);
-    }
-
-    /**
-     * @brief    获取6位数字的验证码
-     *
-     * @return
-     **/
-    public static function getVerifyCode()
-    {
-        $numArr = range(0, 9);
-        $randArr = array();
-        for ($i = 0; $i < 6; ++$i) {
-            $randArr[] = array_rand($numArr);
-        }
-        shuffle($randArr);
-
-        return implode('', $randArr);
     }
 }

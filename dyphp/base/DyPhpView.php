@@ -113,7 +113,7 @@ class DyPhpView
      *
      * @return string 返回处理后结果
      **/
-    public function formatLayout(&$buffer = '')
+    public function formatLayout($buffer)
     {
         if (empty($buffer)) {
             return '';
