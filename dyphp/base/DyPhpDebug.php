@@ -109,45 +109,47 @@ class DyPhpDebug
             'POST' => isset($_POST) ? $_POST : array(),
             'GET' => isset($_GET) ? $_GET : array(),
         );
+
         echo '<table cellspacing="1" style="'.self::$styles['table'].'">';
         echo '<tr><td colspan="2" style="'.self::$styles['obj3'].'">PARAMS</td></tr>';
         echo '<tr style="'.self::$styles['titleTr'].'"><td style="'.self::$styles['titleTd'].'">Type</td><td style="'.self::$styles['titleTd'].'">Content</td></tr>';
-        $i = 0;
+
+        $i = 0;  //用于处理行字体颜色
         foreach ($paramsArr as $key => $val) {
             echo '<tr style="color:'.($i % 2 == 1 ? self::$styles['c1'] : self::$styles['c2']).'">';
             echo '<td style="'.self::$styles['tdKey'].'">'.$key.'</td>';
             echo '<td style="'.self::$styles['tdVal'].'">';
-            if (is_array($val)) {
-                if (empty($val)) {
-                    echo '<div style="'.self::$styles['item'].'">NULL</div>';
-                    ++$i;
-                    continue;
-                }
-                $cookieArr = $key == 'COOKIE' ? DyPhpConfig::item('cookie') : array();
-                $nullCookie = false;
-                foreach ($val as $k => $v) {
-                    if ($cookieArr && isset($cookieArr['prefix']) && !empty($cookieArr['prefix'])) {
-                        if ($cookieArr['prefix'] != substr($k, 0, strlen($cookieArr['prefix']))) {
-                            if (!$nullCookie) {
-                                echo '<div style="'.self::$styles['item'].'">NULL</div>';
-                                $nullCookie = true;
-                            }
-                            continue;
-                        }
-                        $v = DyCookie::get(substr($k, strlen($cookieArr['prefix'])));
-                    } elseif ($key == 'SESSION') {
-                        $k = DyPhpConfig::item('appID') && strpos($k, DyPhpConfig::item('appID')) === 0 ? substr($k, strlen(DyPhpConfig::item('appID')) + 1) : $k;
-                    }
-                    echo '<div style="'.self::$styles['item'].'">'.$k.'=>';
-                    var_export($v);
-                    echo '</div>';
-                }
-            } else {
+
+            //RUNTIME,EXECUTE
+            if (!is_array($val)) {
                 echo '<div style="'.self::$styles['item'].'">'.$val.'</div>';
+                ++$i;
+                continue;
             }
+
+            //SESSION,COOKIE,POST,GET
+            if (empty($val)) {
+                echo '<div style="'.self::$styles['item'].'">NULL</div>';
+                ++$i;
+                continue;
+            }
+
+            foreach ($val as $k => $v) {
+                $cookieArr = DyPhpConfig::item('cookie');
+                if ($key == 'COOKIE' && isset($cookieArr['prefix']) && $cookieArr['prefix'] == substr($k, 0, strlen($cookieArr['prefix']))) {
+                    $v = DyCookie::get(substr($k, strlen($cookieArr['prefix'])));
+                } elseif ($key == 'SESSION') {
+                    $k = DyPhpConfig::item('appID') && strpos($k, DyPhpConfig::item('appID')) === 0 ? substr($k, strlen(DyPhpConfig::item('appID')) + 1) : $k;
+                }
+                echo '<div style="'.self::$styles['item'].'">'.$k.'=>';
+                var_export($v);
+                echo '</div>';
+            }
+
             echo '</td></tr>';
             ++$i;
         }
+
         echo '<tr style="height:0;"><td></td><td></td></tr>';
         echo '</table>';
     }
