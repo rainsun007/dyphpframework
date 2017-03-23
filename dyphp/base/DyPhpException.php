@@ -91,7 +91,7 @@ class DyPhpException extends Exception
         self::logs($title, $message, $traceString);
 
         //进入此逻辑框架将会把异常向外层抛出,应用中必须自己catch
-        //此逻辑可在运行中动态开启和关闭，若使用最好是蝉联使用并显示调用闭关
+        //此方法可在运行中动态开启和关闭，若使用最好是关联使用并在处理逻辑结束后闭关
         //此逻辑不区分是否为debug模式，如无需要不建议使用此方法
         if (self::$appCatch) {
             throw new Exception($message, 0, self::$dyPrevious);
@@ -171,7 +171,7 @@ class DyPhpException extends Exception
     /**
      * @brief    设置是否把异常向外层抛出
      * 设置为true框架将会把异常向外层抛出,应用中必须自己catch
-     * 此方法可在运行中动态开启和关闭，若使用最好是蝉联使用并显示调用闭关
+     * 此方法可在运行中动态开启和关闭，若使用最好是关联使用并在处理逻辑结束后闭关
      * 此方法不区分是否为debug模式，如无需要不建议使用此方法
      *
      * @param   $isCatch

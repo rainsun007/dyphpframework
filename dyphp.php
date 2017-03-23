@@ -11,12 +11,15 @@ define('DS', DIRECTORY_SEPARATOR);
 defined('EXT') or define('EXT', '.php');
 
 //简单别名
-class Dy extends DyPhpBase{}
+class Dy extends DyPhpBase
+{
+}
 
 /**
  * base class
  **/
-class DyPhpBase{
+class DyPhpBase
+{
     //debug开关
     public static $debug = false;
     //app类型
@@ -32,8 +35,9 @@ class DyPhpBase{
      * 运行web app入口
      * @param array app配制
      **/
-    public static function runWebApp($config=null,$debug=false){
-        self::runAppCommon($config,$debug,'web');
+    public static function runWebApp($config = null, $debug = false)
+    {
+        self::runAppCommon($config, $debug, 'web');
         //运行自动登录逻辑
         self::app()->auth->autoLoginStatus();
         DyPhpRoute::runWeb();
@@ -44,11 +48,12 @@ class DyPhpBase{
      * 运行console app入口
      * @param array app配制
      **/
-    public static function runConsoleApp($config=null,$debug=false){
-        if(PHP_SAPI !== 'cli' || !isset($_SERVER['argv'])){
+    public static function runConsoleApp($config = null, $debug = false)
+    {
+        if (PHP_SAPI !== 'cli' || !isset($_SERVER['argv'])) {
             die('This script must be run from the command line.');
         }
-        self::runAppCommon($config,$debug,'console');
+        self::runAppCommon($config, $debug, 'console');
         DyPhpRoute::runConsole();
         exit;
     }
@@ -58,8 +63,9 @@ class DyPhpBase{
      * 公共app运行入口
      * @param array app配制
      **/
-    private static function runAppCommon($config=null,$debug=false,$appType='web'){
-        if(function_exists('ini_get') && ini_get('date.timezone') == "" && function_exists('date_default_timezone_set')){
+    private static function runAppCommon($config = null, $debug = false, $appType = 'web')
+    {
+        if (function_exists('ini_get') && ini_get('date.timezone') == "" && function_exists('date_default_timezone_set')) {
             date_default_timezone_set('PRC');
         }
         self::$appType = $appType;
@@ -80,44 +86,48 @@ class DyPhpBase{
      * 使用自定义错误处理句柄 显示信息
      * @param array  按提示需要随意传值
      **/
-    public static function showMsg($params=array(),$exit = true){
+    public static function showMsg($params = array(), $exit = true)
+    {
         $params = is_array($params) ? $params : (array)$params;
-        $msgHandler = explode('/',trim(DyPhpConfig::item('messageHandler'),'/'));
+        $msgHandler = explode('/', trim(DyPhpConfig::item('messageHandler'), '/'));
         Dy::app()->preModule = Dy::app()->module;
-        DyPhpController::run($msgHandler[0],$msgHandler[1],$params);
-        if ($exit){exit;}
+        DyPhpController::run($msgHandler[0], $msgHandler[1], $params);
+        if ($exit) {
+            exit;
+        }
     }
 
     /**
      * 自动加载
      **/
-    public static function autoload($className){
-        if(isset(self::$coreClasses[$className])){
+    public static function autoload($className)
+    {
+        if (isset(self::$coreClasses[$className])) {
             require DYPHP_PATH.self::$coreClasses[$className];
-        }elseif(DyPhpConfig::getImport($className)){
+        } elseif (DyPhpConfig::getImport($className)) {
             require DyPhpConfig::getImport($className);
-        }else{
+        } else {
             //5.3 namespace
-            if(($pos=strrpos($className,'\\'))!==false){
-                if($alias = DyPhpConfig::getAliasMap(substr($className,0,$pos))){
+            if (($pos=strrpos($className, '\\'))!==false) {
+                if ($alias = DyPhpConfig::getAliasMap(substr($className, 0, $pos))) {
                     require $alias['file'];
-                }else{
-                    $classFile = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\','/',$className).EXT;
-                    if(file_exists($classFile)){
+                } else {
+                    $classFile = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\', '/', $className).EXT;
+                    if (file_exists($classFile)) {
                         require $classFile;
                     }
-                    foreach(DyPhpConfig::getIncludePath() as $key=>$val){
+                    foreach (DyPhpConfig::getIncludePath() as $key => $val) {
                         $autoClassFile = $val.$className . EXT;
-                        if(is_file($autoClassFile)){
+                        if (is_file($autoClassFile)) {
                             require $autoClassFile;
                             break;
                         }
                     }
                 }
-            }else{
-                foreach(DyPhpConfig::getIncludePath() as $key=>$val){
+            } else {
+                foreach (DyPhpConfig::getIncludePath() as $key => $val) {
                     $classFile = $val.$className . EXT;
-                    if(is_file($classFile)){
+                    if (is_file($classFile)) {
                         require $classFile;
                         break;
                     }
@@ -126,7 +136,7 @@ class DyPhpBase{
         }
 
         if (!class_exists($className, false) && !interface_exists($className, false)) {
-            self::throwException('Class does not exist',$className);
+            self::throwException('Class does not exist', $className);
         }
     }
 
@@ -137,11 +147,12 @@ class DyPhpBase{
      * @param    $replace  是否替换框架和自动加载方法
      * @return
      **/
-    public static function autoloadRegister($callback,$replace=false){
+    public static function autoloadRegister($callback, $replace = false)
+    {
         spl_autoload_unregister(array('DyPhpBase', 'autoload'));
-        if($replace){
+        if ($replace) {
             spl_autoload_register($callback);
-        }else{
+        } else {
             spl_autoload_register($callback);
             spl_autoload_register(array('DyPhpBase', 'autoload'));
         }
@@ -152,7 +163,8 @@ class DyPhpBase{
      * 运行时间
      * @return float   seconds
      **/
-    public static function execTime(){
+    public static function execTime()
+    {
         list($usec, $sec) = explode(" ", DYPHP_BEGIN_TIME);
         $beginTime = (float)$usec + (float)$sec;
 
@@ -160,29 +172,33 @@ class DyPhpBase{
         $endTime = (float)$usec + (float)$sec;
 
         $time = $endTime-$beginTime;
-        return number_format($time,6,'.','');
+        return number_format($time, 6, '.', '');
     }
 
     /**
      * app自定义类实例器
      * @public 类名
      **/
-    public static function app(){
+    public static function app()
+    {
         return self::$dyApp;
     }
 
     /**
      * 获取框架版本
      **/
-    public static function getVersion(){
+    public static function getVersion()
+    {
         return 'Beta 1.3';
     }
 
     /**
      * 获取Powered by
-     * @param false时将返回不带连接的powered by
+     * @param bool false时将返回不带连接的powered by
+     * @return string
      **/
-    public static function powerBy($link=true){
+    public static function powerBy($link = true)
+    {
         return $link ? 'Powered by <a href="http://www.dyphp.com" target="_blank">DYPHP-Framework</a>' : 'Powered by DYPHP-Framework';
     }
 
@@ -191,7 +207,8 @@ class DyPhpBase{
      * self::$debug为真时给出错误运行跟踪 为假时运行self::$errorHandler指向只给出错误提示信息
      * 详见DyPhpException类
      **/
-    private static function debug($debug=false){
+    private static function debug($debug = false)
+    {
         self::$debug = $debug ? true : false;
         set_error_handler(array('DyPhpException', 'errorHandler'));
         set_exception_handler(array('DyPhpException', 'exceptionHandler'));
@@ -205,19 +222,20 @@ class DyPhpBase{
      * @param string  异常类型
      * @param bool    是否退出程序
      **/
-    public static function throwException($errorMessage, $prefix='', $code=0, $previous = NULL){
-        if($prefix != ''){
+    public static function throwException($errorMessage, $prefix = '', $code = 0, $previous = null)
+    {
+        if ($prefix != '') {
             $isUtf8 = DyString::isUtf8($prefix);
-            if($isUtf8 === false && function_exists('iconv')){
+            if ($isUtf8 === false && function_exists('iconv')) {
                 $prefix = iconv("gbk", "UTF-8", $prefix);
             }
         }
         $message = DyPhpMessage::getLanguagePackage(DyPhpConfig::item('language'));
         $excMessage = isset($message[$errorMessage]) ? $message[$errorMessage] : $errorMessage;
-        if($previous){
+        if ($previous) {
             //现行版本只对数据库异常给应用一次可catch的机会
             throw new Exception($prefix.' '.$excMessage, (int)$code, $previous);
-        }else{
+        } else {
             $dyExce = new DyPhpException($prefix.' '.$excMessage, $code, $previous);
             $dyExce->appTrace();
         }
@@ -226,9 +244,10 @@ class DyPhpBase{
 
     /**
      * @brief    加载框架类
-     * @return
+     * @return array
      **/
-    private static function loadCoreClass(){
+    private static function loadCoreClass()
+    {
         self::$coreClasses = array(
             //base
             'DyPhpController'=>'/dyphp/base/DyPhpController.php',
@@ -279,17 +298,29 @@ class DyPhpBase{
 
     /**
      * @brief   框架支持检查
-     * @return
+     * @return  null
      **/
-    public static function supportCheck(){
-        //'$_SERVER $_FILES $_COOKIE $_SESSION GD PDO mb_substr iconv_substr iconv  mcrypt';
-        $result = apache_get_modules();
-        if(in_array('mod_rewrite', $result)) {
-            echo 'apache rewrite support';
-        } else {
-            echo 'apache rewrite unsupport';
-        }
-        echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.2.2', '>=') ? 'OK' : 'minimum version of 5.2.2');
+    public static function supportCheck()
+    {
+        //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt'
+        echo PHP_EOL.'[Framework to limit]'.PHP_EOL;
+        echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.2.2', '>=') ? '√ O' : '× minimum version of 5.2.2');
+        echo PHP_EOL.'----------'.PHP_EOL;
+        echo 'Framework to retain for $_GET : ca,ext_name,page';
+
+        echo PHP_EOL.PHP_EOL.'[Extension check]'.PHP_EOL;
+        echo extension_loaded('pdo') ? "√ PDO support" : "× PDO unsupport";
+        echo PHP_EOL.'----------'.PHP_EOL;
+        echo extension_loaded('pdo_mysql') ? "√ PDO_MYSQL support" : "× PDO_MYSQL unsupport";
+        echo PHP_EOL.'----------'.PHP_EOL;
+        echo extension_loaded('mbstring') ? "√ mbstring support" : "× mbstring unsupport";
+        echo PHP_EOL.'----------'.PHP_EOL;
+        echo extension_loaded('iconv') ? "√ iconv support" : "× iconv unsupport";
+        echo PHP_EOL.'----------'.PHP_EOL;
+        echo extension_loaded('gd') ? "√ GD support" : "× GD unsupport";
+        echo PHP_EOL.'----------'.PHP_EOL;
+        echo extension_loaded('mcrypt') ? "√ mcrypt support" : "× mcrypt unsupport";
+        echo PHP_EOL.PHP_EOL;
         exit;
     }
 }
@@ -297,7 +328,8 @@ class DyPhpBase{
 /**
  * app
  **/
-final class DyPhpApp{
+final class DyPhpApp
+{
     //调用的controller名
     public $cid = '';
 
@@ -322,15 +354,18 @@ final class DyPhpApp{
     //唯一包含
     private $incOnce = array();
 
-    public function __construct(){
+    public function __construct()
+    {
     }
 
-    public function __get($name){
+    public function __get($name)
+    {
         return  $this->instance($name);
     }
 
-    public function __set($name,$value){
-        $this->reg($name,$value);
+    public function __set($name, $value)
+    {
+        $this->reg($name, $value);
     }
 
     /**
@@ -339,12 +374,13 @@ final class DyPhpApp{
      * @param    $value  注册实例
      * @return
      **/
-    public function reg($name,$value=''){
-        if($value){
-            if(!isset($this->instanceArr[$name])){
+    public function reg($name, $value = '')
+    {
+        if ($value) {
+            if (!isset($this->instanceArr[$name])) {
                 $this->instanceArr[$name] = $value;
             }
-        }else{
+        } else {
             $this->instance($name);
         }
     }
@@ -354,20 +390,21 @@ final class DyPhpApp{
      * param     注册名
      * @return
      **/
-    private function instance($name){
-        if(isset($this->instanceArr[$name])){
+    private function instance($name)
+    {
+        if (isset($this->instanceArr[$name])) {
             return $this->instanceArr[$name];
         }
 
         $alias = DyPhpConfig::getAliasMap($name);
         $className = $alias ? $alias['name'] : $name;
         $classFile = $alias ? $alias['file'] : DyPhpConfig::getImport($name);
-        if($classFile && !class_exists($className, false)){
+        if ($classFile && !class_exists($className, false)) {
             require $classFile;
         }
 
         //不做单例处理
-        if($name == 'dbc'){
+        if ($name == 'dbc') {
             return new $alias['name'];
         }
 
@@ -380,20 +417,20 @@ final class DyPhpApp{
      * @param vendors 路径及文件名
      * @param dyphp为加载框架自带vendor app为加载app中的vendor
      */
-    public function vendors($filePathName,$isSys=false){
+    public function vendors($filePathName, $isSys = false)
+    {
         $type = $isSys === true ? 'dyphp' : 'app';
 
-        if(in_array($type.'_'.$filePathName,$this->incOnce)){
+        if (in_array($type.'_'.$filePathName, $this->incOnce)) {
             return;
         }
         $vendor = $type == 'app' ? DyPhpConfig::item('appPath').'/vendors/'.$filePathName.EXT : DYPHP_PATH.'/dyphp/vendors/'.$filePathName.'.php';
-        if(!file_exists($vendor)){
-            DyPhpBase::throwException('vendor does not exist',$filePathName);
+        if (!file_exists($vendor)) {
+            DyPhpBase::throwException('vendor does not exist', $filePathName);
         }
         require $vendor;
         $this->incOnce[] = $type.'_'.$filePathName;
     }
-
 }
 
 spl_autoload_register(array('DyPhpBase', 'autoload'));

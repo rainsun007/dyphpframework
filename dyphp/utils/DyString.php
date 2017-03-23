@@ -86,7 +86,7 @@ class DyString{
     /**
      * @brief    ansi转为utf8
      * @param    $str
-     * @return
+     * @return   string
      **/
     public static function ansiToUtf8($str=''){
         if(empty($str) || self::isUtf8($str)){
@@ -96,13 +96,13 @@ class DyString{
     }
 
     /**
-     * @brief    字符串切割
-     * @param    $str
-     * @param    $start
-     * @param    $length
-     * @param    $charset
-     * @param    $suffix
-     * @return
+     * 字符串切割
+     * @param    $str       需要处理的字符串
+     * @param    $start     切割的起始位置
+     * @param    $length    切割长度
+     * @param    $charset   字附编码
+     * @param    $suffix    长度超出部分时后缀
+     * @return   string
      **/
     public static function cutStr($str, $start=0, $length, $charset="utf-8", $suffix=false){
         if($start == 0 && self::length($str) <= $length){
@@ -168,6 +168,10 @@ class DyString{
      * @return type
      */
     public static function length($str,$en2=true,$charset='utf-8'){
+        if(function_exists("mb_strlen")){
+            return mb_strlen($str,$charset);
+        }
+
         if($charset=='utf-8'){
             $str = iconv('utf-8','gbk//ignore',$str);
         }

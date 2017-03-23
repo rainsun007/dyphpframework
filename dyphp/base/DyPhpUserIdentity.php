@@ -199,7 +199,7 @@ abstract class DyPhpUserIdentity
     {
         $remember = DyCookie::get($this->loginStateKey('cookie'));
         if ($remember) {
-            $rememberMe = json_decode($remember);
+            $rememberMe = json_decode($remember, true);
             if ($rememberMe['expire'] - time() <= 0) {
                 return false;
             }
