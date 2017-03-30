@@ -8,6 +8,6 @@
 
 > ###### TODO
 > - [ ] 使用文档编写
-> - ~~[ ] 提供demo~~ 完成 [dyadmin](https://github.com/rainsun007/dyadmin)
-> - ~~[ ] 框架支持检查完善~~ 完成
+> - [x] 提供demo 完成 [dyadmin](https://github.com/rainsun007/dyadmin)
+> - [x] 框架支持检查完善  完成
 
