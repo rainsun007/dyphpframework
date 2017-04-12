@@ -31,13 +31,23 @@ class DyPhpBase
     //框架类
     private static $coreClasses = array();
 
-    /**
-     * 运行web app入口
-     * @param array app配制
-     **/
-    public static function runWebApp($config = null, $debug = false)
+     /**
+      * 运行web app入口
+      *
+      * @param string 配制文件
+      * @param boolean 是否开启debug
+      * @param boolean 是否开启web防火墙
+      * @return void
+      */
+    public static function runWebApp($config = null, $debug = false, $waf = true)
     {
         self::runAppCommon($config, $debug, 'web');
+
+        if ($waf) {
+            require DYPHP_PATH.self::$coreClasses['DyPhpWaf'];
+            new DyPhpWaf();
+        }
+
         //运行自动登录逻辑
         self::app()->auth->autoLoginStatus();
         DyPhpRoute::runWeb();
@@ -145,7 +155,7 @@ class DyPhpBase
      * @brief    注册自动加载
      * @param    $autoload 自动加载函数
      * @param    $replace  是否替换框架和自动加载方法
-     * @return
+     * @return   null
      **/
     public static function autoloadRegister($callback, $replace = false)
     {
@@ -255,6 +265,7 @@ class DyPhpBase
             'DyPhpConfig'=>'/dyphp/base/DyPhpConfig.php',
             'DyPhpRoute'=>'/dyphp/base/DyPhpRoute.php',
             'DyPhpException'=>'/dyphp/base/DyPhpException.php',
+            'DyPhpWaf'=>'/dyphp/base/DyPhpWaf.php',
             'DyPhpUserIdentity'=>'/dyphp/base/DyPhpUserIdentity.php',
             'DyPhpWidgets'=>'/dyphp/base/DyPhpWidgets.php',
             'DyPhpDebug'=>'/dyphp/base/DyPhpDebug.php',
@@ -303,8 +314,8 @@ class DyPhpBase
     public static function supportCheck()
     {
         //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt'
-        echo PHP_EOL.'[Framework to limit]'.PHP_EOL;
-        echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.2.2', '>=') ? '√ O' : '× minimum version of 5.2.2');
+        echo PHP_EOL.'[Framework limit]'.PHP_EOL;
+        echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.2.2', '>=') ? '√ OK' : '× minimum version of 5.2.2');
         echo PHP_EOL.'----------'.PHP_EOL;
         echo 'Framework to retain for $_GET : ca,ext_name,page';
 
@@ -372,7 +383,7 @@ final class DyPhpApp
      * @brief    实例注册
      * @param    $name   注册名
      * @param    $value  注册实例
-     * @return
+     * @return   null
      **/
     public function reg($name, $value = '')
     {
@@ -388,7 +399,7 @@ final class DyPhpApp
     /**
      * @brief    实例处理
      * param     注册名
-     * @return
+     * @return   object
      **/
     private function instance($name)
     {
@@ -414,8 +425,9 @@ final class DyPhpApp
 
     /**
      * 加载vendors
-     * @param vendors 路径及文件名
-     * @param dyphp为加载框架自带vendor app为加载app中的vendor
+     * @param string vendors 路径及文件名
+     * @param bool dyphp为加载框架自带vendor app为加载app中的vendor
+     * @return null
      */
     public function vendors($filePathName, $isSys = false)
     {

@@ -8,6 +8,6 @@
 
 > ###### TODO
 > - [ ] 使用文档编写
-> - [x] 提供demo 完成 [dyadmin](https://github.com/rainsun007/dyadmin)
+> - [x] 提供demo 完成  使用DyphpFramwork [dyadmin](https://github.com/rainsun007/dyadmin)
 > - [x] 框架支持检查完善  完成
 
