@@ -314,24 +314,25 @@ class DyPhpBase
     public static function supportCheck()
     {
         //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt'
-        echo PHP_EOL.'[Framework limit]'.PHP_EOL;
+        $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br >';
+        echo $br.'[Framework limit]'.$br;
         echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.2.2', '>=') ? '√ OK' : '× minimum version of 5.2.2');
-        echo PHP_EOL.'----------'.PHP_EOL;
-        echo 'Framework to retain for $_GET : ca,ext_name,page';
+        echo $br.'-----'.PHP_SAPI.'-----'.$br;
+        echo PHP_SAPI !== 'cli' ? 'Framework to retain for $_GET : ca,ext_name,page' : '';
 
-        echo PHP_EOL.PHP_EOL.'[Extension check]'.PHP_EOL;
+        echo $br.$br.'[Extension check]'.$br;
         echo extension_loaded('pdo') ? "√ PDO support" : "× PDO unsupport";
-        echo PHP_EOL.'----------'.PHP_EOL;
+        echo $br.'----------'.$br;
         echo extension_loaded('pdo_mysql') ? "√ PDO_MYSQL support" : "× PDO_MYSQL unsupport";
-        echo PHP_EOL.'----------'.PHP_EOL;
+        echo $br.'----------'.$br;
         echo extension_loaded('mbstring') ? "√ mbstring support" : "× mbstring unsupport";
-        echo PHP_EOL.'----------'.PHP_EOL;
+        echo $br.'----------'.$br;
         echo extension_loaded('iconv') ? "√ iconv support" : "× iconv unsupport";
-        echo PHP_EOL.'----------'.PHP_EOL;
+        echo $br.'----------'.$br;
         echo extension_loaded('gd') ? "√ GD support" : "× GD unsupport";
-        echo PHP_EOL.'----------'.PHP_EOL;
+        echo $br.'----------'.$br;
         echo extension_loaded('mcrypt') ? "√ mcrypt support" : "× mcrypt unsupport";
-        echo PHP_EOL.PHP_EOL;
+        echo $br.$br;
         exit;
     }
 }
