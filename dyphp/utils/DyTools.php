@@ -110,22 +110,19 @@ class DyTools
     }
 
     /**
-     * log记录  按年月创建目录 每天一个log文件.
+     * log记录  此方法将按月创建目录.
      *
      * @param string  log信息
      * @param string  log类型   如info error warning debug，此参数不做限制
      * @param string  log保存目录   默认在 application/logs/app_log下
-     * @param boolen  是否生成单独文件   如需不同$type生成单独文件设置为true
+     * @param boolen  是否生成单独文件,默认不生成单独文件，如需不同$type生成单独文件设置为true
      * @param boolen  是否切割log，默认为按天切割log, 设置为false则只生成一个log文件
      **/
     public static function logs($message, $type = 'info', $logRootDir = '', $typeAlone = false, $logCut = true)
     {
-        if (function_exists('ini_get') && ini_get('date.timezone') == '' && function_exists('date_default_timezone_set')) {
-            date_default_timezone_set('PRC');
-        }
-
         $formatTime = date('Y-m-d H:i:s', time());
-        $data = $formatTime.' ['.$type.'] '.DyRequest::getClientIp().' '.$_SERVER['REQUEST_URI']."\n".$message."\n\n";
+        $source = DyPhpBase::$appType == 'web' ? DyRequest::getClientIp().' '.DyRequest::getMethod().' '.$_SERVER['REQUEST_URI'] : php_uname('n');
+        $data = $formatTime.' ['.$type.'] '.$source.' '.$message.PHP_EOL;
 
         $logRootDir = empty($logRootDir) ? rtrim(DyPhpConfig::item('appPath'), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'app_log' : $logRootDir;
         $logDir = rtrim($logRootDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.date('Y-m', time()).DIRECTORY_SEPARATOR;

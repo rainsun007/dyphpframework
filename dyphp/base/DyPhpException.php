@@ -147,10 +147,6 @@ class DyPhpException extends Exception
      **/
     private static function logs($title, $message, $traceString)
     {
-        if (function_exists('ini_get') && ini_get('date.timezone') == '' && function_exists('date_default_timezone_set')) {
-            date_default_timezone_set('PRC');
-        }
-
         $logDir = rtrim(DyPhpConfig::item('appPath'), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
         if (!is_dir($logDir)) {
             mkdir($logDir, 0777, true);
@@ -159,7 +155,7 @@ class DyPhpException extends Exception
 
         //按app类型写log信息
         $request = DyPhpBase::$appType == 'web' ? $_SERVER['REQUEST_URI'] : 'controller:'.DyPhpBase::app()->cid.' action:'.DyPhpBase::app()->aid;
-        $source = DyPhpBase::$appType == 'web' ? DyRequest::getClientIp() : php_uname('n');
+        $source = DyPhpBase::$appType == 'web' ? DyRequest::getClientIp().' '.DyRequest::getMethod() : php_uname('n');
         $data = date('Y-m-d H:i:s', time()).' '.$title.'['.self::getErrType().'] '.$source.' '.$request.PHP_EOL.$message.PHP_EOL.$traceString.PHP_EOL.PHP_EOL;
         $fp = fopen($file, 'a');
         if ($fp) {
