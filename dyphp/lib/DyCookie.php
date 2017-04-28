@@ -61,8 +61,11 @@ class DyCookie{
      * @param int    过期时间 单位：秒
      * @param string 存储路径
      * @param string 存储域
+     * @param bool 
+     * @param bool
+     * @return bool
      **/
-    public static function set($name='',$value='',$expire=0,$path='',$domain='',$secure=false,$httponly=false) {
+    public static function set($name='',$value='',$expire=0,$path='',$domain='',$secure=false,$httponly=true) {
         if($name === ''){
             return false;
         }

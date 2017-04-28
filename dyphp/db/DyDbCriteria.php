@@ -259,42 +259,42 @@ class DyDbCriteria
     private function _where($key, $val, $condition = '=', $xor = 'AND', $compatible = true)
     {
         $key = $compatible && trim($key) != '' ? "`{$key}`" : $key;
-        $val = $compatible && is_string($val) ? "'{$val}'" : $val;
+        $val = ($compatible && is_numeric($val)) ||  in_array($condition, array('link','llike','rlike','notlink','notllike','notrlike')) ?  $val : "'{$val}'";
 
         switch ($condition) {
-        case 'in':
-            $where = "{$key} IN({$val}) ";
-            break;
-        case 'notin':
-            $where = "{$key} NOT IN({$val}) ";
-            break;
-        case 'like':
-            $where = "{$key} LIKE '%$val%' ";
-            break;
-        case 'llike':
-            $where = "{$key} LIKE '%$val' ";
-            break;
-        case 'rlike':
-            $where = "{$key} LIKE '$val%' ";
-            break;
-        case 'notlike':
-            $where = "{$key} NOT LIKE '%$val%' ";
-            break;
-        case 'notllike':
-            $where = "{$key} NOT LIKE '%$val' ";
-            break;
-        case 'notrlike':
-            $where = "{$key} NOT LIKE '$val%' ";
-            break;
-        case 'null':
-            $where = "{$key} IS NULL ";
-            break;
-        case 'notnull':
-            $where = "{$key} IS NOT NULL ";
-            break;
-        default:
-            $where = "{$key} {$condition} {$val} ";
-            break;
+            case 'in':
+                $where = "{$key} IN({$val}) ";
+                break;
+            case 'notin':
+                $where = "{$key} NOT IN({$val}) ";
+                break;
+            case 'like':
+                $where = "{$key} LIKE '%{$val}%' ";
+                break;
+            case 'llike':
+                $where = "{$key} LIKE '%{$val}' ";
+                break;
+            case 'rlike':
+                $where = "{$key} LIKE '{$val}%' ";
+                break;
+            case 'notlike':
+                $where = "{$key} NOT LIKE '%{$val}%' ";
+                break;
+            case 'notllike':
+                $where = "{$key} NOT LIKE '%{$val}' ";
+                break;
+            case 'notrlike':
+                $where = "{$key} NOT LIKE '{$val}%' ";
+                break;
+            case 'null':
+                $where = "{$key} IS NULL ";
+                break;
+            case 'notnull':
+                $where = "{$key} IS NOT NULL ";
+                break;
+            default:
+                $where = "{$key} {$condition} {$val} ";
+                break;
         }
 
         return ' '.$xor.' '.$where;
