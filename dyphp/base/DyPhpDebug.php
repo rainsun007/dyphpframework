@@ -64,6 +64,37 @@ class DyPhpDebug
         echo '</table>';
     }
 
+    public static function getLoadFilesConsole($onlyApp = true)
+    {
+        if (!DyPhpBase::$debug) {
+            return '';
+        }
+
+        $line = str_repeat('-',120).PHP_EOL;
+        echo PHP_EOL.'[INCLUDE FILES]'.PHP_EOL;
+        echo  $line;
+        echo '|Index | Size    | File '.PHP_EOL;
+        echo  $line;
+        $allSize = $num = 0;
+        $files = get_included_files();
+        foreach ($files as $key => $file) {
+            $indexNum = $key++;
+            if ($onlyApp) {
+                if (strpos($file, DYPHP_PATH) !== false) {
+                    continue;
+                }
+                $indexNum = $num++;
+            }
+            $size = filesize($file);
+
+            echo '|'.$indexNum.'     | '.DyTools::formatSize($size).' | '.$file.PHP_EOL;
+            echo $line;
+            $allSize += $size;
+        }
+        echo '|Total | '.DyTools::formatSize($allSize).' |'.PHP_EOL;
+        echo  $line.PHP_EOL;
+    }
+
     /**
      *  获取加载的sql.
      **/
@@ -88,10 +119,31 @@ class DyPhpDebug
         echo '</table>';
     }
 
+
+    public static function getLoadQueryConsole()
+    {
+        if (!DyPhpBase::$debug) {
+            return '';
+        }
+
+        $line = str_repeat('-',120).PHP_EOL;
+        $time = 0;
+        echo PHP_EOL.'[EXPLAIN SQL]'.PHP_EOL;
+        echo  $line;
+        echo '|Index | Time    | SQL '.PHP_EOL;
+        echo  $line;
+        foreach (self::$queries as $key => $query) {
+            //echo $key.DyFilter::html($query['sql']).self::mysqlExplain($query['explain']).self::getReadableTime($query['time']).PHP_EOL;
+            echo '|'.$key.'     | '.self::getReadableTime($query['time']).' | '.DyFilter::html($query['sql']).PHP_EOL;
+            echo  $line;
+            $time += $query['time'];
+        }
+        echo '|Total | '.self::getReadableTime($time).' |'.PHP_EOL;
+        echo  $line.PHP_EOL;
+    }
+
     /**
      * @brief    获取全局变量
-     *
-     * @return
      **/
     public static function getGlobalParams()
     {
@@ -152,6 +204,36 @@ class DyPhpDebug
 
         echo '<tr style="height:0;"><td></td><td></td></tr>';
         echo '</table>';
+    }
+
+    public static function getGlobalParamsConsole()
+    {
+        if (!DyPhpBase::$debug) {
+            return '';
+        }
+
+        $usageMemory = (!function_exists('memory_get_usage')) ? '0' : round(memory_get_usage() / 1024 / 1024, 2).'MB';
+
+        $paramsArr = array(
+            'RUNTIME' => DyPhpBase::execTime().'Seconds '.' Memory:'.$usageMemory.' @ '.PHP_OS.', php:'.PHP_VERSION,
+            'EXECUTE' => 'Module:'.DyPhpBase::app()->module.' Controller:'.DyPhpBase::app()->cid.' Action:'.DyPhpBase::app()->aid,
+            //'SESSION' => isset($_SESSION) ? $_SESSION : array(),
+            //'COOKIE' => isset($_COOKIE) ? $_COOKIE : array(),
+            //'POST' => isset($_POST) ? $_POST : array(),
+            //'GET' => isset($_GET) ? $_GET : array(),
+        );
+
+        $line = str_repeat('-',120).PHP_EOL;
+        echo PHP_EOL.'[PARAMS]'.PHP_EOL;
+        echo  $line;
+        echo '|Type    | Content '.PHP_EOL;
+        echo  $line;
+        foreach ($paramsArr as $key => $val) {
+            $val = is_array($val) ? var_export($val,true) : $val;
+            echo '|'.$key.' | '.$val.PHP_EOL;
+            echo  $line;
+        }
+        echo PHP_EOL;
     }
 
     /**
