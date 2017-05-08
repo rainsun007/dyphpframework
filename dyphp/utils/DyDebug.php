@@ -14,12 +14,12 @@ class DyDebug extends DyPhpDebug{
         $showTypeArr = array_unique(explode(',',$showType));
         foreach ($showTypeArr as $key=>$val) {
             if($val == 'sql'){
-                self::getLoadQuery();
+                PHP_SAPI == 'cli' ? self::getLoadQueryConsole() : self::getLoadQuery();
             }elseif($val == 'param'){
-                self::getGlobalParams();
+                PHP_SAPI == 'cli' ? self::getGlobalParamsConsole() : self::getGlobalParams();
             }elseif($val == 'file' || $val == 'allfile'){
                 $onlyApp = $val == 'allfile' ? false : true;
-                self::getLoadFiles($onlyApp);
+                PHP_SAPI == 'cli' ? self::getLoadFilesConsole() : self::getLoadFiles($onlyApp);
             }
         }
     }

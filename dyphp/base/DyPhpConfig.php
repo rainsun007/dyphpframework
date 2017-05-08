@@ -85,6 +85,7 @@ class DyPhpConfig{
         }
         self::$appPath = rtrim(realpath($config['appPath']),'/');
         defined('APP_PATH') or define('APP_PATH', self::$appPath);
+        defined('APP_PARENT_PATH') or define('APP_PARENT_PATH', dirname(self::$appPath));
 
         //get appHttpPath
         if(isset($_SERVER["SCRIPT_NAME"])){

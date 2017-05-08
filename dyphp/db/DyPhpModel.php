@@ -228,6 +228,17 @@ class DyPhpModel
     }
 
     /**
+     * 执行完整的sql语句(兼容pdo exec)
+     *
+     * @param string $sql
+     * @return void
+     */
+    public function exec($sql)
+    {
+        return $this->dbExec($sql);
+    }
+
+    /**
      * @brief    分页查询获取记录
      *
      * @param   $criteria
