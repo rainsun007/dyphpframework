@@ -10,13 +10,6 @@
  */
 class DyRequest
 {
-    //remote post请求结果
-    private static $postResult;
-    private static $userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36';
-
-    //主url单例
-    private static $url = '';
-
     /**
      * @brief    url重定向
      *
@@ -25,7 +18,7 @@ class DyRequest
      * @param   $code
      * @param   $method
      *
-     * @return
+     * @return  null
      **/
     public static function redirect($url, $param = array(), $code = 302, $method = 'location')
     {
@@ -37,7 +30,7 @@ class DyRequest
     /**
      * @brief    获取站点根url
      *
-     * @return
+     * @return   string
      **/
     public static function getSiteRootUrl()
     {
@@ -45,11 +38,11 @@ class DyRequest
     }
 
     /**
-     * 创建兼容性URL.
+     * 框架支持restful风格的url使用此方法可创建兼容性URL,使得url风格配制修改对生成的url无影响
      *
      * @param string controller或controller/action
      * @param array  get参数
-     * @param 强制以url正常get参数格式处理传入的参数
+     * @param bool 强制以url正常get参数格式处理传入的参数
      *
      * @return string 完整的http访问地址
      **/
@@ -76,13 +69,8 @@ class DyRequest
         }
         $getParam = $isRest && $forceGet ? '?'.trim(substr($getParam, 0, -1), '/') : substr($getParam, 0, -1);
 
-        if (self::$url) {
-            return self::$url.$ca.$getParam;
-        }
         $appHttpPath = DyPhpConfig::item('appHttpPath') != '' ? DyPhpConfig::item('appHttpPath').'/' : '';
-        self::$url = self::getServerName().'/'.$appHttpPath;
-
-        return self::$url.$ca.$getParam;
+        return self::getServerName().'/'.$appHttpPath.$ca.$getParam;
     }
 
     /**
@@ -102,7 +90,6 @@ class DyRequest
             $port = '';
             if (isset($_SERVER['SERVER_PORT'])) {
                 $port = ':'.$_SERVER['SERVER_PORT'];
-
                 if ((':80' == $port && 'http://' == $protocol) || (':443' == $port && 'https://' == $protocol)) {
                     $port = '';
                 }
@@ -225,22 +212,17 @@ class DyRequest
      */
     public static function getMethod()
     {
-        $method = 'GET';
-        $methodArr = array('GET', 'POST', 'HEAD', 'OPTIONS', 'PUT', 'DELETE', 'TARCE');
-
-        // 如果指定 $_POST['_method'] ，表示使用POST请求来模拟其他方法的请求。
+        $method = ''; 
         if (isset($_POST['_method'])) {
-            $method = $_POST['_method'];
+            $method = strtoupper($_POST['_method']);
         } elseif (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
-            $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
+            $method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
         } elseif (isset($_SERVER['REQUEST_METHOD'])) {
-            $method = $_SERVER['REQUEST_METHOD'];
-        }
-        if (!in_array($method, $methodArr)) {
-            $method = 'GET';
+            $method = strtoupper($_SERVER['REQUEST_METHOD']);
         }
 
-        return strtoupper($method);
+        $methodArr = array('GET', 'POST', 'HEAD', 'OPTIONS', 'PUT', 'DELETE', 'TARCE');
+        return in_array($method, $methodArr) ? $method : 'GET';
     }
 
     /**
@@ -353,7 +335,7 @@ class DyRequest
      * @param   $paramKey
      * @param   $default
      *
-     * @return
+     * @return  mix
      **/
     public static function getOriginal($paramKey = '', $default = '')
     {
@@ -366,7 +348,7 @@ class DyRequest
      * @param   $paramKey
      * @param   $default
      *
-     * @return
+     * @return  mix
      **/
     public static function postOriginal($paramKey = '', $default = '')
     {
@@ -374,13 +356,9 @@ class DyRequest
     }
 
     /**
-     * @brief    获取json数据流
-     *
-     * @param   $paramKey
-     * @param   $method
-     * @param   $default
-     *
-     * @return
+     * 通过输入流获取json数据并转为array返回
+     * enctype="multipart/form-data" 的时候 php://input 是无效的
+     * @return array
      **/
     public static function getJosnInput()
     {
@@ -388,24 +366,27 @@ class DyRequest
 
         return json_decode($val, true);
     }
+
     /**
      * 发起 post 请求
      *
      * @param string  接受请求的url
      * @param array   提交的数据
+     * @param int     超时时间(单位：秒)
+     * @param string  浏览器user agent
      *
      * @return string 返回请求的结果
      */
-    public static function remotePost($url, $postArray = array(), $timeOut = 5)
+    public static function remotePost($url, $postArray = array(), $timeOut = 5,$userAgent = '')
     {
+        $userAgent = $userAgent ? $userAgent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36';
+
         $postString = http_build_query($postArray, '', '&');
         if (function_exists('curl_init')) {
-            self::runCurlRequest($url, $postString, $timeOut);
+            return self::runCurlRequest($url, $postString, $timeOut,$userAgent);
         } else {
-            self::runFileRequest($url, $postString, $timeOut);
+            return self::runFileRequest($url, $postString, $timeOut,$userAgent);
         }
-
-        return self::$postResult;
     }
 
     /**
@@ -415,9 +396,9 @@ class DyRequest
      * @param   $postString
      * @param   $timeOut
      *
-     * @return
+     * @return  string
      **/
-    private static function runCurlRequest($postUrl, $postString, $timeOut)
+    private static function runCurlRequest($postUrl, $postString, $timeOut,$userAgent)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $postUrl);
@@ -426,9 +407,10 @@ class DyRequest
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeOut);
-        curl_setopt($ch, CURLOPT_USERAGENT, self::$userAgent);
-        self::$postResult = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_USERAGENT,$userAgent);
+        $postResult = curl_exec($ch);
         curl_close($ch);
+        return $postResult;
     }
 
     /**
@@ -438,15 +420,15 @@ class DyRequest
      * @param   $postString
      * @param   $timeOut
      *
-     * @return
+     * @return  string
      **/
-    private static function runFileRequest($postUrl, $postString, $timeOut)
+    private static function runFileRequest($postUrl, $postString, $timeOut,$userAgent)
     {
         $context = array(
             'http' => array(
                 'method' => 'POST',
                 'timeout' => $timeOut,
-                'user_agent' => self::$userAgent,
+                'user_agent' => $userAgent,
                 'header' => 'Content-Type: application/x-www-form-urlencoded'."\r\n".
                 'Content-Length: '.strlen($postString)."\r\n",
                 'content' => $postString,
@@ -457,20 +439,19 @@ class DyRequest
         //第一获取方案
         $postResult = file_get_contents($postUrl, false, $contextID);
         if ($postResult !== false) {
-            self::$postResult = $postResult;
-
-            return;
+            return $postResult;
         }
 
         //备用获取方案
         $sock = fopen($postUrl, 'r', false, $contextID);
-        self::$postResult = '';
+        $postResult = '';
         if ($sock) {
             while (!feof($sock)) {
-                self::$postResult .= fgets($sock, 4096);
+                $postResult .= fgets($sock, 4096);
             }
             fclose($sock);
         }
+        return $postResult;
     }
 
     /**
@@ -480,7 +461,7 @@ class DyRequest
      * @param   $method
      * @param   $default
      *
-     * @return
+     * @return  mix
      **/
     private static function getOriginalParam($paramKey = '', $method = 'get', $default = '')
     {
@@ -514,9 +495,9 @@ class DyRequest
     /**
      * 处理整型数据.
      *
-     * @param string  需要被验证的值
+     * @param int  需要被验证的值
      *
-     * @return string 返回验证过的值
+     * @return int 返回验证过的值
      */
     private static function getFilterInt($requestValue, $default)
     {
@@ -528,7 +509,7 @@ class DyRequest
      *
      * @param   float 需要被验证的值
      *
-     * @return 返回验证过的值
+     * @return float 返回验证过的值
      **/
     private static function getFilterFloat($requestValue, $default)
     {
