@@ -154,17 +154,18 @@ class DyPhpBase
     /**
      * @brief    注册自动加载
      * @param    $autoload 自动加载函数
-     * @param    $replace  是否替换框架和自动加载方法
+     * @param    $replace  是否替换框架的自动加载方法
+     * @param    $prepend  如果是 true，spl_autoload_register() 会添加函数到队列之首，而不是队列尾部。
      * @return   null
      **/
-    public static function autoloadRegister($callback, $replace = false)
+    public static function autoloadRegister($callback, $replace = false, $prepend = false)
     {
-        spl_autoload_unregister(array('DyPhpBase', 'autoload'));
         if ($replace) {
+            spl_autoload_unregister(array('DyPhpBase', 'autoload'));
             spl_autoload_register($callback);
         } else {
-            spl_autoload_register($callback);
-            spl_autoload_register(array('DyPhpBase', 'autoload'));
+            spl_autoload_register($callback,true,$prepend);
+            //spl_autoload_register(array('DyPhpBase', 'autoload'));
         }
     }
 
@@ -316,7 +317,7 @@ class DyPhpBase
         //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt'
         $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br >';
         echo $br.'[Framework limit]'.$br;
-        echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.2.2', '>=') ? '√ OK' : '× minimum version of 5.2.2');
+        echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.3.0', '>=') ? '√ OK' : '× minimum version of 5.2.2');
         echo $br.'-----'.PHP_SAPI.'-----'.$br;
         echo PHP_SAPI !== 'cli' ? 'Framework to retain for $_GET : ca,ext_name,page' : '';
 

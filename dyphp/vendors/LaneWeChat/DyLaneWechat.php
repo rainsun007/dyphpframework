@@ -36,6 +36,6 @@ class LaneWeChatAutoloader{
     }
 }
 
-Dy::autoloadRegister(array('LaneWeChatAutoloader','autoload'));
+Dy::autoloadRegister(array('LaneWeChatAutoloader','autoload'),false,true);
 
 
