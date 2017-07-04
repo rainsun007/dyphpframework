@@ -123,7 +123,7 @@ class DyPhpModel
      *
      * @param array  array('classid'=>'classid+1')
      * @param string
-     * @param array  array('classid')
+     * @param array  进行自加自减操作的字段 array('classid')
      *
      * @return int
      */

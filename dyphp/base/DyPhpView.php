@@ -31,11 +31,12 @@ class DyPhpView
      * 完整view调用.
      *
      * @param string 调用的view
-     * @param mixed  view需要的数据
+     * @param array  view层数据
+     * @param string 主题（此参数如设置将覆盖defaultTheme属性; defaultLayout属性若设置为跨主题，则只针对于layoutFile不会被覆盖）
      **/
-    public function render($view, $data = array())
+    public function render($view, $data = array(), $defaultTheme = '')
     {
-        $this->attrSet($view, $data);
+        $this->attrSet($view, $data, $defaultTheme);
 
         if (!file_exists($this->viewFile)) {
             DyPhpBase::throwException('view does not exist', $view.':'.$this->viewFile);
@@ -44,11 +45,6 @@ class DyPhpView
         if (is_array($this->viewData)) {
             extract($this->viewData);
         }
-
-        //debug时对于非view内输出可见
-        /*if(!DyPhpBase::$debug && ob_get_length()){*/
-            //ob_clean();
-        /*}*/
 
         ob_start();
         include $this->viewFile;
@@ -66,11 +62,12 @@ class DyPhpView
      * 局部view调用.
      *
      * @param string 调用的view
-     * @param mixed  view需要的数据
+     * @param array  view层数据
+     * @param string 主题（此参数如设置将覆盖defaultTheme属性; defaultLayout属性若设置为跨主题，则只针对于layoutFile不会被覆盖）
      **/
-    public function renderPartial($view, $data = array())
+    public function renderPartial($view, $data = array(), $defaultTheme = '')
     {
-        $this->attrSet($view, $data);
+        $this->attrSet($view, $data, $defaultTheme);
 
         if (!file_exists($this->viewFile)) {
             DyPhpBase::throwException('view does not exist', $view);
@@ -86,22 +83,25 @@ class DyPhpView
      * 属性设置.
      *
      * @param string 调用的view
+     * @param array  view层数据
+     * @param string 主题（此参数如设置将覆盖defaultTheme属性; defaultLayout属性若设置为跨主题，则只针对于layoutFile不会被覆盖）
      **/
-    private function attrSet($view = '', $data = array())
+    private function attrSet($view = '', $data = array(), $defaultTheme = '')
     {
         if (empty(self::$aId) || empty(self::$cId)) {
             self::$aId = ucfirst(DyPhpBase::app()->aid);
             self::$cId = ucfirst(DyPhpBase::app()->cid);
         }
 
-        $view = trim($view, '/');
-        if (strpos($view, '/') === false) {
-            $view = self::$cId.DIRECTORY_SEPARATOR.$view;
-        }
+        $viewRoot = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR;
+        $themeViewRoot = $defaultTheme != '' && $defaultTheme != $this->defaultTheme ? $viewRoot.$defaultTheme.DIRECTORY_SEPARATOR : $viewRoot.$this->defaultTheme.DIRECTORY_SEPARATOR;
 
-        $viewRoot = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.$this->defaultTheme.DIRECTORY_SEPARATOR;
-        $this->viewFile = $viewRoot.$view.EXT;
-        $this->layoutFile = $viewRoot.'Layout'.DIRECTORY_SEPARATOR.$this->defaultLayout.EXT;
+        $this->layoutFile = strpos($this->defaultLayout, '/') === false ? $themeViewRoot.'Layout'.DIRECTORY_SEPARATOR.$this->defaultLayout.EXT : $viewRoot.$this->defaultLayout.EXT;
+        
+        $view = trim($view, '/');
+        $view = strpos($view, '/') === false ? self::$cId.DIRECTORY_SEPARATOR.$view : $view;
+        $this->viewFile = $themeViewRoot.$view.EXT;
+
         $this->viewData = array_merge($this->viewData, $data);
     }
 
@@ -150,10 +150,8 @@ class DyPhpView
     /**
      * @brief    设置模板变量
      *
-     * @param   $key
-     * @param   $value
-     *
-     * @return
+     * @param   mix $key
+     * @param   mix $value
      **/
     public function setData($key = '', $value = '')
     {
@@ -166,9 +164,9 @@ class DyPhpView
      * @brief    获取模板变量
      * 主要使用场景为在renderPartial中调用了setData方法 在layout或其它view中后续执行代码中要使用设置的模板变量
      *
-     * @param   $key
+     * @param  string $key
      *
-     * @return
+     * @return mix
      **/
     public function getData($key = '')
     {
@@ -191,10 +189,10 @@ class DyPhpView
     /**
      * @brief    加载css
      *
-     * @param   $css
-     * @param   $return
+     * @param  string $css
+     * @param  bool   $return
      *
-     * @return
+     * @return string
      **/
     protected function loadCss($css, $return = false)
     {
@@ -216,10 +214,10 @@ class DyPhpView
     /**
      * @brief  加载js
      *
-     * @param   $script
-     * @param   $return
+     * @param  string  $script
+     * @param  bool    $return
      *
-     * @return
+     * @return  string 
      **/
     protected function loadJs($script, $return = false)
     {
