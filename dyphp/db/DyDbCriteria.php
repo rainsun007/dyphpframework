@@ -250,7 +250,7 @@ class DyDbCriteria
      *
      * @param   $key
      * @param   $val
-     * @param   $condition  = > < >= <= <> in notin link llike rlike notlink notllike notrlike null notnull
+     * @param   $condition  = > < >= <= <> in notin like llike rlike notlike notllike notrlike null notnull
      * @param   $xor
      * @param   $compatible 兼容性处理
      *
@@ -259,13 +259,14 @@ class DyDbCriteria
     private function _where($key, $val, $condition = '=', $xor = 'AND', $compatible = true)
     {
         $key = $compatible && trim($key) != '' ? "`{$key}`" : $key;
-        $val = ($compatible && is_numeric($val)) ||  in_array($condition, array('link','llike','rlike','notlink','notllike','notrlike')) ?  $val : "'{$val}'";
 
         switch ($condition) {
             case 'in':
+                $val = "'".join("','",explode(',',$val))."'";
                 $where = "{$key} IN({$val}) ";
                 break;
             case 'notin':
+                $val = "'".join("','",explode(',',$val))."'";
                 $where = "{$key} NOT IN({$val}) ";
                 break;
             case 'like':
@@ -293,6 +294,7 @@ class DyDbCriteria
                 $where = "{$key} IS NOT NULL ";
                 break;
             default:
+                $val = ($compatible && is_numeric($val)) ?  $val : "'{$val}'";
                 $where = "{$key} {$condition} {$val} ";
                 break;
         }
@@ -307,7 +309,7 @@ class DyDbCriteria
      *
      * @return
      **/
-    public function getMysqlSql($from)
+    public function getMysqlSql($from = '')
     {
         $select = $this->distinct === true ? 'DISTINCT '.$this->select : $this->select;
         $from = $this->from != '' ? $this->from : '`'.$from.'`';
