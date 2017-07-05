@@ -275,7 +275,7 @@ class DyCaptcha{
             if(DyCookie::is_set($this->saveName)){
                 DyCookie::delete($this->saveName);
             }
-            DyCookie::set($this->saveName,array($this->verifyCode,$time),$this->expire);
+            DyCookie::set($this->saveName,json_encode(array($this->verifyCode,$time)),$this->expire);
         }  
      }
     
@@ -361,7 +361,7 @@ class DyCaptcha{
      protected function createText(){
         //验证码个数
         $wordNum = mt_rand($this->wordLength[0],$this->wordLength[1]);
-        //验证码模式 0只字母  1只数字  2字母和数字
+        //验证码模式 0只字母  1只数字  2字母和数字  3数字运算
         $text = $r = '';
         switch ($this->model) {
            case 0:
@@ -490,6 +490,7 @@ class DyCaptcha{
         DyCookie::delete($this->saveName);
         
         //验证码不合法
+        $sVer = json_decode($sVer,true);
         if(empty($verifyCode) || !$sVer || !is_array($sVer) || count($sVer) != 2){
             return false;
         }

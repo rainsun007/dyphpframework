@@ -1,12 +1,12 @@
 <?php 
-    DyStatic::regScript(viewHelper::getStaticPath('jquery.js'),'head');
+    //DyStatic::regScript(viewHelper::getStaticPath('jquery.js'),'head');
     $captchaRequest = $options['request']; 
     $isRest = DyPhpConfig::getRestCa();    
 ?>
 
 <script language="javascript" type="text/javascript">
    function dyRefreshCaptchaImg(){
-        var url = '<?php echo $captchaRequest.($isRest?'?':'&');?>r='+Math.floor(Math.random()*1000+1);
+        var url = '<?php echo $captchaRequest.($isRest ? "?" : "&");?>r='+Math.floor(Math.random()*1000+1);
         $('#captchaShowImg').attr("src",url);
    }
 </script>
