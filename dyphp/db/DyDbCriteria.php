@@ -243,6 +243,8 @@ class DyDbCriteria
                 $this->$item = '';
             }
         }
+
+        return $this;
     }
 
     /**

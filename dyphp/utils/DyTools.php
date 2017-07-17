@@ -211,17 +211,17 @@ class DyTools
     /**
      * @brief    简单json返回值格式化
      *
-     * @param   $status  状态
-     * @param   $code    代码
-     * @param   $message 信息
-     * @param   $data
+     * @param   int $status  状态
+     * @param   int $code    代码
+     * @param   string $message 信息
+     * @param   mix $data
+     * @param   bool $  以字面编码多字节 Unicode 字符(中文不被转码),自 PHP 5.4.0 起生效
      *
-     * @return
+     * @return  string
      **/
-    public static function apiJson($status = 1, $code = 200, $message = '', $data = '')
+    public static function apiJson($status = 1, $code = 200, $message = '', $data = '', $unescaped = false)
     {
         $dataArr = array('status' => $status, 'code' => $code, 'message' => $message, 'data' => $data);
-
-        return json_encode($dataArr);
+        return $unescaped ? json_encode($dataArr,JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
     }
 }
