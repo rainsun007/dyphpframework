@@ -34,7 +34,6 @@ return array(
     'vendor does not exist'=>'vendor不存在', 
     'GD is not loaded' => 'GD扩展没有加载',
     'sql criteria error'=>'sql条件错误',
-    'page sql criteria error'=>'分页数据获取条件必须为DyDbCriteria实例',
     'hook type error'=>'hook类型错误',
     'hook Undefined or data type error'=>'hook未定义或数据类型错误',
     'hook does not exist'=>'hook文件不存在',
