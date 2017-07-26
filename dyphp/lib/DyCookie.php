@@ -16,7 +16,7 @@ class DyCookie{
         }elseif($key == 'path'){
             $value = isset($cookieArr['path']) ? $cookieArr['path'] : '/';
         }elseif($key == 'domain'){
-            $value = isset($cookieArr['domain']) ? $cookieArr['domain'] : $_SERVER['SERVER_NAME'];
+            $value = isset($cookieArr['domain']) ? $cookieArr['domain'] : '';
         }elseif($key == 'cryptStr'){
             $cookieSecretKey = isset($cookieArr['secretKey']) ? $cookieArr['secretKey'] : '';
             $secretKey = DyPhpConfig::item('secretKey') ? DyPhpConfig::item('secretKey') : '';
@@ -56,11 +56,11 @@ class DyCookie{
 
     /**
      * 设置Cookie
-     * @param string cookie键名
-     * @param mixed  cookie值
-     * @param int    过期时间 单位：秒
-     * @param string 存储路径
-     * @param string 存储域
+     * @param string  cookie键名
+     * @param string  cookie值
+     * @param int     过期时间 单位：秒
+     * @param string  存储路径
+     * @param string  存储域
      * @param bool 
      * @param bool
      * @return bool
@@ -70,14 +70,8 @@ class DyCookie{
             return false;
         }
         $prefix = self::cookieConfig('prefix');
-        if(empty($path)) {
-            $path = self::cookieConfig('path');
-        }
-        if(empty($domain)) {
-            $domain = self::cookieConfig('domain');
-            $domain = ($domain != 'localhost') ? $domain : false;
-        }
-
+        $path = empty($path) ? self::cookieConfig('path') : '';
+        $domain = empty($domain) ? self::cookieConfig('domain') : '';
         //$value = base64_encode(serialize($value));
         $value = DyString::encodeStr($value,self::cookieConfig('cryptStr'),$expire);
         $expire = (int)$expire>0 ? time()+(int)$expire : 0;

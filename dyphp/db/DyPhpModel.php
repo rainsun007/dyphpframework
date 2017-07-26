@@ -249,18 +249,22 @@ class DyPhpModel
      **/
     public function getAllForPage($criteria, $pageSize = 15, $page = 'page')
     {
-        if (!is_object($criteria)) {
-            DyPhpBase::throwException('page sql criteria error', 'getAllForPage error', 0);
-        }
         $limit = $pageSize > 0 ? $pageSize : 15;
         $cpage = is_int($page) ? $page : DyRequest::getInt($page, 0);
         $offset = $cpage > 0 ? ($cpage - 1) * $limit : 0;
 
-        $criteria->limit($limit);
-        $criteria->offset($offset);
-        $data = $this->getAll($criteria);
-
-        $counts = $this->count($criteria);
+        $data = array();
+        $counts = 0;
+        if (is_object($criteria)) {
+            $criteria->limit($limit);
+            $criteria->offset($offset);
+            $data = $this->getAll($criteria);
+            $counts = $this->count($criteria);
+        }else{
+            $criteriaLimit = $criteria." LIMIT {$offset},{$limit}";
+            $data = $this->getAll($criteriaLimit);
+            $counts = $this->count($criteria);
+        }
 
         return array('data' => $data, 'count' => $counts);
     }
