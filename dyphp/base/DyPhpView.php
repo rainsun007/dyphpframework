@@ -17,9 +17,11 @@ class DyPhpView
     //模板数据
     private $viewData = array();
 
-    //主题
+    //默认使用的主题
     public $defaultTheme = 'default';
-    //默认使用的layout文件
+    //模块使用的主题，优先级高于$defaultTheme属性
+    public $moduleTheme = '';
+    //默认使用的layout文件, 若设置为跨模块layout(eg:/admin/Layout/main)，那么在layout中如调用renderPartial则要注意显性设置$moduleTheme参数
     public $defaultLayout = 'main';
     //自定义页面title
     public $pageTitle = '';
@@ -29,11 +31,11 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
-     * @param string 主题（此参数如设置将覆盖defaultTheme属性; defaultLayout属性若设置为跨主题，则只针对于layoutFile不会被覆盖）
+     * @param string 主题（此参数如设置将覆盖moduleTheme属性）
      **/
-    public function render($view, $data = array(), $defaultTheme = '')
+    public function render($view, $data = array(), $moduleTheme = '')
     {
-        $this->attrSet($view, $data, $defaultTheme);
+        $this->attrSet($view, $data, $moduleTheme);
 
         if (!file_exists($this->viewFile)) {
             DyPhpBase::throwException('view does not exist', $view.':'.$this->viewFile);
@@ -60,11 +62,11 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
-     * @param string 主题（此参数如设置将覆盖defaultTheme属性; defaultLayout属性若设置为跨主题，则只针对于layoutFile不会被覆盖）
+     * @param string 主题（此参数如设置将覆盖moduleTheme属性）
      **/
-    public function renderPartial($view, $data = array(), $defaultTheme = '')
+    public function renderPartial($view, $data = array(), $moduleTheme = '')
     {
-        $this->attrSet($view, $data, $defaultTheme);
+        $this->attrSet($view, $data, $moduleTheme);
 
         if (!file_exists($this->viewFile)) {
             DyPhpBase::throwException('view does not exist', $view);
@@ -81,12 +83,16 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
-     * @param string 主题（此参数如设置将覆盖defaultTheme属性; defaultLayout属性若设置为跨主题，则只针对于layoutFile不会被覆盖）
+     * @param string 主题（此参数如设置将覆盖defaultTheme属性）
      **/
-    private function attrSet($view = '', $data = array(), $defaultTheme = '')
+    private function attrSet($view = '', $data = array(), $moduleTheme = '')
     {
+        if($moduleTheme != ''){
+            $this->moduleTheme = $moduleTheme;    
+        }
+
         $viewRoot = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR;
-        $themeViewRoot = $defaultTheme != '' && $defaultTheme != $this->defaultTheme ? $viewRoot.$defaultTheme.DIRECTORY_SEPARATOR : $viewRoot.$this->defaultTheme.DIRECTORY_SEPARATOR;
+        $themeViewRoot = $this->moduleTheme != '' && $this->moduleTheme != $this->defaultTheme ? $viewRoot.$this->moduleTheme.DIRECTORY_SEPARATOR : $viewRoot.$this->defaultTheme.DIRECTORY_SEPARATOR;
 
         $this->layoutFile = strpos($this->defaultLayout, '/') === false ? $themeViewRoot.'Layout'.DIRECTORY_SEPARATOR.$this->defaultLayout.EXT : $viewRoot.$this->defaultLayout.EXT;
         
