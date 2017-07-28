@@ -10,9 +10,6 @@
  **/
 class DyPhpView
 {
-    private static $aId = '';
-    private static $cId = '';
-
     //layout file
     private $layoutFile = '';
     //view file
@@ -88,18 +85,13 @@ class DyPhpView
      **/
     private function attrSet($view = '', $data = array(), $defaultTheme = '')
     {
-        if (empty(self::$aId) || empty(self::$cId)) {
-            self::$aId = ucfirst(DyPhpBase::app()->aid);
-            self::$cId = ucfirst(DyPhpBase::app()->cid);
-        }
-
         $viewRoot = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR;
         $themeViewRoot = $defaultTheme != '' && $defaultTheme != $this->defaultTheme ? $viewRoot.$defaultTheme.DIRECTORY_SEPARATOR : $viewRoot.$this->defaultTheme.DIRECTORY_SEPARATOR;
 
         $this->layoutFile = strpos($this->defaultLayout, '/') === false ? $themeViewRoot.'Layout'.DIRECTORY_SEPARATOR.$this->defaultLayout.EXT : $viewRoot.$this->defaultLayout.EXT;
         
         $view = trim($view, '/');
-        $view = strpos($view, '/') === false ? self::$cId.DIRECTORY_SEPARATOR.$view : $view;
+        $view = strpos($view, '/') === false ? ucfirst(DyPhpBase::app()->cid).DIRECTORY_SEPARATOR.$view : $view;
         $this->viewFile = $themeViewRoot.$view.EXT;
 
         $this->viewData = array_merge($this->viewData, $data);

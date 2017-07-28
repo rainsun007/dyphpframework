@@ -106,25 +106,29 @@ class DyPhpException extends Exception
         //获取归类后的错误类型
         $errType = self::getErrType();
 
-        //debug关闭时将报错信息转到自定义错误处理句柄
+        //清除所有输出
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+
+        //debug关闭时将报错信息转到自定义错误处理句柄      
         if (!DyPhpBase::$debug) {
             if (self::$errorHandlerInvoked) {
                 return;
+            }
+            if (!headers_sent()) {
+                header('Content-Type:text/html;charset=utf-8');
             }
             self::$errorHandlerInvoked = true;
             $errorHandlerArr = explode('/', trim(DyPhpConfig::item('errorHandler'), '/'));
             $exceptionMessage = array('dyExcType' => $title, 'errType' => $errType, 'msg' => $message);
             Dy::app()->preModule = Dy::app()->module;
             DyPhpController::run($errorHandlerArr[0], $errorHandlerArr[1], $exceptionMessage);
-
-            return;
+            exit();
         }
 
         //按app类型输出
         if (DyPhpBase::$appType == 'web') {
-            if (ob_get_length()) {
-                ob_clean();
-            }
             if (!headers_sent()) {
                 header('Content-Type:text/html;charset=utf-8');
             }
