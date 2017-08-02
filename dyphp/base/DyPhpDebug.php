@@ -217,10 +217,6 @@ class DyPhpDebug
         $paramsArr = array(
             'RUNTIME' => DyPhpBase::execTime().'Seconds '.' Memory:'.$usageMemory.' @ '.PHP_OS.', php:'.PHP_VERSION,
             'EXECUTE' => 'Module:'.DyPhpBase::app()->module.' Controller:'.DyPhpBase::app()->cid.' Action:'.DyPhpBase::app()->aid,
-            //'SESSION' => isset($_SESSION) ? $_SESSION : array(),
-            //'COOKIE' => isset($_COOKIE) ? $_COOKIE : array(),
-            //'POST' => isset($_POST) ? $_POST : array(),
-            //'GET' => isset($_GET) ? $_GET : array(),
         );
 
         $line = str_repeat('-',120).PHP_EOL;

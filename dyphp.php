@@ -165,7 +165,6 @@ class DyPhpBase
             spl_autoload_register($callback);
         } else {
             spl_autoload_register($callback,true,$prepend);
-            //spl_autoload_register(array('DyPhpBase', 'autoload'));
         }
     }
 
@@ -200,7 +199,7 @@ class DyPhpBase
      **/
     public static function getVersion()
     {
-        return 'Beta 1.3';
+        return 'Stable 1.0';
     }
 
     /**

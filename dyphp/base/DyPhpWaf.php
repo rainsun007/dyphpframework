@@ -76,7 +76,6 @@ class DyPhpWaf
         }
 
         //按app类型写log信息
-        DyRequest::getClientIp().' '.DyRequest::getMethod();
         $data = date('Y-m-d H:i:s', time()).' '.DyRequest::getClientIp().' '.DyRequest::getMethod().' '.$_SERVER['REQUEST_URI'].' '.$message.PHP_EOL;
         $fp = fopen($logDir.'waf.log', 'a');
         if ($fp) {

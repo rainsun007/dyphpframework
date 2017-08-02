@@ -60,7 +60,6 @@ class DyPhpRoute
     {
         array_shift($_SERVER['argv']);
         if (empty($_SERVER['argv'])) {
-            //die('invoke error: <controller> [<action>] [<param1> <param2> ...]');
             $message = "Welcome to use \n";
             $message .= 'DyFramework Console The default execution : '.ucfirst(DYPHP_DEFAULT_CONTROLLER).'Controller->action'.ucfirst(DYPHP_DEFAULT_ACTION)."\n";
             $message .= "Invocation Method : <controller> [<action>] [<param1> <param2> ...<paramN>] \n";
