@@ -48,12 +48,16 @@ class DyPhpView
         ob_start();
         include $this->viewFile;
         $content = ob_get_contents();
-        ob_end_clean();
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
         DyStatic::cssJsMove();
 
         ob_start(array($this, 'formatLayout'));
         include $this->layoutFile;
-        ob_end_flush();
+        if (ob_get_length()) {
+            ob_end_flush();
+        }
         exit;
     }
 
