@@ -15,6 +15,7 @@ class DyPhpRoute
 
     /**
      * web路由入口
+     * 优先处理urlManager配制
      * $_GET保留key : ca(controller和acton格式 如user.profile或admin.user.profile),ext_name(访问的后缀名 如php),page(用于分页widget)
      * 支持get请求以ca=module.controller.action的方式访问.
      **/
@@ -28,26 +29,26 @@ class DyPhpRoute
             $action = isset($matchArr['action']) ? $matchArr['action'] : '';
             self::runToController(array('c' => $matchArr['controller'], 'a' => $action));
         } else {
-            if (isset($_GET['ca'])) {
-                $ca = strip_tags($_GET['ca']);
-                if (empty($ca)) {
-                    self::runToController();
-
-                    return;
-                }
-                $caArr = explode('.', $ca);
-                if (count($caArr) > 2) {
-                    $action = substr(strrchr($ca, '.'), 1);
-                    array_pop($caArr);
-                    $controller = implode('_', $caArr);
-                } else {
-                    $controller = isset($caArr[0]) ? $caArr[0] : DYPHP_DEFAULT_CONTROLLER;
-                    $action = isset($caArr[1]) ? $caArr[1] : '';
-                }
-                self::runToController(array('c' => $controller, 'a' => $action));
-            } else {
+            if (!isset($_GET['ca'])) {
                 self::runToController();
+                return;
             }
+
+            $ca = $_GET['ca'];
+            if (preg_match('|([.]){2,}|', $ca) || !preg_match('#^[a-zA-Z0-9.]{1,}[a-zA-Z0-9]{1,}$#', $ca)) {
+                DyPhpBase::throwException('ca format error');
+            }
+
+            $caArr = explode('.', $ca);
+            if (count($caArr) > 2) {
+                $action = end($caArr);
+                array_pop($caArr);
+                $controller = implode('_', $caArr);
+            } else {
+                $controller = isset($caArr[0]) ? $caArr[0] : DYPHP_DEFAULT_CONTROLLER;
+                $action = isset($caArr[1]) ? $caArr[1] : '';
+            }
+            self::runToController(array('c' => $controller, 'a' => $action));
         }
     }
 
@@ -102,20 +103,19 @@ class DyPhpRoute
     }
 
     /**
-     * url解析运行controller.
+     * url解析及运行controller和action.
+     * @param array $ca 
      **/
     private static function runToController($ca = array())
     {
         if (!empty($ca)) {
             DyPhpController::run($ca['c'], $ca['a']);
-
             return;
         }
 
         $controllerArgs = self::urlCrop();
         if ($controllerArgs == '' || $controllerArgs == false) {
             DyPhpController::run(DYPHP_DEFAULT_CONTROLLER);
-
             return;
         }
 
@@ -124,7 +124,6 @@ class DyPhpRoute
         if ($pathCutCount <= 2) {
             if ($pathCutCount == 1) {
                 DyPhpController::run($controllerArgsArr[0]);
-
                 return;
             }
             $controller = $controllerArgsArr[0];
@@ -189,7 +188,7 @@ class DyPhpRoute
     {
         $urlManager = DyPhpConfig::item('urlManager');
 
-        //去除url风格
+        //去除url风格设置参数，该参数不参与匹配处理
         if (isset($urlManager['urlStyle'])) {
             unset($urlManager['urlStyle']);
         }
@@ -220,7 +219,7 @@ class DyPhpRoute
         $uriStrArr = explode('/', $cropPathUrl);
         foreach ($urlManager as $urlKey => $urlVal) {
             if (!isset($urlVal['param']) || !is_array($urlVal['param'])) {
-                continue; //未设置param项 设置无效
+                continue; //未设置param项 不做正则处理
             }
             $pmatch = str_replace('/', '\/', strtr(trim($urlKey, '/'), $urlVal['param']));
             if (preg_match('#^'.$pmatch.'$#i', $cropPathUrl)) {
@@ -255,10 +254,16 @@ class DyPhpRoute
      **/
     private static function urlCrop()
     {
-        $requestUriStr = str_replace('index'.EXT, '', trim($_SERVER['REQUEST_URI'], '/'));
-        $uriPath = str_replace(array(DyPhpConfig::item('appHttpPath'), $_SERVER['QUERY_STRING']), '', $requestUriStr);
-        $parse = parse_url($uriPath);
+        $parse = parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH);
+        if($parse !== false || $parse !== NULL){
+            return trim(str_replace(array(DyPhpConfig::item('appHttpPath'),'index'.EXT,'//'), '', $parse), '/');
+        }
 
-        return $parse ? trim($parse['path'], '/') : trim(trim($uriPath, '/'), '?');
+        //parse_url解析出错时才会执行
+        $requestUriStr = str_replace('index'.EXT, '', trim($_SERVER['REQUEST_URI'], '/'));
+        $search = array(DyPhpConfig::item('appHttpPath'));
+        isset($_SERVER['QUERY_STRING']) ? array_push($search,$_SERVER['QUERY_STRING']) : '';
+        $uriPath = str_replace($search, '', $requestUriStr);
+        return trim(trim($uriPath, '/'), '?');
     }
 }
