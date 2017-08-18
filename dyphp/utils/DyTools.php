@@ -92,7 +92,7 @@ class DyTools
      * 创建目录.
      *
      * @param string
-     * @param ctal
+     * @param int
      *
      * @return bool
      */
