@@ -22,7 +22,6 @@ class DyPhpRoute
     public static function runWeb()
     {
         $matchArr = self::urlManager();
-        //var_dump($matchArr);exit;
         if ($matchArr) {
             if (!isset($matchArr['controller'])) {
                 DyPhpBase::throwException('urlManager error');
@@ -85,9 +84,9 @@ class DyPhpRoute
     /**
      * @brief    获取uri中正则匹配到的参数
      *
-     * @param   $paramKey
+     * @param  string  $paramKey
      *
-     * @return
+     * @return string
      **/
     public static function getParam($paramKey = '')
     {
@@ -105,6 +104,7 @@ class DyPhpRoute
 
     /**
      * url解析及运行controller和action.
+     * 
      * @param array $ca 
      **/
     private static function runToController($ca = array())
@@ -242,7 +242,8 @@ class DyPhpRoute
     }
 
     /**
-     * url解析 获取cotroller，action及rest风格的get参数; 获取扩展名，同时将扩展名去掉.
+     * url解析 获取cotroller，action及rest风格的get参数; 
+     * 获取扩展名，同时将扩展名从ca中去掉，此方法使uri支持自定义扩展（如可用于实现伪静态）.
      *
      * @return string
      **/
