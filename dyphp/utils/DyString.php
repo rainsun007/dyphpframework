@@ -16,17 +16,21 @@ class DyString{
         if(empty($string) || $expiry<-1){
             return '';
         }
+
         $key = !empty($key) ? $key : DyPhpConfig::item('secretKey');
-        if(extension_loaded('mcrypt')){
-            $key = substr(md5($key),0,8);
+        if(extension_loaded('openssl')){
             $expiry = $expiry > 0 ? time()+$expiry : $expiry;
-            $data = $expiry.'|'.$string.'_dysc_'.mt_rand(0,9);
+            $string = openssl_encrypt($expiry.'|'.$string.'_dysc_'.mt_rand(0,999), "AES-256-CBC", substr(md5($key),0,16), 0, "3081468300170825");
+            $string = base64_encode($string);
+        }elseif(extension_loaded('mcrypt') && version_compare(PHP_VERSION, '7.1.0', '<')){
+            $expiry = $expiry > 0 ? time()+$expiry : $expiry;
             $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES,MCRYPT_MODE_ECB),MCRYPT_DEV_URANDOM);
-            $string = mcrypt_encrypt(MCRYPT_DES,$key,$data,MCRYPT_MODE_ECB,$iv);
+            $string = mcrypt_encrypt(MCRYPT_DES,substr(md5($key),0,8),$expiry.'|'.$string.'_dysc_'.mt_rand(0,999),MCRYPT_MODE_ECB,$iv);
             $string = base64_encode($string);
         }else{
             $string = self::authCode('ENCODE',$string, $key, $expiry);
         }
+
         return  str_replace(array('+','/'),array('*','_'),$string);
     }
 
@@ -39,29 +43,17 @@ class DyString{
         if(empty($string)){
             return '';
         }
+
         $key = !empty($key) ? $key : DyPhpConfig::item('secretKey');
         $string = str_replace(array('*','_'),array('+','/'),$string);
-        if(extension_loaded('mcrypt')){
+
+        if(extension_loaded('openssl')){
+            $decryptStr = openssl_decrypt(base64_decode($string), "AES-256-CBC", substr(md5($key),0,16), 0, "3081468300170825");
+            return self::decodeCheck($decryptStr);
+        }elseif(extension_loaded('mcrypt') && version_compare(PHP_VERSION, '7.1.0', '<')){
             $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES,MCRYPT_MODE_ECB),MCRYPT_DEV_URANDOM);
             $decryptStr = mcrypt_decrypt(MCRYPT_DES,substr(md5($key),0,8),base64_decode($string),MCRYPT_MODE_ECB,$iv);
-            if($decryptStr == ''){
-                return '';
-            }
-      			//解密字符串转为数组用以验证是否过期
-            $re = explode('|',substr($decryptStr,0,strrpos($decryptStr,'_dysc_')));
-      			if(count($re) != 2){
-      				return '';
-      			}
-      			//判断过期时间的合法性，处理显示设置为过期的字符串
-      			if(!is_numeric($re[0]) || $re[0] == -1){
-      				return '';
-      			}
-
-      			if($re[0] == 0){
-      				return $re[1]; //永不过期直接返回数据
-      			}else{
-      				return $re[0]<time() ? '' : $re[1];
-      			}
+            return self::decodeCheck($decryptStr);
         }else{
             return self::authCode('DECODE',$string, $key);
         }
@@ -197,9 +189,9 @@ class DyString{
 
     /**
      * @brief    全角半角互转
-     * @param    $str
-     * @param    $flip
-     * @return
+     * @param    string  $str
+     * @param    bool    $flip  翻转
+     * @return   string
      **/
     public static function transfer($str,$flip=false){
         if(empty($str) || !is_string($str)){
@@ -289,6 +281,33 @@ class DyString{
             }
         } else {
             return $keyc.str_replace('=', '', base64_encode($result));
+        }
+    }
+
+    /**
+     * 解密结果检证
+     *
+     * @param  string $decryptStr 解码后的原数据
+     * @return string
+     */
+    private static function decodeCheck($decryptStr){
+        if($decryptStr == ''){
+            return '';
+        }
+          //解密字符串转为数组用以验证是否过期
+        $re = explode('|',substr($decryptStr,0,strrpos($decryptStr,'_dysc_')));
+        if(count($re) != 2){
+            return '';
+        }
+        //判断过期时间的合法性，处理设置为过期的字符串,
+        if(!is_numeric($re[0]) || $re[0] == -1){
+            return '';
+        }
+
+        if($re[0] == 0){
+            return $re[1]; //永不过期直接返回数据
+        }else{
+            return $re[0]<time() ? '' : $re[1];
         }
     }
 
