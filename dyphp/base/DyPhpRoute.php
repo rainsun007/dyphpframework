@@ -22,6 +22,7 @@ class DyPhpRoute
     public static function runWeb()
     {
         $matchArr = self::urlManager();
+        //var_dump($matchArr);exit;
         if ($matchArr) {
             if (!isset($matchArr['controller'])) {
                 DyPhpBase::throwException('urlManager error');
@@ -196,26 +197,19 @@ class DyPhpRoute
         if (!is_array($urlManager) || count($urlManager) == 0) {
             return array();
         }
-        $pathUrl = self::urlCrop();
 
-        //扩展名处理
-        $ext = strrchr($pathUrl, '.');
-        $ext = strrchr($ext, '/') !== false ? false : $ext;
-        if ($ext !== false) {
-            $_GET['ext_name'] = $ext;
-            $cropPathUrl = substr($pathUrl, 0, -strlen($ext));
-        }
-
+        $cropPathUrl = self::urlCrop();
         //完全匹处理配
-        $pathUrlArr = array($pathUrl, '/'.$pathUrl, '/'.$pathUrl.'/');
-        foreach ($pathUrlArr as $key => $val) {
-            if (isset($urlManager[$val])) {
-                return $urlManager[$val];
+        if($cropPathUrl){
+            $pathUrlArr = array($cropPathUrl, '/'.$cropPathUrl, '/'.$cropPathUrl.'/');
+            foreach ($pathUrlArr as $key => $val) {
+                if (isset($urlManager[$val])) {
+                    return $urlManager[$val];
+                }
             }
         }
 
         //正则处理
-        $cropPathUrl = isset($cropPathUrl) ? $cropPathUrl : $pathUrl;
         $uriStrArr = explode('/', $cropPathUrl);
         foreach ($urlManager as $urlKey => $urlVal) {
             if (!isset($urlVal['param']) || !is_array($urlVal['param'])) {
@@ -248,22 +242,26 @@ class DyPhpRoute
     }
 
     /**
-     * url解析 获取cotroller action及rest风格的get参数及扩展名.
+     * url解析 获取cotroller，action及rest风格的get参数; 获取扩展名，同时将扩展名去掉.
      *
      * @return string
      **/
     private static function urlCrop()
     {
+        $pathStr = '';
         $parse = parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH);
-        if($parse !== false || $parse !== NULL){
-            return trim(str_replace(array(DyPhpConfig::item('appHttpPath'),'index'.EXT,'//'), '', $parse), '/');
+        if($parse !== false && $parse !== NULL){
+            $pathStr = trim(str_replace(array(DyPhpConfig::item('appHttpPath'),'index'.EXT,'//'), '', $parse), '/');
+        }else{
+            $requestUriStr = str_replace('index'.EXT, '', trim($_SERVER['REQUEST_URI'], '/'));
+            $search = array(DyPhpConfig::item('appHttpPath'));
+            isset($_SERVER['QUERY_STRING']) ? array_push($search,$_SERVER['QUERY_STRING']) : '';
+            $uriPath = str_replace($search, '', $requestUriStr);
+            $pathStr =  trim(trim($uriPath, '/'), '?');
         }
 
-        //parse_url解析出错时才会执行
-        $requestUriStr = str_replace('index'.EXT, '', trim($_SERVER['REQUEST_URI'], '/'));
-        $search = array(DyPhpConfig::item('appHttpPath'));
-        isset($_SERVER['QUERY_STRING']) ? array_push($search,$_SERVER['QUERY_STRING']) : '';
-        $uriPath = str_replace($search, '', $requestUriStr);
-        return trim(trim($uriPath, '/'), '?');
+        $ext = pathinfo($pathStr,PATHINFO_EXTENSION);
+        $_GET['ext_name'] = $ext;
+        return $ext ? substr($pathStr, 0, -(strlen($ext)+1)) : $pathStr;
     }
 }
