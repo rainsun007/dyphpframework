@@ -64,7 +64,7 @@ class DyPhpException extends Exception
     public static function exceptionHandler($exception)
     {
         self::$eReport = E_ERROR;
-        self::centralizeHandler('Exception', $exception->getMessage(), $exception->getTraceAsString());
+        self::centralizeHandler('Exception', $exception->getMessage(), $exception->getFile().'('.$exception->getLine().")\n".$exception->getTraceAsString());
     }
 
     /**
@@ -111,18 +111,16 @@ class DyPhpException extends Exception
             ob_end_clean();
         }
 
-        //debug关闭时将报错信息转到自定义错误处理句柄      
+        //debug关闭时将报错信息转到自定义错误处理句柄
         if (!DyPhpBase::$debug) {
             if (self::$errorHandlerInvoked) {
                 return;
             }
-            if (!headers_sent()) {
-                header('Content-Type:text/html;charset=utf-8');
-            }
             self::$errorHandlerInvoked = true;
+
             $errorHandlerArr = explode('/', trim(DyPhpConfig::item('errorHandler'), '/'));
             $exceptionMessage = array('dyExcType' => $title, 'errType' => $errType, 'msg' => $message);
-            Dy::app()->preModule = Dy::app()->module;
+            Dy::app()->setPreInsAttr();
             DyPhpController::run($errorHandlerArr[0], $errorHandlerArr[1], $exceptionMessage);
             exit();
         }
@@ -221,6 +219,7 @@ class DyPhpException extends Exception
               break;
           case E_STRICT:
               $errType = 'STRICT';
+              // no break
           default:
               $errType = 'Unknown';
               break;

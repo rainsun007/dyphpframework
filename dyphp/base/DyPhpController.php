@@ -10,23 +10,24 @@
  **/
 class DyPhpController
 {
-    //未登陆跳转地址 不能使用重写后的地址（跳转排除判断会拦截不到）
+    //默认使用的action
+    protected $defaultAction = DYPHP_DEFAULT_ACTION;
+    //action调用自定义
+    protected $actionParam = array();
+
+    //未登陆跳转地址
     protected $loginHandler = '';
     //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginHandler属性不受限制）
     protected $allNeedLogin = false;
     //设置为true时handler调用将跳过init，beforeAction，hooks的执行, 设置为false应用中如有handler的循环调用，必须自己处理跳过逻辑
     protected $handlerPass = false;
 
-    //默认使用的action
-    protected $defaultAction = DYPHP_DEFAULT_ACTION;
     //当前运行的module,controller,action 首字母为小写
     protected $cid = '';
     protected $aid = '';
     protected $pcid = '';
     protected $module = '';
 
-    //action调用自定义
-    protected $actionParam = array();
     //当前时间戳
     protected $time = 0;
     //当前完整日期时间（Y-m-d H:i:s）
@@ -36,22 +37,18 @@ class DyPhpController
 
     //controller单例控制
     private static $incController = array();
-    //view实例
+    //DyPhpView实例
     public $view;
 
     /**
-     * @brief   在beforeAction之前执行,可以重写此方法实现自己的业务逻辑
-     *
-     * @return
+     * 在beforeAction之前执行,可以重写此方法实现自己的业务逻辑
      **/
     protected function init()
     {
     }
 
     /**
-     * @brief   在action之前执行,可以重写此方法实现自己的业务逻辑
-     *
-     * @return
+     * 在action之前执行,可以重写此方法实现自己的业务逻辑
      **/
     protected function beforeAction()
     {
@@ -59,6 +56,7 @@ class DyPhpController
 
     /**
      * 未登陆禁止访问的action 首字母为小写.
+     * @return array
      **/
     protected function needLogin()
     {
@@ -124,10 +122,10 @@ class DyPhpController
     /**
      * @brief    解析action
      *
-     * @param   $controllerRun controller实例
-     * @param   $action
+     * @param   string $controllerRun controller实例
+     * @param   string $action
      *
-     * @return
+     * @return  string
      **/
     private static function parseAction($controllerRun, $action)
     {
@@ -157,9 +155,9 @@ class DyPhpController
     /**
      * @brief    解析controller
      *
-     * @param   $controllerPname
+     * @param   string $controllerPname
      *
-     * @return
+     * @return  string
      **/
     private static function parseController($controllerPname)
     {
@@ -196,9 +194,9 @@ class DyPhpController
     /**
      * @brief    首字母小写
      *
-     * @param   $string
+     * @param  string $string
      *
-     * @return
+     * @return string
      **/
     private static function lcfirst($string)
     {

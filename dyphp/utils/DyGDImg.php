@@ -5,11 +5,13 @@
  * @link http://www.dyphp.com/
  * @copyright Copyright 2011 dyphp.com
  **/
-class DyGDImg {
+class DyGDImg
+{
     private static $instance;
 
-    private static function instance(){
-        if(self::$instance){
+    private static function instance()
+    {
+        if (self::$instance) {
             return self::$instance;
         }
         self::$instance = new DyGDImgRealize();
@@ -26,13 +28,15 @@ class DyGDImg {
      * @param int    新图的高度
      * @param int    截图距原图左上角的宽
      * @param int    截图距原图左上角的高
+     * @return bool
      *
      * 实例
      * DyGDImg::cut('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50);
      **/
-    public static function cut($srcimg,$save_path,$save_name,$width,$heigth,$srcx=0,$srcy=0){
-        self::instance()->resize($srcimg,$save_path,$save_name,$width,$heigth,$srcx,$srcy,true);
-        $save_path = rtrim($save_path,'/');
+    public static function cut($srcimg, $save_path, $save_name, $width, $heigth, $srcx=0, $srcy=0)
+    {
+        self::instance()->resize($srcimg, $save_path, $save_name, $width, $heigth, $srcx, $srcy, true);
+        $save_path = rtrim($save_path, '/');
         $saveFile = $save_path.'/'.$save_name;
         return file_exists($saveFile);
     }
@@ -45,39 +49,62 @@ class DyGDImg {
      * @param string 生成图像的文件名
      * @param int    新图的宽度
      * @param int    新图的高度
+     * @return bool
      *
      * 实例
      * DyGDImg::resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125);
      **/
-    public static function resize($srcimg,$save_path,$save_name,$width,$heigth){
-        self::instance()->resize($srcimg,$save_path,$save_name,$width,$heigth,0,0,false);
-        $save_path = rtrim($save_path,'/');
+    public static function resize($srcimg, $save_path, $save_name, $width, $heigth)
+    {
+        self::instance()->resize($srcimg, $save_path, $save_name, $width, $heigth, 0, 0, false);
+        $save_path = rtrim($save_path, '/');
         $saveFile = $save_path.'/'.$save_name;
         return file_exists($saveFile);
     }
 
     /**
      * @brief    上传图片
-     * @param    $upFileName  表单上传控件name
-     * @param    $save_path
-     * @param    $save_name
-     * @param    $extensions
-     * @param    $maxSize    单位MB
-     * @return   bool|int
+     * @param    string $upFileName  表单上传控件name
+     * @param    string $save_path   上传后保存的路径
+     * @param    string $save_name   上传后保存的文件名
+     * @param    string|array $extensions 支持文件格式
+     * @param    int    $maxSize    单位MB
+     * @return   int
      **/
-    public static function upload($upFileName,$save_path,$save_name,$maxSize=2,$extensions ='jpg|gif|bmp|png'){
+    public static function upload($upFileName, $save_path, $save_name, $maxSize=2, $extensions ='jpg|gif|bmp|png')
+    {
         self::instance()->save_path = $save_path;
         self::instance()->save_name = $save_name;
-        self::instance()->extensions = explode('|',$extensions);
+        self::instance()->extensions = is_string($extensions) ? explode('|', $extensions) : $extensions;
         self::instance()->maxSize = $maxSize*1024*1024;
         return self::instance()->upload($upFileName);
     }
 
     /**
      * @brief  获取保存后的文件名
+     * @return string
      **/
-    public static function getFileSaveName(){
+    public static function getFileSaveName()
+    {
         return self::instance()->fileSaveName;
+    }
+
+    /**
+     * @brief  获取上传成功后的文件信息
+     * @return array
+     **/
+    public static function getUploadInfo()
+    {
+        return self::instance()->getInfo();
+    }
+
+    /**
+     * @brief  获取保存后的文件扩展名
+     * @return string
+     **/
+     public static function getFileExt(){
+        $info = self::instance()->getInfo();
+        return $info['type'];
     }
 
     /**
@@ -85,8 +112,10 @@ class DyGDImg {
      * @param string callback
      * @param string 返回上传状态
      * @param string 返回上传信息
+     * @return string 
      */
-    public static function iframJsCallBack($callbackFunName='',$type='seccess',$msg="upload seccess"){
+    public static function iframJsCallBack($callbackFunName='', $type='seccess', $msg="upload seccess")
+    {
         return '<script language="javascript" type="text/javascript">window.top.window.'.$callbackFunName.'(\''.$type."','".$msg.'\');</script>';
     }
 }
@@ -94,13 +123,17 @@ class DyGDImg {
 /**
  * 实现类
  */
-class DyGDImgRealize{
+class DyGDImgRealize
+{
+    /** 原图参数 **/
     //图片类型
     private $type;
     //实际宽度
     private $width;
     //实际高度
     private $height;
+    
+    /** 切图使用参数 **/
     //截图距原图左上角的宽
     private $src_x;
     //截图距原图左上角的高
@@ -121,14 +154,22 @@ class DyGDImgRealize{
     private $im;
 
     /** 上传使用参数 **/
+    //文件的大实际大小
+    private $fileSize;
+    //保存路径
     public $save_path = '';
+    //保存的文件名（不带扩展名）
     public $save_name = '';
+    //允许上传的文件类型
     public $extensions = array('jpg','gif','bmp','png');
+    //最大限制（默认为2M）
     public $maxSize = 2097152;
+    //保存的文件名（带扩展名）
     public $fileSaveName;
 
-    public function __construct(){
-        if (!extension_loaded('gd') && !extension_loaded('gd2')){
+    public function __construct()
+    {
+        if (!extension_loaded('gd') && !extension_loaded('gd2')) {
             DyPhpBase::throwException('GD is not loaded');
         }
     }
@@ -149,8 +190,9 @@ class DyGDImgRealize{
      * $image = new DyImage();
      * $image->resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50,true);
      **/
-    public function resize($srcimg,$save_path,$save_name,$width,$heigth,$srcx=0,$srcy=0,$cut=false){
-        $save_path = rtrim($save_path,'/');
+    public function resize($srcimg, $save_path, $save_name, $width, $heigth, $srcx=0, $srcy=0, $cut=false)
+    {
+        $save_path = rtrim($save_path, '/');
         $this->srcimg = $srcimg;
         $this->dstimg = $save_path.'/'.$save_name;
         $this->resize_save_path = $save_path;
@@ -160,7 +202,7 @@ class DyGDImgRealize{
         $this->src_x = $srcx;
         $this->src_y = $srcy;
 
-        //图片信息
+        //原图信息
         $this->imageInfo($this->srcimg);
 
         //初始化图象
@@ -173,17 +215,17 @@ class DyGDImgRealize{
     /**
      * 上传图片
      *
-     * @param string     表单控件名称
-     * @return bool|int
+     * @param string   表单控件名称
+     * @return int     0为上传成功，大于0为出错
      */
-    public function upload($upFileName){
+    public function upload($upFileName)
+    {
         //上传表单存在性判断
-        if(!isset($_FILES[$upFileName])){
+        if (!isset($_FILES[$upFileName])) {
             return 10;
         }
 
         //上传出错判断 1~7
-        //0; 文件上传成功。
         //1; 超过了文件大小php.ini中即系统设定的大小。
         //2; 超过了文件大小MAX_FILE_SIZE 选项指定的值。
         //3; 文件只有部分被上传。
@@ -192,41 +234,27 @@ class DyGDImgRealize{
         //6; 找不到临时文件夹。PHP 4.3.10 和 PHP 5.0.3 引进。
         //7; 文件写入失败。PHP 5.1.0 引进。
         $upPic = $_FILES[$upFileName];
-        if($upPic['error'] > 0){
+        if ($upPic['error'] > 0) {
             return $upPic['error'];
         }
 
         //文件大小判断(自定义阀值)
-        if ($upPic['size'] > $this->maxSize) {
+        $this->fileSize = $upPic['size'];
+        if ($this->fileSize > $this->maxSize) {
             return 11;
         }
 
         //文件类型判断
-        $info = getimagesize($upPic['tmp_name']);
-        switch($info['mime']){
-        case 'image/pjpeg' :
-        case 'image/jpeg' :
-            $fileType = 'jpg';break;
-        case 'image/gif':
-            $fileType = 'gif';break;
-        case 'image/x-png' :
-        case 'image/png':
-            $fileType = 'png';break;
-        case 'image/bmp':
-            $fileType = 'bmp';break;
-        default:
-            $fileType = 'unknown';break;
-        }
-        if (!in_array($fileType, $this->extensions)) {
+        $this->imageInfo($upPic['tmp_name']);
+        if (!in_array($this->type, $this->extensions)) {
             return 12;
         }
 
         //文件移动
         if (is_uploaded_file($upPic['tmp_name'])) {
-            $this->save_path = rtrim($this->save_path,'/');
-            $this->path_name = $this->save_path . '/' . $this->save_name.'.'.$fileType;
-            if ($this->moveUpload($upPic['tmp_name'], $this->path_name)) {
-                $this->fileSaveName = $this->save_name.'.'.$fileType;
+            $this->save_path = rtrim($this->save_path, '/');
+            $this->fileSaveName = $this->save_name.'.'.$this->type;
+            if ($this->moveUpload($upPic['tmp_name'], $this->save_path . '/' . $this->fileSaveName)) {
                 return 0;
             } else {
                 return 13;
@@ -236,21 +264,38 @@ class DyGDImgRealize{
         }
     }
 
+    /**
+     * 获取上传成功后的文件信息
+     *
+     * @return array
+     */
+    public function getInfo()
+    {
+        return array(
+            'width' => $this->width,
+            'height' => $this->height,
+            'type' => $this->type,
+            'size' => $this->fileSize,
+            'saveName' => $this->fileSaveName,
+            'savePath' => $this->save_path,
+        );
+    }
 
 
     /**
      * resize方法
      **/
-    private function getResize(){
+    private function getResize()
+    {
         //裁图
-        if($this->cut){
+        if ($this->cut) {
             $resize_width = $this->resize_width;
             $resize_height = $this->resize_height;
             $src_x = $this->src_x;
             $src_y = $this->src_y;
-            $newimg = imagecreatetruecolor($resize_width,$resize_height);
-            imagecopy($newimg, $this->im,0,0,$src_x,$src_y,$resize_width,$resize_height);
-        }else{
+            $newimg = imagecreatetruecolor($resize_width, $resize_height);
+            imagecopy($newimg, $this->im, 0, 0, $src_x, $src_y, $resize_width, $resize_height);
+        } else {
             //改变后的图象的比例
             $resize_ratio = $this->resize_width/$this->resize_height;
             //实际图象的比例
@@ -259,15 +304,16 @@ class DyGDImgRealize{
             $src_y = $this->src_y;
             $width = $this->width;
             $height = $this->height;
-            if($ratio>=$resize_ratio){
+            if ($ratio>=$resize_ratio) {
                 $resize_width = $this->resize_width;
                 $resize_height = ceil($this->resize_width/$ratio);
-            }else{
+            } else {
                 $resize_width = ceil($this->resize_height*$ratio);
                 $resize_height = $this->resize_height;
             }
-            $newimg = imagecreatetruecolor($resize_width,$resize_height);
-            imagecopyresampled($newimg, $this->im, 0, 0, $src_x, $src_y, $resize_width,$resize_height, $width, $height);
+            $newimg = imagecreatetruecolor($resize_width, $resize_height);
+            imagecopyresampled($newimg, $this->im, 0, 0, $src_x, $src_y, $resize_width, $resize_height, $width, $height);
+            //imagecopyresized($newimg, $this->im, 0, 0, $src_x, $src_y, $resize_width, $resize_height, $width, $height);
         }
 
         $this->createImg($newimg);
@@ -278,8 +324,9 @@ class DyGDImgRealize{
      * 获取文件信息
      * @param 源图像地址
      */
-    private function imageInfo($srcimg){
-        $picType = array('1'=>'gif','2'=>'jpg','3'=>'png','6'=>'bmp');
+    private function imageInfo($srcimg)
+    {
+        $picType = array(1=>'gif',2=>'jpg',3=>'png',4=>'swf',5=>'psd',6=>'bmp',7=>'tiff_ii',8=>'tiff_mm',9=>'jpc',10=>'jp2', 11=>'jpx',12=>'jb2',13=>'swc',14=>'iff',15=>'wbmp',16=>'xbm',);
         list($width, $height, $type, $attr) = getimagesize($srcimg);
         $this->width = $width;
         $this->height = $height;
@@ -287,8 +334,9 @@ class DyGDImgRealize{
     }
 
     //初始化图象
-    private function imImg(){
-        switch($this->type){
+    private function imImg()
+    {
+        switch ($this->type) {
         case "jpg":
             $this->im = imagecreatefromjpeg($this->srcimg);
             break;
@@ -305,20 +353,21 @@ class DyGDImgRealize{
     }
 
     //创建图象
-    private function createImg($newimg){
+    private function createImg($newimg)
+    {
         $this->checkDir($this->resize_save_path);
-        switch($this->type){
+        switch ($this->type) {
         case "jpg":
-            imagejpeg ($newimg,$this->dstimg,80);
+            imagejpeg($newimg, $this->dstimg, 80);
             break;
         case "gif":
-            imagegif ($newimg,$this->dstimg);
+            imagegif($newimg, $this->dstimg);
             break;
         case "png":
-            imagepng ($newimg,$this->dstimg);
+            imagepng($newimg, $this->dstimg);
             break;
         case "bmp":
-            imagewbmp ($newimg,$this->dstimg);
+            imagewbmp($newimg, $this->dstimg);
             break;
         }
     }
@@ -330,7 +379,8 @@ class DyGDImgRealize{
      * @param string $new_file
      * @return bool
      */
-    private function moveUpload($tmp_file, $new_file){
+    private function moveUpload($tmp_file, $new_file)
+    {
         umask(0);
         if ($this->checkDir($this->save_path)) {
             if (move_uploaded_file($tmp_file, $new_file)) {
@@ -350,7 +400,8 @@ class DyGDImgRealize{
      * @param string $dir
      * @return bool
      */
-    private function checkDir($dir){
+    private function checkDir($dir)
+    {
         if (is_dir($dir)) {
             return true;
         } else {
@@ -358,5 +409,4 @@ class DyGDImgRealize{
             return mkdir($dir, 0755, true);
         }
     }
-
 }
