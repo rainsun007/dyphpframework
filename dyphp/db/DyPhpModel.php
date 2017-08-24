@@ -89,11 +89,11 @@ class DyPhpModel
     /**
      * 同时写入多条记录.
      *
-     * @param array('user_id','user_name')
-     * @param array(
-     *             array('12345','rain sun 2'),
-     *             array('1234','rain sun 1'),
-     *        )
+     * @param array array('user_id','user_name')
+     * @param array array(
+     *                  array('12345','rain sun 2'),
+     *                  array('1234','rain sun 1'),
+     *              )
      **/
     public function insertBatch($column, $values)
     {

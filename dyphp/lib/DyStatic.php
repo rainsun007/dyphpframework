@@ -105,7 +105,6 @@ class DyStatic{
         if(!empty(self::$cssArr)){
             self::$viewCssTempArr = self::$cssArr;
             self::$cssArr = array();
-
         }
 
         if(!empty(self::$jsArr)){

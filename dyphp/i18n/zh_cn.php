@@ -23,6 +23,7 @@ return array(
     'pdo extension loaded error'=>'pdo扩展加载错误',
     'default view does not exist'=>'defaultView 地址不存在', 
     'urlManager error'=>'URL重写格式错误',
+    'ca format error'=>'CA格式错误', 
     'database config undefined'=>'数据库配制未定义', 
     'database lbs return error'=>'数据库lbs方法返回值必须为数组', 
     'cache type does not exist'=>'缓存类型不合法', 
