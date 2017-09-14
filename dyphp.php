@@ -197,12 +197,12 @@ class DyPhpBase
     /**
      * 获取框架版本
      * 版本号规则：
-     * 主版本号(较大的变动).子版本号(现在功能变化或新特性增加).阶段版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
+     * 主版本号(较大的变动).子版本号(功能变化或新特性增加).阶段版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
      * 上一级版本号变动时下级版本号归零
      **/
     public static function getVersion()
     {
-        return '2.1.1-release';
+        return '2.2.0-release';
     }
 
     /**
