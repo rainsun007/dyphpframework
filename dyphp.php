@@ -100,7 +100,7 @@ class DyPhpBase
     {
         $params = is_array($params) ? $params : (array)$params;
         $msgHandler = explode('/', trim(DyPhpConfig::item('messageHandler'), '/'));
-        Dy::app()->preModule = Dy::app()->module;
+        Dy::app()->setPreInsAttr();
         DyPhpController::run($msgHandler[0], $msgHandler[1], $params);
         if ($exit) {
             exit;
@@ -118,7 +118,7 @@ class DyPhpBase
             require DyPhpConfig::getImport($className);
         } else {
             //5.3 namespace
-            if (($pos=strrpos($className, '\\'))!==false) {
+            if (($pos=strrpos($className, '\\')) !== false) {
                 if ($alias = DyPhpConfig::getAliasMap(substr($className, 0, $pos))) {
                     require $alias['file'];
                 } else {
@@ -196,10 +196,13 @@ class DyPhpBase
 
     /**
      * 获取框架版本
+     * 版本号规则：
+     * 主版本号(较大的变动).子版本号(现在功能变化或新特性增加).阶段版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
+     * 上一级版本号变动时下级版本号归零
      **/
     public static function getVersion()
     {
-        return 'Stable 1.0';
+        return '2.1.1-release';
     }
 
     /**
@@ -342,28 +345,32 @@ class DyPhpBase
  **/
 final class DyPhpApp
 {
-    //调用的controller名
-    public $cid = '';
-
+    /* controller实例全局属性 */
+    //调用的module名
+    public $module = '';
     //调用的module/controller名
     public $pcid = '';
-
+    //调用的controller名
+    public $cid = '';
     //调用的action名
     public $aid = '';
 
-    //调用的module名
-    public $module = '';
-
-    //此针对errorHandler，messageHandler信息接管，记录前一次运行的module
+    /* 此针对errorHandler，messageHandler信息接管 */
+    //记录前一次运行的module
     public $preModule = '';
+    //记录前一次运行的module/controller
+    public $prePcid = '';
+    //记录前一次运行的controller
+    public $preCid = '';
+    //记录前一次运行的action
+    public $preAid = '';
 
     //当前运行的controller实例
     public $runingController = null;
 
-    //实例存储
+    //注册实例及别名实例单例存储器
     private $instanceArr = array();
-
-    //唯一包含
+    //加载vendors单例存储器
     private $incOnce = array();
 
     public function __construct()
@@ -443,6 +450,17 @@ final class DyPhpApp
         }
         require $vendor;
         $this->incOnce[] = $type.'_'.$filePathName;
+    }
+
+    /**
+     * 设置controller实例全局属性的前一次运行属性
+     */
+    public function setPreInsAttr()
+    {
+        $this->preModule = $this->module;
+        $this->prePcid = $this->pcid;
+        $this->preCid = $this->cid;
+        $this->preAid = $this->aid;
     }
 }
 
