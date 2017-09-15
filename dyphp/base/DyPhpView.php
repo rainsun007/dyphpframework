@@ -16,6 +16,8 @@ class DyPhpView
     private $viewFile = '';
     //模板数据
     private $viewData = array();
+    //完整view渲染后的html
+    private $renderHtml='';
 
     //默认使用的主题
     public $defaultTheme = 'default';
@@ -27,7 +29,7 @@ class DyPhpView
     public $pageTitle = '';
 
     /**
-     * 完整view调用.
+     * 完整view渲染.
      *
      * @param string 调用的view
      * @param array  view层数据
@@ -35,34 +37,27 @@ class DyPhpView
      **/
     public function render($view, $data = array(), $moduleTheme = '')
     {
-        $this->attrSet($view, $data, $moduleTheme);
-
-        if (!file_exists($this->viewFile)) {
-            DyPhpBase::throwException('view does not exist', $view.':'.$this->viewFile);
-        }
-
-        if (is_array($this->viewData)) {
-            extract($this->viewData);
-        }
-
-        ob_start();
-        include $this->viewFile;
-        $content = ob_get_contents();
-        if (ob_get_length()) {
-            ob_end_clean();
-        }
-        DyStatic::cssJsMove();
-
-        ob_start(array($this, 'formatLayout'));
-        include $this->layoutFile;
-        if (ob_get_length()) {
-            ob_end_flush();
-        }
+        $this->viewLayoutRender($view, $data, $moduleTheme, true);
         exit;
     }
 
     /**
-     * 局部view调用.
+     * 获取完整view渲染后的html.
+     *
+     * @param string 调用的view
+     * @param array  view层数据
+     * @param string 主题（此参数如设置将覆盖moduleTheme属性）
+     * 
+     * @return string
+     **/
+    public function getRenderHtml($view, $data = array(), $moduleTheme = '')
+    {
+        $this->viewLayoutRender($view, $data, $moduleTheme, false);
+        return $this->renderHtml;
+    }
+
+    /**
+     * 局部view渲染.
      *
      * @param string 调用的view
      * @param array  view层数据
@@ -80,65 +75,6 @@ class DyPhpView
             extract($this->viewData);
         }
         require $this->viewFile;
-    }
-
-    /**
-     * 属性设置.
-     *
-     * @param string 调用的view
-     * @param array  view层数据
-     * @param string 主题（此参数如设置将覆盖defaultTheme属性）
-     **/
-    private function attrSet($view = '', $data = array(), $moduleTheme = '')
-    {
-        if($moduleTheme != ''){
-            $this->moduleTheme = $moduleTheme;    
-        }
-
-        $viewRoot = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR;
-        $themeViewRoot = $this->moduleTheme != '' && $this->moduleTheme != $this->defaultTheme ? $viewRoot.$this->moduleTheme.DIRECTORY_SEPARATOR : $viewRoot.$this->defaultTheme.DIRECTORY_SEPARATOR;
-
-        $this->layoutFile = strpos($this->defaultLayout, '/') === false ? $themeViewRoot.'Layout'.DIRECTORY_SEPARATOR.$this->defaultLayout.EXT : $viewRoot.$this->defaultLayout.EXT;
-        
-        $view = trim($view, '/');
-        $view = strpos($view, '/') === false ? ucfirst(DyPhpBase::app()->cid).DIRECTORY_SEPARATOR.$view : $view;
-        $this->viewFile = $themeViewRoot.$view.EXT;
-
-        $this->viewData = array_merge($this->viewData, $data);
-    }
-
-    /**
-     * 格式化layout.
-     *
-     * @param string  缓冲输出文件内容
-     * @param bool    是否将content输出替换为include
-     *
-     * @return string 返回处理后结果
-     **/
-    public function formatLayout($buffer)
-    {
-        if (empty($buffer)) {
-            return '';
-        }
-
-        $headCssScript = DyStatic::viewCssLoad().DyStatic::viewHeadScriptLoad();
-        if ($headCssScript != '') {
-            $buffer = str_replace('</head>', $headCssScript.'</head>', $buffer);
-        }
-
-        $bodyScript = DyStatic::viewBodyScriptLoad();
-        if ($bodyScript != '') {
-            if (preg_match('/<body.*?>/i', $buffer, $regs)) {
-                $buffer = str_replace($regs[0], $regs[0].$bodyScript, $buffer);
-            }
-        }
-
-        $footScript = DyStatic::viewFootScriptLoad();
-        if ($footScript != '') {
-            $buffer = str_replace('</body>', $footScript.'</body>', $buffer);
-        }
-
-        return $buffer;
     }
 
     /**
@@ -237,4 +173,97 @@ class DyPhpView
         }
         echo $scriptStr;
     }
+
+    /**
+     * 完整view渲染处理器.
+     *
+     * @param string 调用的view
+     * @param array  view层数据
+     * @param string 主题（此参数如设置将覆盖moduleTheme属性）
+     **/
+     private function viewLayoutRender($view, $data = array(), $moduleTheme = '', $flush = false)
+     {
+         $this->attrSet($view, $data, $moduleTheme);
+ 
+         if (!file_exists($this->viewFile)) {
+             DyPhpBase::throwException('view does not exist', $view.':'.$this->viewFile);
+         }
+ 
+         if (is_array($this->viewData)) {
+             extract($this->viewData);
+         }
+ 
+         ob_start();
+         include $this->viewFile;
+         $content = ob_get_contents();
+         if (ob_get_length()) {
+             ob_end_clean();
+         }
+         DyStatic::cssJsMove();
+ 
+         ob_start(array($this, 'formatViewLayoutRender'));
+         include $this->layoutFile;
+         if (ob_get_length()) {
+             $flush ? ob_end_flush() : ob_end_clean();
+         }
+     }
+
+    /**
+     * 属性设置.
+     *
+     * @param string 调用的view
+     * @param array  view层数据
+     * @param string 主题（此参数如设置将覆盖defaultTheme属性）
+     **/
+     private function attrSet($view = '', $data = array(), $moduleTheme = '')
+     {
+         if($moduleTheme != ''){
+             $this->moduleTheme = $moduleTheme;    
+         }
+ 
+         $viewRoot = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR;
+         $themeViewRoot = $this->moduleTheme != '' && $this->moduleTheme != $this->defaultTheme ? $viewRoot.$this->moduleTheme.DIRECTORY_SEPARATOR : $viewRoot.$this->defaultTheme.DIRECTORY_SEPARATOR;
+ 
+         $this->layoutFile = strpos($this->defaultLayout, '/') === false ? $themeViewRoot.'Layout'.DIRECTORY_SEPARATOR.$this->defaultLayout.EXT : $viewRoot.$this->defaultLayout.EXT;
+         
+         $view = trim($view, '/');
+         $view = strpos($view, '/') === false ? ucfirst(DyPhpBase::app()->cid).DIRECTORY_SEPARATOR.$view : $view;
+         $this->viewFile = $themeViewRoot.$view.EXT;
+ 
+         $this->viewData = array_merge($this->viewData, $data);
+     }
+ 
+     /**
+      * 格式化完整view渲染,静态文件加载.
+      *
+      * @param string  缓冲输出文件内容
+      * 
+      * @return string 返回html及js,css加载处理结果
+      **/
+     private function formatViewLayoutRender($buffer)
+     {
+         if (empty($buffer)) {
+             return '';
+         }
+ 
+         $headCssScript = DyStatic::viewCssLoad().DyStatic::viewHeadScriptLoad();
+         if ($headCssScript != '') {
+             $buffer = str_replace('</head>', $headCssScript.'</head>', $buffer);
+         }
+ 
+         $bodyScript = DyStatic::viewBodyScriptLoad();
+         if ($bodyScript != '') {
+             if (preg_match('/<body.*?>/i', $buffer, $regs)) {
+                 $buffer = str_replace($regs[0], $regs[0].$bodyScript, $buffer);
+             }
+         }
+ 
+         $footScript = DyStatic::viewFootScriptLoad();
+         if ($footScript != '') {
+             $buffer = str_replace('</body>', $footScript.'</body>', $buffer);
+         }
+ 
+         $this->renderHtml = $buffer;
+         return $buffer;
+     }
 }
