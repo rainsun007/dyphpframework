@@ -31,14 +31,14 @@ class DyPhpBase
     //框架类
     private static $coreClasses = array();
 
-     /**
-      * 运行web app入口
-      *
-      * @param string 配制文件
-      * @param boolean 是否开启debug
-      * @param boolean 是否开启web防火墙
-      * @return void
-      */
+    /**
+     * 运行web app入口
+     *
+     * @param string 配制文件
+     * @param boolean 是否开启debug
+     * @param boolean 是否开启web防火墙
+     * @return void
+     */
     public static function runWebApp($config = null, $debug = false, $waf = true)
     {
         self::runAppCommon($config, $debug, 'web');
@@ -117,29 +117,37 @@ class DyPhpBase
         } elseif (DyPhpConfig::getImport($className)) {
             require DyPhpConfig::getImport($className);
         } else {
-            //5.3 namespace
-            if (($pos=strrpos($className, '\\')) !== false) {
+            //5.3 namespace自动加载
+            if (($pos = strrpos($className, '\\')) !== false) {
                 if ($alias = DyPhpConfig::getAliasMap(substr($className, 0, $pos))) {
                     require $alias['file'];
                 } else {
                     $classFile = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\', '/', $className).EXT;
                     if (file_exists($classFile)) {
                         require $classFile;
-                    }
-                    foreach (DyPhpConfig::getIncludePath() as $key => $val) {
-                        $autoClassFile = $val.$className . EXT;
-                        if (is_file($autoClassFile)) {
-                            require $autoClassFile;
-                            break;
+                    }else{
+                        foreach (DyPhpConfig::getIncludePath() as $key => $val) {
+                            $autoClassFile = $val.$className . EXT;
+                            if (is_file($autoClassFile)) {
+                                require $autoClassFile;
+                                break;
+                            }
                         }
                     }
                 }
             } else {
-                foreach (DyPhpConfig::getIncludePath() as $key => $val) {
-                    $classFile = $val.$className . EXT;
-                    if (is_file($classFile)) {
-                        require $classFile;
-                        break;
+                if ($alias = DyPhpConfig::getAliasMap($className)) {
+                    if(!class_exists($alias['name'], false)){
+                       require $alias['file']; 
+                    }
+                    class_alias($alias['name'], $className, false);
+                } else {
+                    foreach (DyPhpConfig::getIncludePath() as $key => $val) {
+                        $classFile = $val.$className . EXT;
+                        if (is_file($classFile)) {
+                            require $classFile;
+                            break;
+                        }
                     }
                 }
             }
@@ -164,7 +172,7 @@ class DyPhpBase
             spl_autoload_unregister(array('DyPhpBase', 'autoload'));
             spl_autoload_register($callback);
         } else {
-            spl_autoload_register($callback,true,$prepend);
+            spl_autoload_register($callback, true, $prepend);
         }
     }
 
@@ -202,7 +210,7 @@ class DyPhpBase
      **/
     public static function getVersion()
     {
-        return '2.2.0-release';
+        return '2.2.1-release';
     }
 
     /**
@@ -316,25 +324,32 @@ class DyPhpBase
      **/
     public static function supportCheck()
     {
-        //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt'
+        //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt openssl'
         $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br >';
-        echo $br.'[Framework limit]'.$br;
-        echo 'php current version:'.PHP_VERSION.' status:'.(version_compare(PHP_VERSION, '5.3.0', '>=') ? '√ OK' : '× minimum version of 5.2.2');
-        echo $br.'-----'.PHP_SAPI.'-----'.$br;
-        echo PHP_SAPI !== 'cli' ? 'Framework to retain for $_GET : ca,ext_name,page' : '';
+        $splitLine = $br.str_repeat ('-',55).$br;
 
-        echo $br.$br.'[Extension check]'.$br;
+        echo $br.'[Framework limit]';
+        echo $splitLine;
+        echo 'php current version:'.PHP_VERSION.' status: '.(version_compare(PHP_VERSION, '5.3.0', '>=') ? '√ OK' : '× minimum version of 5.2.2');
+        echo $br.'Current running SAPI : '.PHP_SAPI.$br;
+        echo PHP_SAPI !== 'cli' ? 'Framework to retain for $_GET : ca,ext_name,page' : '';
+        
+        echo $br.$br.'[Extension check]';
+        echo $splitLine;
         echo extension_loaded('pdo') ? "√ PDO support" : "× PDO unsupport";
-        echo $br.'----------'.$br;
+        echo $splitLine;
         echo extension_loaded('pdo_mysql') ? "√ PDO_MYSQL support" : "× PDO_MYSQL unsupport";
-        echo $br.'----------'.$br;
+        echo $splitLine;
         echo extension_loaded('mbstring') ? "√ mbstring support" : "× mbstring unsupport";
-        echo $br.'----------'.$br;
+        echo $splitLine;
         echo extension_loaded('iconv') ? "√ iconv support" : "× iconv unsupport";
-        echo $br.'----------'.$br;
-        echo extension_loaded('gd') ? "√ GD support" : "× GD unsupport";
-        echo $br.'----------'.$br;
+        echo $splitLine;
+        echo extension_loaded('gd') || extension_loaded('gd2') ? "√ GD support" : "× GD unsupport";
+        echo $splitLine;
         echo extension_loaded('mcrypt') ? "√ mcrypt support" : "× mcrypt unsupport";
+        echo $splitLine;
+        echo extension_loaded('openssl') ? "√ openssl support" : "× openssl unsupport";
+        echo $splitLine;
         echo $br.$br;
         exit;
     }

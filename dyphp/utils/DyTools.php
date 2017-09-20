@@ -14,8 +14,9 @@ class DyTools
     /**
      * 格式化字节
      *
-     * @param 字节数
-     * @param
+     * @param int 字节数
+     *
+     * @return string
      **/
     public static function formatSize($size)
     {
@@ -40,8 +41,8 @@ class DyTools
     /**
      * 格式化时间.
      *
-     * @param type $time
-     * @param type $period
+     * @param int  $time    时间戳
+     * @param bool $period
      *
      * @return string
      */
@@ -64,19 +65,19 @@ class DyTools
     }
 
     /**
-     * @brief    分类格式化
+     * @brief   树型分类格式化
      *
-     * @param   $items
-     *                 foreach($nav as $val){
-     *                 $classArr[$val->id] = array(
-     *                 'id'=>$val->id,
-     *                 'name'=>$val->name,
-     *                 'pid'=>$val->pid,
-     *                 'link'=>$val->cate_link,
-     *                 );
-     *                 }
+     * @param   $items  以id为key的二维数组
+     * foreach($nav as $val){
+     *      $classArr[$val->id] = array(
+     *          'id'=>$val->id,    //必须字段
+     *          'pid'=>$val->pid,  //必须字段
+     *          'name'=>$val->name,
+     *          'link'=>$val->cate_link,
+     *      );
+     * }
      *
-     * @return
+     * @return  array
      **/
     public static function treeFormat($items)
     {
@@ -151,11 +152,11 @@ class DyTools
     /**
      * @brief    配制文件修改 也可用于其它文件内容修改
      *
-     * @param   $cfgArr
-     * @param   $configTemplate
-     * @param   $config
+     * @param   array   $cfgArr          替换映射数组
+     * @param   string  $configTemplate  模版文件
+     * @param   string  $config          生成后写入的文件
      *
-     * @return
+     * @return  string
      **/
     public function setConfig($cfgArr, $configTemplate, $config)
     {
@@ -176,7 +177,7 @@ class DyTools
      *
      * @param int 完整的年份
      *
-     * @return 生肖
+     * @return string 生肖
      **/
     public static function getAnimal($year)
     {
@@ -193,7 +194,7 @@ class DyTools
      * @param float 经度2
      * @param float 纬度2
      *
-     * @return 单位：千米
+     * @return float 单位：千米
      */
     public static function getDistance($lng1, $lat1, $lng2, $lat2)
     {
@@ -211,17 +212,17 @@ class DyTools
     /**
      * @brief    简单json返回值格式化
      *
-     * @param   int $status  状态
-     * @param   int $code    代码
-     * @param   string $message 信息
-     * @param   mix $data
-     * @param   bool $  以字面编码多字节 Unicode 字符(中文不被转码),自 PHP 5.4.0 起生效
+     * @param   int     $status     状态
+     * @param   int     $code       代码
+     * @param   string  $message    信息
+     * @param   mixed   $data       数据
+     * @param   bool    $unescaped  以字面编码多字节 Unicode 字符(中文不被转码),自 PHP 5.4.0 起生效
      *
      * @return  string
      **/
     public static function apiJson($status = 1, $code = 200, $message = '', $data = '', $unescaped = false)
     {
         $dataArr = array('status' => $status, 'code' => $code, 'message' => $message, 'data' => $data);
-        return $unescaped ? json_encode($dataArr,JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
+        return $unescaped ? json_encode($dataArr, JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
     }
 }

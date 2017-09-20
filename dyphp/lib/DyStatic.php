@@ -67,16 +67,16 @@ class DyStatic
      * 移除注册css文件
      * @param css地址
      **/
-     public static function unregCss($cssDir)
-     {
+    public static function unregCss($cssDir)
+    {
         if (!in_array($cssDir, self::$viewCssUnregArr)) {
             self::$viewCssUnregArr[] = $cssDir;
         }
-     }
+    }
 
     /**
      * 装载css
-     * 
+     *
      * @return string
      **/
     public static function viewCssLoad()
@@ -91,7 +91,7 @@ class DyStatic
 
     /**
      * 装载head script
-     * 
+     *
      * @return string
      **/
     public static function viewHeadScriptLoad()
@@ -106,7 +106,7 @@ class DyStatic
 
     /**
      * 装载body script
-     * 
+     *
      * @return string
      **/
     public static function viewBodyScriptLoad()
@@ -121,7 +121,7 @@ class DyStatic
 
     /**
      * 装载foot script
-     * 
+     *
      * @return string
      **/
     public static function viewFootScriptLoad()
@@ -160,9 +160,9 @@ class DyStatic
         self::$cssArr = array_diff(self::$cssArr, self::$viewCssUnregArr);
 
         self::$jsArr  = array_merge_recursive(self::$jsArr, self::$viewJsTempArr);
-        self::$jsArr['head']  = array_diff(array_unique(self::$jsArr['head']),self::$viewJsUnregArr['head']);
-        self::$jsArr['body']  = array_diff(array_unique(self::$jsArr['body']),self::$viewJsUnregArr['body']);
-        self::$jsArr['foot']  = array_diff(array_unique(self::$jsArr['foot']),self::$viewJsUnregArr['foot']);
+        self::$jsArr['head']  = array_diff(array_unique(self::$jsArr['head']), self::$viewJsUnregArr['head']);
+        self::$jsArr['body']  = array_diff(array_unique(self::$jsArr['body']), self::$viewJsUnregArr['body']);
+        self::$jsArr['foot']  = array_diff(array_unique(self::$jsArr['foot']), self::$viewJsUnregArr['foot']);
 
         self::$recombinationLock = true;
     }

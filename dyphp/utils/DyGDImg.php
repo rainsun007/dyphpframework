@@ -20,6 +20,8 @@ class DyGDImg
 
     /**
      * 按坐标及宽高生成缩略图(此方法适合用于前端可视化切图)
+     * 实例
+     * DyGDImg::cut('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50);
      *
      * @param string 源图片地址 如：$_FILES['files']['tmp_name']
      * @param string 保存生成图像的地址(目录如不存在会自动创建)
@@ -29,44 +31,36 @@ class DyGDImg
      * @param int    截图距原图左上角的宽
      * @param int    截图距原图左上角的高
      * @return bool
-     *
-     * 实例
-     * DyGDImg::cut('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50);
      **/
     public static function cut($srcimg, $save_path, $save_name, $width, $heigth, $srcx=0, $srcy=0)
     {
-        self::instance()->resize($srcimg, $save_path, $save_name, $width, $heigth, $srcx, $srcy, true);
-        $save_path = rtrim($save_path, '/');
-        $saveFile = $save_path.'/'.$save_name;
-        return file_exists($saveFile);
+        $info = self::getSaveInfo($srcimg,$save_path, $save_name, $width);
+        return self::instance()->resize($srcimg, $info['path'], $info['name'], $width, $heigth, $srcx, $srcy, true) ? $info : false;
     }
 
     /**
      * 按照原图比例生成缩略图
-     *
+     * 实例
+     * DyGDImg::resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125);
+     * 
      * @param string 源图片地址 如：$_FILES['files']['tmp_name']
      * @param string 保存生成图像的地址(目录如不存在会自动创建)
      * @param string 生成图像的文件名
      * @param int    新图的宽度
      * @param int    新图的高度
-     * @return bool
-     *
-     * 实例
-     * DyGDImg::resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125);
+     * @return bool|array
      **/
     public static function resize($srcimg, $save_path, $save_name, $width, $heigth)
     {
-        self::instance()->resize($srcimg, $save_path, $save_name, $width, $heigth, 0, 0, false);
-        $save_path = rtrim($save_path, '/');
-        $saveFile = $save_path.'/'.$save_name;
-        return file_exists($saveFile);
+        $info = self::getSaveInfo($srcimg,$save_path, $save_name, $width);
+        return self::instance()->resize($srcimg, $info['path'], $info['name'], $width, $heigth, 0, 0, false) ? $info : false;
     }
 
     /**
      * @brief    上传图片
      * @param    string $upFileName  表单上传控件name
      * @param    string $save_path   上传后保存的路径
-     * @param    string $save_name   上传后保存的文件名
+     * @param    string $save_name   上传后保存的文件名（不带扩展名）
      * @param    string|array $extensions 支持文件格式
      * @param    int    $maxSize    单位MB
      * @return   int
@@ -81,12 +75,23 @@ class DyGDImg
     }
 
     /**
+     * @brief  获取保存后的文件扩展名
+     * @return string
+     **/
+     public static function getFileExt()
+     {
+         $info = self::instance()->getInfo();
+         return $info['type'];
+     }
+
+    /**
      * @brief  获取保存后的文件名
      * @return string
      **/
     public static function getFileSaveName()
     {
-        return self::instance()->fileSaveName;
+        $info = self::instance()->getInfo();
+        return $info['name'];
     }
 
     /**
@@ -99,24 +104,36 @@ class DyGDImg
     }
 
     /**
-     * @brief  获取保存后的文件扩展名
-     * @return string
-     **/
-     public static function getFileExt(){
-        $info = self::instance()->getInfo();
-        return $info['type'];
-    }
-
-    /**
      * 无页面刷新框架上传 callback处理
      * @param string callback
      * @param string 返回上传状态
      * @param string 返回上传信息
-     * @return string 
+     * @return string
      */
     public static function iframJsCallBack($callbackFunName='', $type='seccess', $msg="upload seccess")
     {
         return '<script language="javascript" type="text/javascript">window.top.window.'.$callbackFunName.'(\''.$type."','".$msg.'\');</script>';
+    }
+
+    /**
+     * 获取切图的信息 cut和resize的子方法
+     *
+     * @param string $srcimg
+     * @param string $save_path
+     * @param string $save_name
+     * @return void
+     */
+    private static function getSaveInfo($srcimg,$save_path, $save_name, $width)
+    {
+        $save_path = $save_path ? $save_path : dirname($srcimg);
+        $save_name = $save_name ? $save_name : substr(basename($srcimg), 0, strrpos(basename($srcimg), '.')).'_'.$width.strrchr(basename($srcimg), '.');
+         
+        return array(
+            'type' => strrchr(basename($srcimg), '.'),
+            'name' => $save_name,
+            'path' => $save_path,
+            'path_name' => rtrim($save_path,'/').'/'.$save_name
+        );
     }
 }
 
@@ -160,12 +177,12 @@ class DyGDImgRealize
     public $save_path = '';
     //保存的文件名（不带扩展名）
     public $save_name = '';
+    //保存的文件名（带扩展名）
+    public $fileSaveName;
     //允许上传的文件类型
     public $extensions = array('jpg','gif','bmp','png');
     //最大限制（默认为2M）
     public $maxSize = 2097152;
-    //保存的文件名（带扩展名）
-    public $fileSaveName;
 
     public function __construct()
     {
@@ -176,6 +193,9 @@ class DyGDImgRealize
 
     /**
      * 利用PHP的GD库生成缩略图。
+     * 实例
+     * $image = new DyImage();
+     * $image->resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50,true);
      *
      * @param string 源图片地址$_FILES['files']['tmp_name']
      * @param string 保存生成图像的地址
@@ -186,9 +206,7 @@ class DyGDImgRealize
      * @param int    截图距原图左上角的高
      * @param bool   是否裁图，true按坐标及宽高生成缩略图(此方法适合用于前端可视化切图)，false则按照原图比例生成缩略图
      *
-     * 实例
-     * $image = new DyImage();
-     * $image->resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125,30,50,true);
+     * @return bool
      **/
     public function resize($srcimg, $save_path, $save_name, $width, $heigth, $srcx=0, $srcy=0, $cut=false)
     {
@@ -209,7 +227,7 @@ class DyGDImgRealize
         $this->imImg();
 
         //生成图象
-        $this->getResize();
+        return $this->getResize();
     }
 
     /**
@@ -272,12 +290,13 @@ class DyGDImgRealize
     public function getInfo()
     {
         return array(
+            'size' => $this->fileSize,
             'width' => $this->width,
             'height' => $this->height,
             'type' => $this->type,
-            'size' => $this->fileSize,
-            'saveName' => $this->fileSaveName,
-            'savePath' => $this->save_path,
+            'name' => $this->fileSaveName,
+            'path' => $this->save_path,
+            'path_name' => $this->save_path . '/' . $this->fileSaveName,
         );
     }
 
@@ -316,8 +335,9 @@ class DyGDImgRealize
             //imagecopyresized($newimg, $this->im, 0, 0, $src_x, $src_y, $resize_width, $resize_height, $width, $height);
         }
 
-        $this->createImg($newimg);
+        $result = $this->createImg($newimg);
         ImageDestroy($this->im);
+        return $result;
     }
 
     /**
@@ -357,18 +377,14 @@ class DyGDImgRealize
     {
         $this->checkDir($this->resize_save_path);
         switch ($this->type) {
-        case "jpg":
-            imagejpeg($newimg, $this->dstimg, 80);
-            break;
-        case "gif":
-            imagegif($newimg, $this->dstimg);
-            break;
-        case "png":
-            imagepng($newimg, $this->dstimg);
-            break;
-        case "bmp":
-            imagewbmp($newimg, $this->dstimg);
-            break;
+            case "jpg":
+                return imagejpeg($newimg, $this->dstimg, 80);
+            case "gif":
+                return imagegif($newimg, $this->dstimg);
+            case "png":
+                return imagepng($newimg, $this->dstimg);
+            case "bmp":
+                return imagewbmp($newimg, $this->dstimg);
         }
     }
 
