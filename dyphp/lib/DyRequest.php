@@ -212,7 +212,7 @@ class DyRequest
      */
     public static function getMethod()
     {
-        $method = ''; 
+        $method = '';
         if (isset($_POST['_method'])) {
             $method = strtoupper($_POST['_method']);
         } elseif (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
@@ -377,15 +377,15 @@ class DyRequest
      *
      * @return string 返回请求的结果
      */
-    public static function remotePost($url, $postArray = array(), $timeOut = 5,$userAgent = '')
+    public static function remotePost($url, $postArray = array(), $timeOut = 5, $userAgent = '')
     {
         $userAgent = $userAgent ? $userAgent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36';
 
         $postString = http_build_query($postArray, '', '&');
         if (function_exists('curl_init')) {
-            return self::runCurlRequest($url, $postString, $timeOut,$userAgent);
+            return self::runCurlRequest($url, $postString, $timeOut, $userAgent);
         } else {
-            return self::runFileRequest($url, $postString, $timeOut,$userAgent);
+            return self::runFileRequest($url, $postString, $timeOut, $userAgent);
         }
     }
 
@@ -398,7 +398,7 @@ class DyRequest
      *
      * @return  string
      **/
-    private static function runCurlRequest($postUrl, $postString, $timeOut,$userAgent)
+    private static function runCurlRequest($postUrl, $postString, $timeOut, $userAgent)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $postUrl);
@@ -407,7 +407,7 @@ class DyRequest
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeOut);
-        curl_setopt($ch, CURLOPT_USERAGENT,$userAgent);
+        curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
         $postResult = curl_exec($ch);
         curl_close($ch);
         return $postResult;
@@ -422,7 +422,7 @@ class DyRequest
      *
      * @return  string
      **/
-    private static function runFileRequest($postUrl, $postString, $timeOut,$userAgent)
+    private static function runFileRequest($postUrl, $postString, $timeOut, $userAgent)
     {
         $context = array(
             'http' => array(
@@ -501,7 +501,7 @@ class DyRequest
      */
     private static function getFilterInt($requestValue, $default)
     {
-        return DyFilter::isInt($requestValue) ? $requestValue : $default;
+        return DyFilter::isInt($requestValue) !== false ? $requestValue : $default;
     }
 
     /**
@@ -513,7 +513,7 @@ class DyRequest
      **/
     private static function getFilterFloat($requestValue, $default)
     {
-        return DyFilter::isFloat($requestValue) ? $requestValue : $default;
+        return DyFilter::isFloat($requestValue) !== false ? $requestValue : $default;
     }
 
     /**

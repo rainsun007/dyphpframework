@@ -125,7 +125,7 @@ class DyPhpBase
                     $classFile = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\', '/', $className).EXT;
                     if (file_exists($classFile)) {
                         require $classFile;
-                    }else{
+                    } else {
                         foreach (DyPhpConfig::getIncludePath() as $key => $val) {
                             $autoClassFile = $val.$className . EXT;
                             if (is_file($autoClassFile)) {
@@ -137,8 +137,8 @@ class DyPhpBase
                 }
             } else {
                 if ($alias = DyPhpConfig::getAliasMap($className)) {
-                    if(!class_exists($alias['name'], false)){
-                       require $alias['file']; 
+                    if (!class_exists($alias['name'], false)) {
+                        require $alias['file'];
                     }
                     class_alias($alias['name'], $className, false);
                 } else {
@@ -210,7 +210,7 @@ class DyPhpBase
      **/
     public static function getVersion()
     {
-        return '2.2.1-release';
+        return '2.3.0-release';
     }
 
     /**
@@ -326,7 +326,7 @@ class DyPhpBase
     {
         //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt openssl'
         $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br >';
-        $splitLine = $br.str_repeat ('-',55).$br;
+        $splitLine = $br.str_repeat('-', 55).$br;
 
         echo $br.'[Framework limit]';
         echo $splitLine;
