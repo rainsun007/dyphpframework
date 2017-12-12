@@ -122,7 +122,7 @@ class DyPhpModel
      * 更新数据.
      *
      * @param array  array('classid'=>'classid+1')
-     * @param string
+     * @param string where条件
      * @param array  进行自加自减操作的字段 array('classid')
      *
      * @return int
@@ -136,6 +136,42 @@ class DyPhpModel
         $sql = 'UPDATE `'.$this->getInstance()->tableName.'` SET '.$this->sqlImplode($setArr, 'up', $columnOperationArr).' WHERE '.$criteria;
 
         return $this->dbExec($sql);
+    }
+
+    /**
+     * 更新数据(字段自加操作).
+     *
+     * @param array  array('classid'=>1,'classid2'=>2)
+     * @param string where条件
+     *
+     * @return int
+     */
+    public function incr($setArr = array(),$criteria = '')
+    {
+        $upSetArr = $columnOperationArr = array();
+        foreach ($setArr as $key => $value) {
+            $upSetArr[$key] = $key.'+'.$value;
+            $columnOperationArr[] = $key;
+        }
+        return $this->update($upSetArr,$criteria,$columnOperationArr);
+    }
+
+    /**
+     * 更新数据(字段自减操作).
+     *
+     * @param array  array('classid'=>1,'classid2'=>2)
+     * @param string where条件
+     *
+     * @return int
+     */
+    public function decr($setArr = array(),$criteria = '')
+    {
+        $upSetArr = $columnOperationArr = array();
+        foreach ($setArr as $key => $value) {
+            $upSetArr[$key] = $key.'-'.$value;
+            $columnOperationArr[] = $key;
+        }
+        return $this->update($upSetArr,$criteria,$columnOperationArr);
     }
 
     /**
