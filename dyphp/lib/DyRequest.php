@@ -110,19 +110,25 @@ class DyRequest
      **/
     public static function getClientIp()
     {
-        if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
-            $ip = getenv('HTTP_CLIENT_IP');
+        $ip = '0.0.0.0';
+        if (getenv('HTTP_X_REAL_IP') && strcasecmp(getenv('HTTP_X_REAL_IP'), 'unknown')) {
+            //nginx 代理模式下，获取客户端真实IP
+            $ip = getenv('HTTP_X_REAL_IP'); 
+        }elseif (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
+            //客户端的ip
+            $ip = getenv('HTTP_CLIENT_IP'); 
         } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
-            $ip = getenv('HTTP_X_FORWARDED_FOR');
+            //浏览当前页面的用户计算机的网关
+            $ip = getenv('HTTP_X_FORWARDED_FOR'); 
         } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
+            //浏览当前页面的用户计算机的ip地址
             $ip = getenv('REMOTE_ADDR');
         } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
+            //浏览当前页面的用户计算机的ip地址
             $ip = $_SERVER['REMOTE_ADDR'];
-        } else {
-            $ip = '0.0.0.0';
         }
 
-        return $ip;
+        return ip2long($ip) > 0 ? $ip : '0.0.0.0';
     }
 
     /**
@@ -235,7 +241,8 @@ class DyRequest
      */
     public static function getStr($key, $default = '')
     {
-        return isset($_GET[$key]) ? self::getFilterString($_GET[$key], $default) : $default;
+        $result = isset($_GET[$key]) ? self::getFilterString($_GET[$key], $default) : $default;
+        return $result == '' && $default != '' ? $default : $result;
     }
 
     /**
@@ -243,12 +250,13 @@ class DyRequest
      *
      * @param string get请求的变量名
      * @param int    默认值
+     * @param int    最小值范围，小于此值将返回0
      *
      * @return int get变量名对应的值
      */
-    public static function getInt($key, $default = 0)
+    public static function getInt($key, $default = 0, $minRange = 0)
     {
-        return isset($_GET[$key]) ? self::getFilterInt($_GET[$key], $default) : $default;
+        return isset($_GET[$key]) ? self::getFilterInt($_GET[$key], $default, $minRange) : $default;
     }
 
     /**
@@ -287,7 +295,8 @@ class DyRequest
      */
     public static function postStr($key, $default = '')
     {
-        return isset($_POST[$key]) ? self::getFilterString($_POST[$key], $default) : $default;
+        $result = isset($_POST[$key]) ? self::getFilterString($_POST[$key], $default) : $default;
+        return $result == '' && $default != '' ? $default : $result;
     }
 
     /**
@@ -295,12 +304,13 @@ class DyRequest
      *
      * @param string post请求的变量名
      * @param int    默认值
+     * @param int    最小值范围，小于此值将返回0
      *
      * @return int post变量名对应的值
      */
-    public static function postInt($key, $default = 0)
+    public static function postInt($key, $default = 0, $minRange = 0)
     {
-        return isset($_POST[$key]) ? self::getFilterInt($_POST[$key], $default) : $default;
+        return isset($_POST[$key]) ? self::getFilterInt($_POST[$key], $default, $minRange) : $default;
     }
 
     /**
@@ -499,9 +509,9 @@ class DyRequest
      *
      * @return int 返回验证过的值
      */
-    private static function getFilterInt($requestValue, $default)
+    private static function getFilterInt($requestValue, $default,$minRange = 0)
     {
-        return DyFilter::isInt($requestValue) !== false ? $requestValue : $default;
+        return DyFilter::isInt($requestValue,$minRange) !== false ? $requestValue : $default;
     }
 
     /**

@@ -210,7 +210,7 @@ class DyPhpBase
      **/
     public static function getVersion()
     {
-        return '2.3.0-release';
+        return '2.3.1-release';
     }
 
     /**

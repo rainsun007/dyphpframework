@@ -76,7 +76,7 @@ class DyFilter
     }
 
     /**
-     * @brief    非负整数
+     * @brief    整数
      *
      * @param   $int
      * @param   $minRange
@@ -86,7 +86,7 @@ class DyFilter
      **/
     public static function isInt($int, $minRange = 0, $maxRange = PHP_INT_MAX)
     {
-        if ($minRange < 0 || $maxRange < $minRange || $maxRange > PHP_INT_MAX) {
+        if (!is_numeric($minRange) || !is_numeric($maxRange) || $maxRange < $minRange || $maxRange > PHP_INT_MAX) {
             return false;
         }
         $int_options = array('options' => array('min_range' => $minRange, 'max_range' => $maxRange));

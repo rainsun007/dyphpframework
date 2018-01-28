@@ -14,7 +14,7 @@ class DyTools
     /**
      * 格式化字节
      *
-     * @param int 字节数
+     * @param int 字节数（一般为文件的大小）
      *
      * @return string
      **/
@@ -41,9 +41,12 @@ class DyTools
     /**
      * 格式化时间.
      *
-     * @param int  $time    时间戳
-     * @param bool $period
-     *
+     * @param int     $time     时间戳
+     * @param boolean $period   时间周期格式
+     * @param integer $just     $period=true时“刚刚”的时间周期
+     * @param integer $minute   $period=true时“分钟”的时间周期
+     * @param integer $hour     $period=true时“小时”的时间周期
+     * 
      * @return string
      */
     public static function formatTime($time, $period = false, $just = 60, $minute = 3600, $hour = 86400)
@@ -65,9 +68,12 @@ class DyTools
     }
 
     /**
-     * @brief   树型分类格式化
-     *
+     * @abstract  树型分类格式化
+     * 
      * @param   $items  以id为key的二维数组
+     * 
+     * @example
+     * $classArr = array();
      * foreach($nav as $val){
      *      $classArr[$val->id] = array(
      *          'id'=>$val->id,    //必须字段
@@ -79,21 +85,21 @@ class DyTools
      *
      * @return  array
      **/
-    public static function treeFormat($items)
+    public static function treeFormat($items,$childKeyName = 'child')
     {
         foreach ($items as $item) {
-            $items[$item['pid']]['child'][$item['id']] = &$items[$item['id']];
+            $items[$item['pid']][$childKeyName][$item['id']] = &$items[$item['id']];
         }
 
-        return isset($items[0]['child']) ? $items[0]['child'] : array();
+        return isset($items[0][$childKeyName]) ? $items[0][$childKeyName] : array();
     }
 
     //-------------------------文件，目录-----------------------
     /**
      * 创建目录.
      *
-     * @param string
-     * @param int
+     * @param string   目录路径
+     * @param int      目录权限
      *
      * @return bool
      */
