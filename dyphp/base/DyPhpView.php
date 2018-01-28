@@ -21,7 +21,7 @@ class DyPhpView
 
     //默认使用的主题
     public $defaultTheme = 'default';
-    //模块使用的主题，优先级高于$defaultTheme属性
+    //模块使用的主题，优先级高于$defaultTheme属性, render,renderPartial,getRenderHtml方法参数$moduleTheme如设置，将覆盖moduleTheme属性
     public $moduleTheme = '';
     //默认使用的layout文件, 若设置为跨模块layout(eg:/admin/Layout/main)，那么在layout中如调用renderPartial则要注意显性设置$moduleTheme参数
     public $defaultLayout = 'main';
@@ -218,7 +218,7 @@ class DyPhpView
      private function attrSet($view = '', $data = array(), $moduleTheme = '')
      {
          if($moduleTheme != ''){
-             $this->moduleTheme = $moduleTheme;    
+             $this->moduleTheme = $moduleTheme;
          }
  
          $viewRoot = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR;

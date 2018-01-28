@@ -249,6 +249,10 @@ class DyPhpModel
      **/
     public function query($query = '', $isFetchAll = false)
     {
+        if (DyPhpBase::$debug) {
+            $start = $this->getTime();
+        }
+
         $dbms = strpos(strtolower(ltrim($query)), 'select') === 0 ? 'slave' : 'master';
         $result = $this->getInstance($dbms)->query($query);
         $fetchResult = false;
@@ -258,6 +262,10 @@ class DyPhpModel
             } else {
                 $fetchResult = $isFetchAll ? $this->getInstance($dbms)->fetchAll() : $this->getInstance($dbms)->fetch();
             }
+        }
+
+        if (DyPhpBase::$debug) {
+            $this->logQuery($query, $start);
         }
 
         return $fetchResult;
