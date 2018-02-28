@@ -156,7 +156,7 @@ class DyPhpRoute
     /**
      * URL重写处理
      * 'urlManager'=>array(
-     *   'urlStyle'=>array('hideIndex'=>'yes','restCa'=>'yes',),.
+     *   'urlStyle'=>array('hideIndex'=>'yes','restCa'=>'yes',),
      *
      *   '/error'=>array("controller"=>"home","action"=>"error",),
      *
