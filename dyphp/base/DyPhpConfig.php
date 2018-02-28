@@ -41,6 +41,21 @@ class DyPhpConfig{
     //数据库配制
     private static $db = array();
     //缓存配制
+    /*
+    配制格式
+    'cache'=>array( 
+        'c1'=>array('type'=>'file','gcOpen'=>true),  //文件缓存多时 不建议打开gc 会导致性能低下  可以使用shell处理
+        'c2'=>array('type'=>'apc'),
+        'c3'=>array(
+            'type'=>'memcache',
+            'isMemd'=>false,
+            'servers_one'=>array(
+                array('host','port','weight'),
+                array('host','port','weight'),
+            ),
+        ),
+    ),
+    */
     private static $cache = array();
     //cookie配制
     private static $cookie = array();
@@ -67,6 +82,7 @@ class DyPhpConfig{
         $config = require $config;
 
         //language load
+        //异常信息输出语言 现只支持zh_cn
         self::$language = isset($config['language']) ? $config['language'] : 'zh_cn';
 
         //app config
@@ -75,9 +91,12 @@ class DyPhpConfig{
         }
 
         //check secretKey
+        //app密钥 cookie session string等加密  不同应用此密钥应唯一
         if (!array_key_exists('secretKey', $config) || empty($config['secretKey'])) {
             DyPhpBase::throwException('secretKey Undefined');
         }
+        //生成app唯一id session key的前缀中使用到 解决多应用session冲突（当前版本只有这一个用途）
+        self::$appID = md5($config['secretKey']);
 
         //check appPath and setting define
         if (!array_key_exists('appPath', $config)) {
@@ -88,15 +107,16 @@ class DyPhpConfig{
         define('APP_PARENT_PATH', dirname(APP_PATH));
 
         //check environment
-        $envArr = array('dev','test','pro','pre','');
-        if(array_key_exists('env', $config) && !in_array($config['env'],$envArr)){
+        //运行环境，用于加载不同环境的constants文件，不设置或为空时加载constants.php（当前版本只有这一个用途）
+        if(array_key_exists('env', $config) && !in_array($config['env'],array('dev','test','pro','pre',''))){
             DyPhpBase::throwException('run environment defined invalid');
         }
 
-        //get appHttpPath
+        //get appHttpPath 获取url层级地址，以支持将应用部署到web根目录下的子目录下，DyRequest::createUrl()方法中使用
         self::$appHttpPath = isset($_SERVER["SCRIPT_NAME"]) ? trim(str_replace(array('\\','\\\\','//'),'/',dirname($_SERVER["SCRIPT_NAME"])),'/') : trim(str_replace($_SERVER['DOCUMENT_ROOT'],"",dirname($_SERVER['SCRIPT_FILENAME'])),'/');
 
         //初始化handler
+        //建议：按console web类型，配合DYPHP_DEFAULT_CONTROLLER定义 在action中做不同处理
         self::$errorHandler = DYPHP_DEFAULT_CONTROLLER.'/error';
         self::$loginHandler = DYPHP_DEFAULT_CONTROLLER.'/login';
         self::$messageHandler = DYPHP_DEFAULT_CONTROLLER.'/message';
@@ -104,7 +124,7 @@ class DyPhpConfig{
         //设置配制属性
         $configArr = array(
             'db','cache','cookie','urlManager','params','aliasMap','hooks',
-            'errorHandler','messageHandler','loginHandler','appName','secretKey','appID','env'
+            'errorHandler','messageHandler','loginHandler','appName','secretKey','env'
         );
         foreach($configArr as $key=>$val){
             if (array_key_exists($val, $config)) {
@@ -269,7 +289,7 @@ class DyPhpConfig{
      **/
     public static function getHideIndex(){
         $urlmanager = self::$urlManager;
-        return isset($urlmanager['urlStyle']['hideIndex']) && $urlmanager['urlStyle']['hideIndex']=='yes' ? true : false;
+        return isset($urlmanager['urlStyle']['hideIndex']) && $urlmanager['urlStyle']['hideIndex'] == 'yes' ? true : false;
     }
 
     /**
@@ -278,7 +298,7 @@ class DyPhpConfig{
      **/
     public static function getRestCa(){
         $urlmanager = self::$urlManager;
-        return isset($urlmanager['urlStyle']['restCa']) && $urlmanager['urlStyle']['restCa']=='yes' ? true : false;
+        return isset($urlmanager['urlStyle']['restCa']) && $urlmanager['urlStyle']['restCa'] == 'yes' ? true : false;
     }
 
     /**

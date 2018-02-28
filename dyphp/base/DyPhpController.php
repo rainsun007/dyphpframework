@@ -86,19 +86,23 @@ class DyPhpController
         //view实例化
         $controllerRun->view = new DyPhpView();
 
+        //hook调用: controller实例化之后执行，必须登录的action如未登录，此hook不执行
+        DyPhpBase::app()->hook->invokeHook('after_controller_constructor');
+
         //handler不执行以下逻辑（防止统一拦截处理时进入重定向死循环）
         $handlers = array(trim(DyPhpConfig::item('errorHandler'), '/'), trim(DyPhpConfig::item('messageHandler'), '/'), trim(DyPhpConfig::item('loginHandler'), '/'), trim($controllerRun->loginHandler, '/'));
         if (!$controllerRun->handlerPass || !in_array($controllerRun->pcid.'/'.$controllerRun->aid, $handlers)) {
             //init运行
             $controllerRun->init();
-            //hook调用
-            DyPhpBase::app()->hook->invokeHook('before_action');
             //beforeAction运行
             $controllerRun->beforeAction();
         }
 
         //action执行
         $controllerRun->$actionName();
+
+        //hook调用: action执行完成之后
+        DyPhpBase::app()->hook->invokeHook('after_action');
     }
 
     /**

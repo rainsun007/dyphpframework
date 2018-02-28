@@ -6,24 +6,40 @@
  * @copyright Copyright 2011 dyphp.com 
  **/
 class DyPhpHooks{
-    //在beforeAction之前执行
-    const BEFORE_ACTION = 'before_action';
-    //唯一包含
+    //controller实例化之后执行，必须登录的action如未登录，此hook不执行
+    const AFTER_CONTROLLER_CONSTRUCTOR = 'after_controller_constructor';
+    //action执行完成之后执行
+    const AFTER_ACTION = 'after_action';
+    //view的render方法调用执行之前执行
+    const BEFORE_VIEW_RENDER = 'before_view_render';
+
+    //hook文件加载单例
     private $incOnce = array();
 
     /**
      * @brief    hook调用
      * @param    $hookType
-     * @return   
+     * 
+     * 配制格式
+     * 'hooks'=>array(
+     *   'enable'=>true,
+     *   'before_action'=>array(
+     *       'enable'=>true,
+     *       'commonHook'=> array('setCommonView'),
+     *       'adminHook'=> array('setAdminView'=>'param','adminVerify'),
+     *   ), 
+     * ),
      **/
-    final public function invokeHook($hookType,&$args=null){
+    final public function invokeHook($hookType){
         $hook = DyPhpConfig::item('hooks');
+
+        //判断是否关闭所有hook
         $enable = isset($hook['enable']) && is_bool($hook['enable']) ? $hook['enable'] : false;
         if(!$enable){
             return;
         }
 
-        if(!in_array($hookType,array(self::BEFORE_ACTION))){
+        if(!in_array($hookType,array(self::AFTER_CONTROLLER_CONSTRUCTOR,self::AFTER_ACTION,self::BEFORE_VIEW_RENDER))){
             DyPhpBase::throwException('hook type error',$hookType);
         }
 
@@ -32,10 +48,17 @@ class DyPhpHooks{
             DyPhpBase::throwException('hook Undefined or data type error',$hookType);
         }
 
+         //判断是否只关闭当前 $hookType 的hook
+        if(isset($hook[$hookType]['enable'])){
+            $itemEnable = is_bool($hook[$hookType]['enable']) ? $hook[$hookType]['enable'] : false;
+            if(!$itemEnable){
+                return;
+            }
+        }
+
+        //hook执行
         foreach($hook[$hookType] as $key=>$val){
             $this->incOnce($key);
-
-            //hook调用
             $userHook = new $key;
             foreach($val as $k=>$v){
                 is_int($k) ? $userHook->$v() : $userHook->$k($v);

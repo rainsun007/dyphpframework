@@ -18,6 +18,8 @@ class DyPhpView
     private $viewData = array();
     //完整view渲染后的html
     private $renderHtml='';
+    //是否直接输出到客户端
+    private $flush = false;
 
     //默认使用的主题
     public $defaultTheme = 'default';
@@ -37,8 +39,11 @@ class DyPhpView
      **/
     public function render($view, $data = array(), $moduleTheme = '')
     {
-        $this->viewLayoutRender($view, $data, $moduleTheme, true);
-        exit;
+        //hook调用
+        DyPhpBase::app()->hook->invokeHook('before_view_render');
+
+        $this->flush = true;
+        $this->viewLayoutRender($view, $data, $moduleTheme);
     }
 
     /**
@@ -52,7 +57,8 @@ class DyPhpView
      **/
     public function getRenderHtml($view, $data = array(), $moduleTheme = '')
     {
-        $this->viewLayoutRender($view, $data, $moduleTheme, false);
+        $this->flush = false;
+        $this->viewLayoutRender($view, $data, $moduleTheme);
         return $this->renderHtml;
     }
 
@@ -181,7 +187,7 @@ class DyPhpView
      * @param array  view层数据
      * @param string 主题（此参数如设置将覆盖moduleTheme属性）
      **/
-     private function viewLayoutRender($view, $data = array(), $moduleTheme = '', $flush = false)
+     private function viewLayoutRender($view, $data = array(), $moduleTheme = '')
      {
          $this->attrSet($view, $data, $moduleTheme);
  
@@ -204,7 +210,7 @@ class DyPhpView
          ob_start(array($this, 'formatViewLayoutRender'));
          include $this->layoutFile;
          if (ob_get_length()) {
-             $flush ? ob_end_flush() : ob_end_clean();
+            $this->flush ? ob_end_flush() : ob_end_clean();
          }
      }
 
@@ -262,8 +268,8 @@ class DyPhpView
          if ($footScript != '') {
              $buffer = str_replace('</body>', $footScript.'</body>', $buffer);
          }
- 
-         $this->renderHtml = $buffer;
+
+         $this->renderHtml = !$this->flush ? $buffer : '';
          return $buffer;
      }
 }

@@ -1,14 +1,15 @@
 <?php 
 /**
  * @file DyDownload.php
- * @brief    
+ * @brief
  * @author QingYu.Sun Email:dyphp.com@gmail.com
  * @version 1.0
  * @copyright dyphp.com
  * @link http://www.dyphp.com
  * @date 2013-07-12
  **/
-class DyDownload{
+class DyDownload
+{
     //类型
     private $extArr = array(
         "default" => "application/force-download",
@@ -38,7 +39,7 @@ class DyDownload{
         "cpp"   => "text/x-c",
         "crt"   => "application/x-x509-ca-cert",
         "css"   => "text/css",
-        "csv"   => "text/csv",
+        "csv"   => "application/vnd.ms-excel",
         "cxx"   => "text/x-c",
         "deb"   => "application/x-debian-package",
         "der"   => "application/x-x509-ca-cert",
@@ -191,9 +192,10 @@ class DyDownload{
 
     /**
      * @brief    清除所有可以下载类型
-     * @return   
+     * @return
      **/
-    public function cleanAllowExt(){
+    public function cleanAllowExt()
+    {
         $this->allowArr = array();
         return $this;
     }
@@ -202,10 +204,11 @@ class DyDownload{
      * @brief    设置扩展类型
      * @param    $ext
      * @param    $type
-     * @return   
+     * @return
      **/
-    public function setExt($ext,$type){
-        if(empty($ext) || empty($type)){
+    public function setExt($ext, $type)
+    {
+        if (empty($ext) || empty($type)) {
             return false;
         }
         $this->extArr[$ext] = $type;
@@ -214,10 +217,11 @@ class DyDownload{
     /**
      * @brief    获取扩展类型
      * @param    $ext
-     * @return   
+     * @return
      **/
-    public function getExt($ext,$useDefault=false){
-        if(empty($ext) || !isset($this->extArr[$ext])){
+    public function getExt($ext, $useDefault=false)
+    {
+        if (empty($ext) || !isset($this->extArr[$ext])) {
             return $useDefault ? $this->extArr['default'] : null;
         }
         return $this->extArr[$ext];
@@ -226,77 +230,79 @@ class DyDownload{
     /**
      * @brief    设置允许下载扩展名
      * @param    $ext
-     * @return   
+     * @return
      **/
-    public function setAllowExt($ext){
-        if(empty($ext)){
+    public function setAllowExt($ext)
+    {
+        if (empty($ext)) {
             return false;
         }
 
-        if(is_array($ext)){
-            array_merge($this->allowArr,$ext);
+        if (is_array($ext)) {
+            array_merge($this->allowArr, $ext);
             return;
         }
 
-        if(!in_array($ext,$this->allowArr)){
+        if (!in_array($ext, $this->allowArr)) {
             $this->allowArr[] = $ext;
         }
     }
 
-    /** 
+    /**
      * 文件下载
      * @param string 文件名
      * @param string 下载文件所在目录
      * @param bool   获取不到文件类型时是否使用默认文件类型
      * @param bool   是否为本地文件
      **/
-    public function down($fileName='',$fileDir='',$useDefault=false,$isLocal=true){
-        if (empty($fileName)){
+    public function down($fileName='', $fileDir='', $useDefault=false, $isLocal=true)
+    {
+        if (empty($fileName)) {
             return array('status'=>false,'message'=>"file name is empty");
         }
 
-        $fileDir = $fileDir ? $fileDir : ATTACHMENT_PATH.'/';
+        $fileDir = $fileDir ? $fileDir : APP_PARENT_PATH.'/';
         $filePath = $fileDir . $fileName;
-        $fileExtension = strtolower(substr(strrchr($fileName,"."),1)); 
+        $fileExtension = strtolower(substr(strrchr($fileName, "."), 1));
 
-        if(!in_array($fileExtension,$this->allowArr)){
+        if (!in_array($fileExtension, $this->allowArr)) {
             return array('status'=>false,'message'=>"forbid download");
         }
 
-        $type = $this->getExt($fileExtension,$useDefault);
-        if(!$type){
+        $type = $this->getExt($fileExtension, $useDefault);
+        
+        if (!$type) {
             return array('status'=>false,'message'=>"extension not exist");
         }
-
+        
         header("Pragma: public");
         header("Expires: 0");
         header("Cache-Control: must-revalidate,post-check=0,pre-check=0");
-        header("Cache-Control: public",false);
+        header("Cache-Control: public", false);
         header("Content-Description: File Transfer");
         header("Content-type: {$type}");
         header("Accept-Ranges: bytes");
         header("Connection: close");
         header("Content-Disposition: attachment; filename=" . $fileName);
         header("Content-Transfer-Encoding: binary");
-
-        if($isLocal){
-            if (!file_exists($filePath)){
+        
+        if ($isLocal) {
+            if (!file_exists($filePath)) {
                 return array('status'=>false,'message'=>"file not exist");
             }
             header("Accept-Length=> ".filesize($filePath));
         }
 
-        $file = fopen($filePath,"rb");
-        if (!$file) { 
+        $file = fopen($filePath, "rb");
+        if (!$file) {
             return array('status'=>false,'message'=>"file read error");
-        } 
+        }
 
-        while (!feof ($file) && connection_status() == 0) { 
-            echo fread($file,8192); 
+        while (!feof($file) && connection_status() == 0) {
+            echo fread($file, 8192);
             flush();
         }
-        fclose ($file);
+        fclose($file);
         return array('status'=>true,'message'=>"success");
     }
 }
-

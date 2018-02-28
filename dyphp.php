@@ -210,7 +210,7 @@ class DyPhpBase
      **/
     public static function getVersion()
     {
-        return '2.3.1-release';
+        return '2.3.2-release';
     }
 
     /**
@@ -468,7 +468,7 @@ final class DyPhpApp
     }
 
     /**
-     * 设置controller实例全局属性的前一次运行属性
+     * 设置controller实例全局属性的前一次运行属性, 记录来源(前一次运行)module,controller,action
      */
     public function setPreInsAttr()
     {
