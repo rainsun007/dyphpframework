@@ -12,17 +12,17 @@ class DyPhpController
 {
     //默认使用的action
     protected $defaultAction = DYPHP_DEFAULT_ACTION;
-    //action调用自定义
-    protected $actionParam = array();
+
+    //run方法 和 forward方法 所传递的参数，在init方法执行前就已设置生效
+    protected $caParam = array();
 
     //未登陆跳转地址
     protected $loginHandler = '';
+
     //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginHandler属性不受限制）
     protected $allNeedLogin = false;
-    //设置为true时handler调用将跳过init，beforeAction，hooks的执行, 设置为false应用中如有handler的循环调用，必须自己处理跳过逻辑
-    protected $handlerPass = false;
 
-    //当前运行的module,controller,action 首字母为小写
+    //当前运行的module,controller,action名，首字母为小写
     protected $cid = '';
     protected $aid = '';
     protected $pcid = '';
@@ -37,6 +37,7 @@ class DyPhpController
 
     //controller单例控制
     private static $incController = array();
+
     //DyPhpView实例
     public $view;
 
@@ -55,7 +56,7 @@ class DyPhpController
     }
 
     /**
-     * 未登陆禁止访问的action 首字母为小写.
+     * 未登陆禁止访问的action 首字母需小写.
      * @return array
      **/
     protected function needLogin()
@@ -69,7 +70,7 @@ class DyPhpController
      *
      * @param string controller  以module_controller或module/controller的格式调用
      * @param string action
-     * @param array  参数
+     * @param array  当前运行controller中可公用的参数
      **/
     final public static function run($controllerPname, $action = '', $params = array())
     {
@@ -82,21 +83,19 @@ class DyPhpController
         $controllerRun->date = date('Y-m-d', $controllerRun->time);
 
         //参数设置
-        $controllerRun->actionParam = $params;
+        $controllerRun->caParam = $params;
+
         //view实例化
         $controllerRun->view = new DyPhpView();
 
-        //hook调用: controller实例化之后执行，必须登录的action如未登录，此hook不执行
+        //hook调用: controller实例化之后执行，必须登录才可访问的action如未登录此hook不执行
         DyPhpBase::app()->hook->invokeHook('after_controller_constructor');
 
-        //handler不执行以下逻辑（防止统一拦截处理时进入重定向死循环）
-        $handlers = array(trim(DyPhpConfig::item('errorHandler'), '/'), trim(DyPhpConfig::item('messageHandler'), '/'), trim(DyPhpConfig::item('loginHandler'), '/'), trim($controllerRun->loginHandler, '/'));
-        if (!$controllerRun->handlerPass || !in_array($controllerRun->pcid.'/'.$controllerRun->aid, $handlers)) {
-            //init运行
-            $controllerRun->init();
-            //beforeAction运行
-            $controllerRun->beforeAction();
-        }
+        //init运行
+        $controllerRun->init();
+
+        //beforeAction运行
+        $controllerRun->beforeAction();
 
         //action执行
         $controllerRun->$actionName();
@@ -110,7 +109,7 @@ class DyPhpController
      *
      * @param string controller 以module_controller或module/controller的格式调用
      * @param string action
-     * @param array  参数
+     * @param array  当前运行controller中可公用的参数
      **/
     final protected function forward($controllerPname = '', $action = '', $params = array())
     {
@@ -147,7 +146,7 @@ class DyPhpController
             DyPhpBase::throwException('needLogin method error');
         }
 
-        //重定向到登录页
+        //未登录不可访问的action,重定向到登录页
         $loginHandler = empty($controllerRun->loginHandler) ? DyPhpConfig::item('loginHandler') : $controllerRun->loginHandler;
         if ($controllerRun->pcid.'/'.$controllerRun->aid != trim($loginHandler, '/') && DyPhpBase::app()->auth->isGuest() && ($controllerRun->allNeedLogin || in_array($controllerRun->aid, $controllerRun->needLogin()))) {
             DyRequest::redirect($loginHandler);

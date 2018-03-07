@@ -22,12 +22,13 @@ class DyPhpBase
 {
     //debug开关
     public static $debug = false;
+
     //app类型
     public static $appType = 'web';
+
     //app公用类实例器
     private static $dyApp;
-    //app自定的提示信息参数
-    private static $showMsgParam = '';
+
     //框架类
     private static $coreClasses = array();
 
@@ -68,7 +69,6 @@ class DyPhpBase
         exit;
     }
 
-
     /**
      * 公共app运行入口
      * @param array app配制
@@ -86,6 +86,7 @@ class DyPhpBase
         require DYPHP_PATH.self::$coreClasses['DyPhpRoute'];
         require DYPHP_PATH.self::$coreClasses['DyPhpUserIdentity'];
         require DYPHP_PATH.self::$coreClasses['DyPhpController'];
+        require DYPHP_PATH.self::$coreClasses['DyPhpHooks'];
 
         self::debug($debug);
         self::$dyApp = new DyPhpApp(self::$coreClasses);
@@ -96,15 +97,13 @@ class DyPhpBase
      * 使用自定义错误处理句柄 显示信息
      * @param array  按提示需要随意传值
      **/
-    public static function showMsg($params = array(), $exit = true)
+    public static function showMsg($params = array())
     {
+        Dy::app()->setPreInsAttr();
+
         $params = is_array($params) ? $params : (array)$params;
         $msgHandler = explode('/', trim(DyPhpConfig::item('messageHandler'), '/'));
-        Dy::app()->setPreInsAttr();
         DyPhpController::run($msgHandler[0], $msgHandler[1], $params);
-        if ($exit) {
-            exit;
-        }
     }
 
     /**
@@ -160,13 +159,12 @@ class DyPhpBase
 
 
     /**
-     * @brief    注册自动加载
-     * @param    $autoload 自动加载函数
-     * @param    $replace  是否替换框架的自动加载方法
-     * @param    $prepend  如果是 true，spl_autoload_register() 会添加函数到队列之首，而不是队列尾部。
-     * @return   null
+     * 注册自动加载
+     * @param  mixed  $autoload 自动加载函数
+     * @param  bool   $prepend  如果是 true，spl_autoload_register() 会添加函数到队列之首，而不是队列尾部。
+     * @param  bool   $replace  是否替换框架的自动加载方法, 替换后要实现框架相关的自动加载逻辑，不建议替换
      **/
-    public static function autoloadRegister($callback, $replace = false, $prepend = false)
+    public static function autoloadRegister($callback, $prepend = false, $replace = false)
     {
         if ($replace) {
             spl_autoload_unregister(array('DyPhpBase', 'autoload'));
@@ -210,7 +208,7 @@ class DyPhpBase
      **/
     public static function getVersion()
     {
-        return '2.3.2-release';
+        return '2.4.0-release';
     }
 
     /**
