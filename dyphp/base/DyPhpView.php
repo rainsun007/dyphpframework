@@ -63,11 +63,12 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
+     * @param string 主题（优先级高于defaultTheme属性），跨模块调用layout时将使用到此参数
      **/
-    public function renderPartial($view, $data = array())
+    public function renderPartial($view, $data = array(), $moduleTheme = '')
     {
-        $layout = explode('/',trim($this->defaultLayout,'/'));
-        $moduleTheme = count($layout) > 1 ? $layout[0] : '';
+        //$layout = explode('/',trim($this->defaultLayout,'/'));
+        //$moduleTheme = count($layout) > 1 ? $layout[0] : '';
         $this->attrSet($view, $data, $moduleTheme);
 
         if (!file_exists($this->viewFile)) {
@@ -182,7 +183,6 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
-     * @param string 主题（此参数如设置将覆盖moduleTheme属性）
      **/
      private function viewLayoutRender($view, $data = array())
      {
@@ -216,7 +216,7 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
-     * @param string 主题（此参数如设置将覆盖defaultTheme属性）
+     * @param string 主题（优先级高于defaultTheme属性）
      **/
      private function attrSet($view = '', $data = array(), $moduleTheme = '')
      {
