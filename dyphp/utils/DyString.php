@@ -76,15 +76,22 @@ class DyString{
     }
 
     /**
-     * @brief    ansi转为utf8
-     * @param    $str
-     * @return   string
+     * 中文转为utf8
+     * @param  string|array   $str 需要转码的字符串
+     * @param  string         $inCharset 输入的字符集
+     * @return string
      **/
-    public static function ansiToUtf8($str=''){
+    public static function zhcnToUtf8($str='',$inCharset='gb2312'){
+        if(is_array($str)){
+            foreach ($str as $key => $value) {
+                $str[$key] = self::zhcnToUtf8($value,$inCharset);
+            }
+            return $str;
+        }
         if(empty($str) || self::isUtf8($str)){
             return $str;
         }
-        return iconv("gbk", "UTF-8", $str);
+        return iconv($inCharset, "UTF-8", $str);
     }
 
     /**
