@@ -5,7 +5,8 @@
  * @link http://www.dyphp.com/
  * @copyright Copyright 2011 dyphp.com
  */
-class DyPhpMemcacheCache extends DyPhpCache {
+class DyPhpMemcacheCache extends DyPhpCache
+{
     private $connection;
 
     //缓存配制中的键值
@@ -17,24 +18,35 @@ class DyPhpMemcacheCache extends DyPhpCache {
     //是否使用Memcached
     private $isMemd;
 
-    public function __construct() {
+    public function __construct()
+    {
     }
 
-    public function run(){
+    public function run()
+    {
         $cacheCfg = DyPhpConfig::item('cache');
         $cache = $cacheCfg[$this->cacheKey];
 
         $this->isMemd = isset($cache['isMemd']) ? $cache['isMemd'] : false;
         $this->connection = $this->isMemd ? new Memcached : new Memcache;
 
-        if(is_array($cache[$this->serversKey])){
-            foreach($cache[$this->serversKey] as $server){
+        if (is_array($cache[$this->serversKey])) {
+            foreach ($cache[$this->serversKey] as $server) {
                 $host = isset($server['0']) ? $server['0'] : '127.0.0.1';
                 $port = isset($server['1']) ? $server['1'] : 11211;
                 $weight = isset($server['2']) ? $server['2'] : 10;
-                $this->addServer($host,$port,$weight);
+                $this->addServer($host, $port, $weight);
             }
         }
+    }
+
+    /**
+     * 获取memcache链接实例，为满足要使用memcache原生方法的场景
+     *
+     */
+    public function getConnect()
+    {
+        return $this->connection;
     }
 
     /**
@@ -43,11 +55,12 @@ class DyPhpMemcacheCache extends DyPhpCache {
      * @param 端口
      * @param 权重
      **/
-    private function addServer($host, $port=11211, $weight=10) {
+    private function addServer($host, $port=11211, $weight=10)
+    {
         if ($this->isMemd) {
             $this->connection->addServer($host, (int)$port, (int)$weight);
-        }else {
-            $this->connection->addServer($host, (int)$port, false, (int)$weight,10,15,true);
+        } else {
+            $this->connection->addServer($host, (int)$port, false, (int)$weight, 10, 15, true);
         }
     }
 
@@ -59,11 +72,12 @@ class DyPhpMemcacheCache extends DyPhpCache {
      * @param int    过期时间，单位：秒
      * @return bool
      */
-    public function set($key, $data='', $expire=null) {
+    public function set($key, $data='', $expire=null)
+    {
         if ($this->isMemd) {
-          return $this->connection->set($key, $data, $expire);
-        }else{
-          return $this->connection->set($key, $data, 0, $expire);
+            return $this->connection->set($key, $data, $expire);
+        } else {
+            return $this->connection->set($key, $data, 0, $expire);
         }
     }
 
@@ -73,7 +87,8 @@ class DyPhpMemcacheCache extends DyPhpCache {
      * @param string 缓存键名
      * @return mixed|string
      */
-    public function get($key) {
+    public function get($key)
+    {
         return $this->connection->get($key);
     }
 
@@ -83,17 +98,27 @@ class DyPhpMemcacheCache extends DyPhpCache {
      * @param string 缓存键名
      * @return bool
      */
-    public function delete($key) {
+    public function delete($key)
+    {
         return $this->connection->delete($key);
     }
 
+    public function exists($key)
+    {
+        if ($this->connection->get($key) === false) {
+            return $this->connection->getResultCode() == Memcached::RES_NOTFOUND ? false : true;
+        }
+
+        return true;
+    }
 
     /**
      * 清除所有缓存的数据
      *
      * @return bool
      */
-    public function flush() {
+    public function flush()
+    {
         return $this->connection->flush();
     }
 }
