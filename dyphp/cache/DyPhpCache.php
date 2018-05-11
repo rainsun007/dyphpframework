@@ -5,16 +5,20 @@
  * @link http://www.dyphp.com/
  * @copyright Copyright 2011 dyphp.com
  **/
-abstract class DyPhpCache{
+abstract class DyPhpCache
+{
     //获取缓存
-    abstract function get($key);
+    abstract public function get($key);
     
     //设置缓存
-    abstract function set($key,$value='',$expire=null);
+    abstract public function set($key, $value='', $expire=null);
     
     //删除缓存
-    abstract function delete($key);
+    abstract public function delete($key);
+
+    //判断缓存是否存在
+    abstract public function exists($key);
     
     //删除全部缓存
-    abstract function flush();
+    abstract public function flush();
 }

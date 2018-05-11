@@ -63,7 +63,7 @@ class DyPhpRoute
         if (empty($_SERVER['argv'])) {
             $message = "Welcome to use \n";
             $message .= 'DyFramework Console The default execution : '.ucfirst(DYPHP_DEFAULT_CONTROLLER).'Controller->action'.ucfirst(DYPHP_DEFAULT_ACTION)."\n";
-            $message .= "Invocation Method : <controller> [<action>] [<param1> <param2> ...<paramN>] \n";
+            $message .= "Invocation Method : [controller] [<action>] [<param1> <param2> ...<paramN>] \n";
             echo $message;
         }
 
@@ -73,7 +73,7 @@ class DyPhpRoute
         if (isset($_SERVER['argv'][1])) {
             $action = $_SERVER['argv'][1];
             unset($_SERVER['argv'][0], $_SERVER['argv'][1]);
-            sort($_SERVER['argv']);
+            array_values($_SERVER['argv']);
             foreach ($_SERVER['argv'] as $key => $val) {
                 $params[] = $val;
             }
@@ -104,8 +104,8 @@ class DyPhpRoute
 
     /**
      * url解析及运行controller和action.
-     * 
-     * @param array $ca 
+     *
+     * @param array $ca
      **/
     private static function runToController($ca = array())
     {
@@ -200,7 +200,7 @@ class DyPhpRoute
 
         $cropPathUrl = self::urlCrop();
         //完全匹处理配
-        if($cropPathUrl){
+        if ($cropPathUrl) {
             $pathUrlArr = array($cropPathUrl, '/'.$cropPathUrl, '/'.$cropPathUrl.'/');
             foreach ($pathUrlArr as $key => $val) {
                 if (isset($urlManager[$val])) {
@@ -242,7 +242,7 @@ class DyPhpRoute
     }
 
     /**
-     * url解析 获取cotroller，action及rest风格的get参数; 
+     * url解析 获取cotroller，action及rest风格的get参数;
      * 获取扩展名，同时将扩展名从ca中去掉，此方法使uri支持自定义扩展（如可用于实现伪静态）.
      *
      * @return string
@@ -250,18 +250,18 @@ class DyPhpRoute
     private static function urlCrop()
     {
         $pathStr = '';
-        $parse = parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH);
-        if($parse !== false && $parse !== NULL){
+        $parse = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        if ($parse !== false && $parse !== null) {
             $pathStr = trim(str_replace(array(DyPhpConfig::item('appHttpPath'),'index'.EXT,'//'), '', $parse), '/');
-        }else{
+        } else {
             $requestUriStr = str_replace('index'.EXT, '', trim($_SERVER['REQUEST_URI'], '/'));
             $search = array(DyPhpConfig::item('appHttpPath'));
-            isset($_SERVER['QUERY_STRING']) ? array_push($search,$_SERVER['QUERY_STRING']) : '';
+            isset($_SERVER['QUERY_STRING']) ? array_push($search, $_SERVER['QUERY_STRING']) : '';
             $uriPath = str_replace($search, '', $requestUriStr);
             $pathStr =  trim(trim($uriPath, '/'), '?');
         }
 
-        $ext = pathinfo($pathStr,PATHINFO_EXTENSION);
+        $ext = pathinfo($pathStr, PATHINFO_EXTENSION);
         $_GET['ext_name'] = $ext;
         return $ext ? substr($pathStr, 0, -(strlen($ext)+1)) : $pathStr;
     }

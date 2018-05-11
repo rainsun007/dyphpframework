@@ -84,7 +84,9 @@ class DyPhpBase
         require DYPHP_PATH.self::$coreClasses['DyPhpException'];
         require DYPHP_PATH.self::$coreClasses['DyPhpConfig'];
         require DYPHP_PATH.self::$coreClasses['DyPhpRoute'];
-        require DYPHP_PATH.self::$coreClasses['DyPhpUserIdentity'];
+        if ($appType == 'web') {
+            require DYPHP_PATH.self::$coreClasses['DyPhpUserIdentity'];
+        }
         require DYPHP_PATH.self::$coreClasses['DyPhpController'];
         require DYPHP_PATH.self::$coreClasses['DyPhpHooks'];
 
