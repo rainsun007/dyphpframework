@@ -10,7 +10,7 @@
  **/
 class DyPhpRoute
 {
-    //url重写后正则匹配到的Get参数
+    //url重写后正则匹配到的Get参数数组,过滤后传递给controller的caParam属性
     private static $regularGetParams = array();
 
     /**
@@ -82,35 +82,30 @@ class DyPhpRoute
     }
 
     /**
-     * @brief    获取uri中正则匹配到的参数
+     * @brief  获取uri中正则匹配到的参数,并字符串转换
      *
-     * @param  string  $paramKey
-     *
-     * @return string
+     * @return array
      **/
-    public static function getParam($paramKey = '')
+    private static function getRegParam()
     {
-        if (!isset(self::$regularGetParams[$paramKey])) {
-            return null;
+        foreach (self::$regularGetParams as $key => $value) {
+            self::$regularGetParams[$key] = function_exists('addslashes') ? addslashes($value) : mysql_real_escape_string($value);
         }
 
-        $value = self::$regularGetParams[$paramKey];
-        if (!get_magic_quotes_gpc()) {
-            $value = function_exists('addslashes') ? addslashes($value) : mysql_real_escape_string($value);
-        }
-
-        return $value;
+        return self::$regularGetParams;
     }
 
     /**
      * url解析及运行controller和action.
      *
-     * @param array $ca
+     * @param array $ca url设置了ca参数或urlManager规则命中，分析所得的ctroller和action
+     *
      **/
     private static function runToController($ca = array())
     {
         if (!empty($ca)) {
-            DyPhpController::run($ca['c'], $ca['a']);
+            $params = self::$regularGetParams ? self::getRegParam() : array();
+            DyPhpController::run($ca['c'], $ca['a'], $params);
             return;
         }
 
@@ -155,26 +150,31 @@ class DyPhpRoute
 
     /**
      * URL重写处理
+     *
+     * eg
      * 'urlManager'=>array(
      *   'urlStyle'=>array('hideIndex'=>'yes','restCa'=>'yes',),
      *
+     *   //固定controller 固定action
      *   '/error'=>array("controller"=>"home","action"=>"error",),
      *
-     *   '/admin/globalBase/:action'=>array(
-     *       "controller"=>"admin_base",
+     *   //固定controller 动态action
+     *   '/admin/global/:action'=>array(
+     *       "controller"=>"admin_base", //支持指定到module下的controller,使用下"_"或"/"指明
      *       "param"=>array(
      *           ":action"=>"[a-zA-Z0-9]{1,10}",
      *       ),
      *   ),
      *
-     *   '/user/:class/:controller/:action'=>array(
+     *   //动态controller 动态action
+     *   '/user/:controller/:action'=>array(
      *       "param"=>array(
      *           ":controller"=>"[a-zA-Z0-9]{1,20}",
      *           ":action"=>"[a-zA-Z0-9]{1,10}",
-     *           ":class"=>"[a-zA-Z0-9]{1,10}",
      *       ),
      *   ),
      *
+     *   //解析特定url参数
      *   '/ping/aaa/:user/ccc/ddd/:id'=>array(
      *       "controller"=>"test",
      *       "action"=>"index",
@@ -182,6 +182,13 @@ class DyPhpRoute
      *           ":user"=>"[a-zA-Z0-9]{4,10}",
      *           ":id"=>"\d{1,3}",
      *       ),
+     *   ),
+     *
+     *   //为module下controller指定默认的action
+     *   '/blog/:controller'=>array(
+     *       "pathController"=>true, //此参数设置为true,否则不生效
+     *       "action"=>"index",
+     *       "param"=>array(":controller"=>"[a-zA-Z0-9]{1,20}",),
      *   ),
      * )
      **/

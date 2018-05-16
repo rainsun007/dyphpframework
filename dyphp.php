@@ -5,10 +5,23 @@
  * @link http://www.dyphp.com/
  * @copyright Copyright 2011 dyphp.com
  **/
+
+//系统运行开始时间
 define('DYPHP_BEGIN_TIME', microtime());
+//框架根目录地址
 define('DYPHP_PATH', dirname(__FILE__));
+//系统路径分割符简写
 define('DS', DIRECTORY_SEPARATOR);
+//文件扩展名
 defined('EXT') or define('EXT', '.php');
+/**
+ * 框架版本
+ * 版本号规则：
+ * 主版本号(较大的变动).子版本号(功能变化或新特性增加).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
+ * 上一级版本号变动时下级版本号归零
+ **/
+define('DYPHP_VERSION', '2.4.2-release');
+
 
 //简单别名
 class Dy extends DyPhpBase
@@ -203,24 +216,13 @@ class DyPhpBase
     }
 
     /**
-     * 获取框架版本
-     * 版本号规则：
-     * 主版本号(较大的变动).子版本号(功能变化或新特性增加).阶段版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
-     * 上一级版本号变动时下级版本号归零
-     **/
-    public static function getVersion()
-    {
-        return '2.4.1-release';
-    }
-
-    /**
      * 获取Powered by
      * @param bool false时将返回不带连接的powered by
      * @return string
      **/
     public static function powerBy($link = true)
     {
-        return $link ? 'Powered by <a href="http://www.dyphp.com" target="_blank">DYPHP-Framework</a>' : 'Powered by DYPHP-Framework';
+        return $link ? 'Powered by <a href="http://www.dyphp.com" target="_blank">DYPHP-Framework '.DYPHP_VERSION.'</a>' : 'Powered by DYPHP-Framework '.DYPHP_VERSION;
     }
 
     /**
@@ -326,30 +328,47 @@ class DyPhpBase
     {
         //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt openssl'
         $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br >';
-        $splitLine = $br.str_repeat('-', 55).$br;
+        $splitLine = $br.str_repeat('-', 60).$br;
 
         echo $br.'[Framework limit]';
         echo $splitLine;
         echo 'php current version:'.PHP_VERSION.' status: '.(version_compare(PHP_VERSION, '5.3.0', '>=') ? '√ OK' : '× minimum version of 5.2.2');
         echo $br.'Current running SAPI : '.PHP_SAPI.$br;
-        echo PHP_SAPI !== 'cli' ? 'Framework to retain for $_GET : ca,ext_name,page' : '';
+        echo PHP_SAPI !== 'cli' ? 'Framework retain key for $_GET : ca,ext_name,page' : '';
         
         echo $br.$br.'[Extension check]';
         echo $splitLine;
+
         echo extension_loaded('pdo') ? "√ PDO support" : "× PDO unsupport";
         echo $splitLine;
+
         echo extension_loaded('pdo_mysql') ? "√ PDO_MYSQL support" : "× PDO_MYSQL unsupport";
         echo $splitLine;
+
         echo extension_loaded('mbstring') ? "√ mbstring support" : "× mbstring unsupport";
         echo $splitLine;
+
         echo extension_loaded('iconv') ? "√ iconv support" : "× iconv unsupport";
         echo $splitLine;
+
         echo extension_loaded('gd') || extension_loaded('gd2') ? "√ GD support" : "× GD unsupport";
         echo $splitLine;
-        echo extension_loaded('mcrypt') ? "√ mcrypt support" : "× mcrypt unsupport";
-        echo $splitLine;
+
         echo extension_loaded('openssl') ? "√ openssl support" : "× openssl unsupport";
         echo $splitLine;
+
+        echo extension_loaded('mcrypt') ? "√ mcrypt support" : "× mcrypt unsupport";
+        echo $splitLine;
+
+        echo extension_loaded('openssl') ? "√ openssl support" : "× openssl unsupport";
+        echo $splitLine;
+
+        if (version_compare(PHP_VERSION, '5.4.0', '<')) {
+            //5.4之后magic_quotes_gpc移除, 总是返回false, 5.4以上版本不做此检查
+            echo get_magic_quotes_gpc() ? '√ magic_quotes_gpc open' : '× magic_quotes_gpc close';
+            echo $splitLine;
+        }
+
         echo $br.$br;
         exit;
     }
