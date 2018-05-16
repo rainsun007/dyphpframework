@@ -3,10 +3,11 @@
  * hook类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright 2011 dyphp.com
  **/
-class DyPhpHooks{
-    //controller实例化之后执行，必须登录的action如未登录，此hook不执行
+class DyPhpHooks
+{
+    //controller实例化之后执行，如需要区分是否登录，在hook中自行处理
     const AFTER_CONTROLLER_CONSTRUCTOR = 'after_controller_constructor';
     //action执行完成之后执行
     const AFTER_ACTION = 'after_action';
@@ -19,7 +20,7 @@ class DyPhpHooks{
     /**
      * @brief    hook调用
      * @param    $hookType
-     * 
+     *
      * 配制格式
      * 'hooks'=>array(
      *   'enable'=>true,
@@ -27,40 +28,41 @@ class DyPhpHooks{
      *       'enable'=>true,
      *       'commonHook'=> array('setCommonView'),
      *       'adminHook'=> array('setAdminView'=>'param','adminVerify'),
-     *   ), 
+     *   ),
      * ),
      **/
-    final public function invokeHook($hookType){
+    final public function invokeHook($hookType)
+    {
         $hook = DyPhpConfig::item('hooks');
 
         //判断是否关闭所有hook
         $enable = isset($hook['enable']) && is_bool($hook['enable']) ? $hook['enable'] : false;
-        if(!$enable){
+        if (!$enable) {
             return;
         }
 
-        if(!in_array($hookType,array(self::AFTER_CONTROLLER_CONSTRUCTOR,self::AFTER_ACTION,self::BEFORE_VIEW_RENDER))){
-            DyPhpBase::throwException('hook type error',$hookType);
+        if (!in_array($hookType, array(self::AFTER_CONTROLLER_CONSTRUCTOR,self::AFTER_ACTION,self::BEFORE_VIEW_RENDER))) {
+            DyPhpBase::throwException('hook type error', $hookType);
         }
 
         //hook配制验证
-        if(!isset($hook[$hookType]) || !is_array($hook[$hookType])){
-            DyPhpBase::throwException('hook Undefined or data type error',$hookType);
+        if (!isset($hook[$hookType]) || !is_array($hook[$hookType])) {
+            DyPhpBase::throwException('hook Undefined or data type error', $hookType);
         }
 
-         //判断是否只关闭当前 $hookType 的hook
-        if(isset($hook[$hookType]['enable'])){
+        //判断是否只关闭当前 $hookType 的hook
+        if (isset($hook[$hookType]['enable'])) {
             $itemEnable = is_bool($hook[$hookType]['enable']) ? $hook[$hookType]['enable'] : false;
-            if(!$itemEnable){
+            if (!$itemEnable) {
                 return;
             }
         }
 
         //hook执行
-        foreach($hook[$hookType] as $key=>$val){
+        foreach ($hook[$hookType] as $key=>$val) {
             $this->incOnce($key);
             $userHook = new $key;
-            foreach($val as $k=>$v){
+            foreach ($val as $k=>$v) {
                 is_int($k) ? $userHook->$v() : $userHook->$k($v);
             }
         }
@@ -69,19 +71,18 @@ class DyPhpHooks{
     /**
      * @brief    加载hook文件
      * @param    $hookName
-     * @return   
+     * @return
      **/
-    private function incOnce($hookName){
-        if(in_array($hookName,$this->incOnce)){
+    private function incOnce($hookName)
+    {
+        if (in_array($hookName, $this->incOnce)) {
             return;
         }
         $file  = DyPhpConfig::item('appPath').'/hooks/'.$hookName.EXT;
-        if(!file_exists($file)){
-            DyPhpBase::throwException('hook does not exist',$hookName);
+        if (!file_exists($file)) {
+            DyPhpBase::throwException('hook does not exist', $hookName);
         }
         require $file;
         $this->incOnce[] = $hookName;
     }
-
 }
-

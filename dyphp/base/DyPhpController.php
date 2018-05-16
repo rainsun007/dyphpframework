@@ -74,8 +74,8 @@ class DyPhpController
      **/
     final public static function run($controllerPname, $action = '', $params = array())
     {
+        //controller分析及实例化
         $controllerRun = self::parseController($controllerPname);
-        $actionName = self::parseAction($controllerRun, $action);
 
         //时间属性只为开发使用方便
         $controllerRun->time = time();
@@ -88,8 +88,8 @@ class DyPhpController
         //view实例化
         $controllerRun->view = new DyPhpView();
 
-        //hook调用: controller实例化之后执行，必须登录才可访问的action如未登录此hook不执行
-        DyPhpBase::app()->hook->invokeHook('after_controller_constructor');
+        //action分析及登录验证
+        $actionName = self::parseAction($controllerRun, $action);
 
         //init运行
         $controllerRun->init();
@@ -140,6 +140,9 @@ class DyPhpController
         }
         $controllerRun->aid = self::lcfirst($actionNameStr);
         DyPhpBase::app()->aid = $controllerRun->aid;
+
+        //hook调用: controller实例化之后执行
+        DyPhpBase::app()->hook->invokeHook('after_controller_constructor');
 
         //need login处理 判断返回值类型  对必须登录才可以访问的方法进行验证与拦截
         if (!is_array($controllerRun->needLogin())) {
