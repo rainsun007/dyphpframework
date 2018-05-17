@@ -33,8 +33,6 @@ class DyPhpHooks
      **/
     final public function invokeHook($hookType)
     {
-        ob_start();
-
         $hook = DyPhpConfig::item('hooks');
 
         //判断是否关闭所有hook
@@ -62,6 +60,8 @@ class DyPhpHooks
             return;
         }
 
+        ob_start();
+        
         //hook执行
         foreach ($hook[$hookType] as $key=>$val) {
             if ($key == 'enable') {
