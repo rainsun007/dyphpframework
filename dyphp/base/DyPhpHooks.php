@@ -24,15 +24,17 @@ class DyPhpHooks
      * 配制格式
      * 'hooks'=>array(
      *   'enable'=>true,
-     *   'before_action'=>array(
+     *   'after_controller_constructor'=>array(
      *       'enable'=>true,
-     *       'commonHook'=> array('setCommonView'),
-     *       'adminHook'=> array('setAdminView'=>'param','adminVerify'),
+     *       'HookClassNameOne'=> array('methodName'),
+     *       'HookClassNameTwo'=> array('methodOne'=>'param mixed : String , Int, Array','methodTwo'),
      *   ),
      * ),
      **/
     final public function invokeHook($hookType)
     {
+        ob_start();
+
         $hook = DyPhpConfig::item('hooks');
 
         //判断是否关闭所有hook
@@ -46,25 +48,35 @@ class DyPhpHooks
         }
 
         //hook配制验证
-        if (!isset($hook[$hookType]) || !is_array($hook[$hookType])) {
+        if (isset($hook[$hookType]) && !is_array($hook[$hookType])) {
             DyPhpBase::throwException('hook Undefined or data type error', $hookType);
         }
-
+        
         //判断是否只关闭当前 $hookType 的hook
         if (isset($hook[$hookType]['enable'])) {
             $itemEnable = is_bool($hook[$hookType]['enable']) ? $hook[$hookType]['enable'] : false;
             if (!$itemEnable) {
                 return;
             }
+        } else {
+            return;
         }
 
         //hook执行
         foreach ($hook[$hookType] as $key=>$val) {
+            if ($key == 'enable') {
+                continue;
+            }
+
             $this->incOnce($key);
             $userHook = new $key;
             foreach ($val as $k=>$v) {
                 is_int($k) ? $userHook->$v() : $userHook->$k($v);
             }
+        }
+
+        if (ob_get_length()) {
+            ob_end_flush();
         }
     }
 
@@ -78,11 +90,13 @@ class DyPhpHooks
         if (in_array($hookName, $this->incOnce)) {
             return;
         }
+
         $file  = DyPhpConfig::item('appPath').'/hooks/'.$hookName.EXT;
         if (!file_exists($file)) {
             DyPhpBase::throwException('hook does not exist', $hookName);
         }
         require $file;
+        
         $this->incOnce[] = $hookName;
     }
 }
