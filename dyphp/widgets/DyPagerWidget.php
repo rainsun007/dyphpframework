@@ -140,7 +140,7 @@ class DyPagerWidget extends DyPhpWidgets
         $getArr[$this->paramName] = $page;
         $getParam = $this->isRest ? '/' : '&';
         foreach ($getArr as $key => $val) {
-            if ($key == 'ca' || empty($key) || empty($val)) {
+            if ($key == 'ca' || empty($key) || (empty($val) && !is_numeric($val))) {
                 continue;
             }
             $getParam .= $this->isRest ? $key.'/'.$val.'/' : $key.'='.$val.'&';
