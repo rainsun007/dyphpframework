@@ -75,7 +75,7 @@ class DyPhpFileCache extends DyPhpCache
      * 取得一个缓存结果
      *
      * @param string 缓存键名
-     * @return mixed|string
+     * @return mixed
      */
     public function get($key)
     {
@@ -119,7 +119,15 @@ class DyPhpFileCache extends DyPhpCache
     public function exists($key)
     {
         $hashFile = $this->file($key, false);
-        return file_exists($hashFile);
+        if (is_file($hashFile)) {
+            if (filemtime($hashFile) < time()) {
+                //unlink($hashFile);
+                return false;
+            }else{
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

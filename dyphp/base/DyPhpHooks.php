@@ -34,12 +34,14 @@ class DyPhpHooks
     final public function invokeHook($hookType)
     {
         $hook = DyPhpConfig::item('hooks');
-
+        
         //判断是否关闭所有hook
         $enable = isset($hook['enable']) && is_bool($hook['enable']) ? $hook['enable'] : false;
         if (!$enable) {
             return;
         }
+        
+
 
         if (!in_array($hookType, array(self::AFTER_CONTROLLER_CONSTRUCTOR,self::AFTER_ACTION,self::BEFORE_VIEW_RENDER))) {
             DyPhpBase::throwException('hook type error', $hookType);
@@ -49,29 +51,25 @@ class DyPhpHooks
         if (isset($hook[$hookType]) && !is_array($hook[$hookType])) {
             DyPhpBase::throwException('hook Undefined or data type error', $hookType);
         }
-        
+
         //判断是否只关闭当前 $hookType 的hook
-        if (isset($hook[$hookType]['enable'])) {
-            $itemEnable = is_bool($hook[$hookType]['enable']) ? $hook[$hookType]['enable'] : false;
-            if (!$itemEnable) {
-                return;
-            }
-        } else {
+        $itemEnable = isset($hook[$hookType]['enable']) && is_bool($hook[$hookType]['enable']) ? $hook[$hookType]['enable'] : false;
+        if (!$itemEnable) {
             return;
         }
-
-        ob_start();
         
+        //var_dump($hook);
+        //if (ob_get_level()) ob_end_clean();
+        ob_start();
+
         //hook执行
         foreach ($hook[$hookType] as $key=>$val) {
-            if ($key == 'enable') {
-                continue;
-            }
-
-            $this->incOnce($key);
-            $userHook = new $key;
-            foreach ($val as $k=>$v) {
-                is_int($k) ? $userHook->$v() : $userHook->$k($v);
+            if ($key != 'enable') {
+                $this->incOnce($key);
+                $userHook = new $key;
+                foreach ($val as $k=>$v) {
+                    is_int($k) ? $userHook->$v() : $userHook->$k($v);
+                }
             }
         }
 
