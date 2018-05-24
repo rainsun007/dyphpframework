@@ -70,7 +70,7 @@ class DyPhpController
      *
      * @param string controller  以module_controller或module/controller的格式调用
      * @param string action
-     * @param array  当前运行controller中可公用的参数
+     * @param array  当前运行controller中可公用的参数（异常信息，提示信息等）
      **/
     final public static function run($controllerPname, $action = '', $params = array())
     {

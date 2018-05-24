@@ -10,13 +10,13 @@
  **/
 class DyPhpRoute
 {
-    //url重写后正则匹配到的Get参数数组,过滤后传递给controller的caParam属性
+    //url重写后正则匹配到的Get参数数组及扩展名（键值ext_name）,过滤后传递给controller的caParam属性
     private static $regularGetParams = array();
 
     /**
      * web路由入口
      * 优先处理urlManager配制
-     * $_GET保留key : ca(controller和acton格式 如user.profile或admin.user.profile),ext_name(访问的后缀名 如php),page(用于分页widget)
+     * $_GET保留key : ca(controller和acton格式 如user.profile或admin.user.profile),,page(用于分页widget)
      * 支持get请求以ca=module.controller.action的方式访问.
      **/
     public static function runWeb()
@@ -103,13 +103,15 @@ class DyPhpRoute
      **/
     private static function runToController($ca = array())
     {
+        //$regularGetParams属性中ext_name参数设置在urlCrop()中添加，所以需要在所有DyPhpController::run之前调用
+        $controllerArgs = self::urlCrop();
+
         if (!empty($ca)) {
             $params = self::$regularGetParams ? self::getRegParam() : array();
             DyPhpController::run($ca['c'], $ca['a'], $params);
             return;
         }
 
-        $controllerArgs = self::urlCrop();
         if ($controllerArgs == '' || $controllerArgs == false) {
             DyPhpController::run(DYPHP_DEFAULT_CONTROLLER);
             return;
@@ -269,7 +271,9 @@ class DyPhpRoute
         }
 
         $ext = pathinfo($pathStr, PATHINFO_EXTENSION);
-        $_GET['ext_name'] = $ext;
+        //$_GET['ext_name'] = $ext;
+        self::$regularGetParams['ext_name'] = $ext;
+
         return $ext ? substr($pathStr, 0, -(strlen($ext)+1)) : $pathStr;
     }
 }
