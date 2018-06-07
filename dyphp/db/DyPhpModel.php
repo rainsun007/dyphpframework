@@ -39,6 +39,9 @@ class DyPhpModel
     //是否使用pdo
     private $isPdo = false;
 
+    //lbs权重处理类实例
+    private $weightRound = false;
+
     protected function __construct()
     {
         $this->time = time();
@@ -190,12 +193,12 @@ class DyPhpModel
     }
 
     /**
-     * @brief    使用id获取记录
+     * 使用id获取记录
      *
-     * @param   $id
-     * @param   $select
+     * @param int     $id
+     * @param string  $select
      *
-     * @return
+     * @return object
      **/
     public function getById($id = 0, $select = '*')
     {
@@ -210,8 +213,10 @@ class DyPhpModel
     /**
      * 获取一条记录.
      *
-     * @param obj|string DyDbCriteria类实例|完整sql语句或是where语句
-     * @param 查询字段  当$criteria为where条件时有效
+     * @param mixed  $criteria  DyDbCriteria类实例 或 完整sql语句 或 是where语句
+     * @param string $select    查询字段  当$criteria为where条件时有效
+     * 
+     * @return object
      **/
     public function getOne($criteria = '', $select = '*')
     {
@@ -229,8 +234,10 @@ class DyPhpModel
     /**
      * 获取多条记录.
      *
-     * @param obj|string DyDbCriteria类实例|完整sql语句或是where语句
-     * @param 查询字段  当$criteria为where条件时有效
+     * @param mixed  $criteria  DyDbCriteria类实例 或 完整sql语句 或 是where语句
+     * @param string $select    查询字段  当$criteria为where条件时有效
+     * 
+     * @return array
      **/
     public function getAll($criteria = '', $select = '*')
     {
@@ -240,10 +247,10 @@ class DyPhpModel
     }
 
     /**
-     * @brief    执行完整的sql语句
+     * 执行完整的sql语句
      *
-     * @param   $query
-     * @param   $fetch
+     * @param  string  $query        sql语句
+     * @param  bool    $isFetchAll   true为返回全部，false为只返回一条
      *
      * @return
      **/
@@ -283,11 +290,11 @@ class DyPhpModel
     }
 
     /**
-     * @brief    分页查询获取记录
+     * 分页查询获取记录
      *
-     * @param   $criteria
-     * @param   $pageSize
-     * @param   $page     此参数为int类型时直接做为页数使用  为字符串时做为$_GET的key使用(默认为page)
+     * @param mixed  $criteria DyDbCriteria类实例 或 完整sql语句 或 是where语句
+     * @param int    $pageSize 
+     * @param string $page     此参数为int类型时直接做为页数使用  为字符串时做为$_GET的key使用(默认为page)
      *
      * @return
      **/
@@ -324,9 +331,9 @@ class DyPhpModel
     }
 
     /**
-     * @brief    获取数据大小
+     * 获取数据大小
      *
-     * @return
+     * @return int
      **/
     public function getDataSize()
     {
@@ -334,9 +341,9 @@ class DyPhpModel
     }
 
     /**
-     * @brief    获取版本号
+     * 获取版本号
      *
-     * @return
+     * @return string
      **/
     public function getVersion()
     {
@@ -346,7 +353,7 @@ class DyPhpModel
     /**
      * 获取查询总数.
      *
-     * @param obj|string DyDbCriteria类实例|完整sql语句或是where语句
+     * @param mixed $criteria DyDbCriteria类实例 或 完整sql语句 或 是where语句
      *
      * @return int
      */
@@ -412,11 +419,11 @@ class DyPhpModel
     }
 
     /**
-     * @brief    单列化数据库
+     * 单列化数据库
      *
-     * @param   $dbms 主/从数据库
+     * @param string  $dbms 主/从数据库
      *
-     * @return db instance
+     * @return object db instance 数据库实例
      **/
     private function getInstance($dbms = 'master')
     {
@@ -443,8 +450,10 @@ class DyPhpModel
     }
 
     /**
-     * @brief  获取数据库配制数组
+     * 获取数据库配制数组
      *
+     * @param string  $dbms 主/从数据库
+     * 
      * @return array
      **/
     private function getDbConfigArr($dbms = 'master')
@@ -476,9 +485,10 @@ class DyPhpModel
                 DyPhpBase::throwException('database lbs return error', 'getDbConfigArr error', 0);
             }
             if (empty($dbLbs)) {
-                $weight = new WeightedRoundRobin($dbConfig[$this->dbCnf]['slaves']);
-
-                return $weight->getWeight();
+                if(!$this->weightRound){
+                    $this->weightRound = new DyphpWeightRound($dbConfig[$this->dbCnf]['slaves']);
+                }
+                return $this->weightRound->getDbConfig();
             } else {
                 return $dbLbs;
             }
@@ -488,8 +498,10 @@ class DyPhpModel
     /**
      * 多条记录获取器.
      *
-     * @param 查询语句
-     * @param 是否执行查询分析
+     * @param string  查询语句
+     * @param bool    是否执行查询分析
+     * 
+     * @return mixed
      **/
     private function fetchAll($query, $explain = true)
     {
@@ -522,8 +534,10 @@ class DyPhpModel
     /**
      * 单条记录获取器.
      *
-     * @param 查询语句
-     * @param 是否执行查询分析
+     * @param string  查询语句
+     * @param bool    是否执行查询分析
+     * 
+     * @return mixed
      **/
     private function fetch($query, $explain = true)
     {
@@ -556,9 +570,9 @@ class DyPhpModel
     /**
      * exec管理器.
      *
-     * @param exec语句
+     * @param string exec语句,完整sql
      *
-     * @return 执行结果
+     * @return mixed
      **/
     private function dbExec($sql)
     {
@@ -581,20 +595,19 @@ class DyPhpModel
     }
 
     /**
-     * @brief    数组转为用sql格式的字符串
+     * 数组转sql格式化字符串
      *
-     * @param   $args
-     * @param   $type
-     * @param   $ftype
+     * @param  array  $args   update，insert字段与值对应的数组
+     * @param  string $type   up为update, in为insert
+     * @param  mixed  $ftype  $type为in时有两个值（column为字段类型，values为值类型）,$type为up时为数组（进行自加自减操作的字段不会加引号）
      *
-     * @return
+     * @return string
      **/
     private function sqlImplode($args, $type = 'up', $ftype = 'column')
     {
         $ret = '';
         if ($type == 'up') {
-            while (list($key, $val) = each($args)) {
-                //$val = $ftype == 'column' && preg_match('/^[+-][[:space:]]{0,2}\d$/i',trim($val)) ? $key.$val : "'{$val}'";
+            foreach ($args as $key => $val) {
                 $val = in_array($key, $ftype) ? $val : "'{$val}'";
                 $ret .= "`{$key}`={$val},";
             }
@@ -611,9 +624,11 @@ class DyPhpModel
     /**
      * 获取SQL查询语句.
      *
-     * @param object/string
-     * @param 查询字段  当$criteria为where条件时有效
-     * @param bool 是否为查询总数
+     * @param mixed   $criteria DyDbCriteria类实例 或 完整sql语句 或 是where语句
+     * @param string  $select   查询字段  当$criteria为where条件时有效
+     * @param bool    $isCount  是否为查询总数
+     * 
+     * @return string
      **/
     private function querySql($criteria, $select = '*', $isCount = false)
     {
@@ -662,13 +677,13 @@ class DyPhpModel
     }
 
     /**
-     * @brief    sql结束log及sql分析
+     * sql结束log及sql分析
      *
      * @param   $sql     sql语句
      * @param   $start   执行开始时间
      * @param   $explain 是否使用sql分析
      *
-     * @return
+     * @return null
      **/
     private function logQuery($sql, $start, $explain = true)
     {
@@ -766,11 +781,12 @@ final class DyPhpModelManage
     }
 
     /**
-     * @brief    pdo扩展加载检查
+     * pdo扩展加载检查
      *
-     * @param   $dbType
+     * @param   $isPdo  是否为pdo
+     * @param   $dbType 数据库类型
      *
-     * @return
+     * @return null
      **/
     private static function checkPdo($isPdo, $dbType)
     {
@@ -784,112 +800,55 @@ final class DyPhpModelManage
 }
 
 /**
- * @brief    以权重实现lbs(经简单改造)
- *
- * @author   此算法来自网络作者不详
+ * 通过权重获取数据库
  **/
-class WeightedRoundRobin
+class DyphpWeightRound
 {
-    private static $_weightArray = array();
-    private static $_i = -1; //代表上一次选择的服务器
-    private static $_gcd; //表示集合S中所有服务器权值的最大公约数
-    private static $_cw = 0; //当前调度的权值
-    private static $_max;
-    private static $_n; //agent个数
+    private $weightArray = array();
+    private $tempWeightArray = array();
 
-    public function __construct(array $weightArray)
+    private $weightNum = 0;
+
+    public function __construct($weightArray)
     {
-        //配制及权重处理
-        $weightArrayTmp = array();
-        if (count($weightArray) == 1) {
-            //只有一个从配制时强制使用该配制
-            $weightArray[0]['id'] = 0;
-            $weightArray[0]['weight'] = 1;
-            $weightArrayTmp = $weightArray;
-        } else {
-            //权重为0或未设置不进入计算，即视为不使用
-            foreach ($weightArray as $key => $val) {
-                if (!isset($val['weight']) || $val['weight'] > 0) {
-                    $weightArray[$key]['id'] = $key;
-                    $weightArrayTmp[] = $weightArray[$key];
-                }
-            }
-            //权重都未设置将权重全部设置为1
-            if (count($weightArrayTmp) == 0) {
-                foreach ($weightArray as $key => $val) {
-                    $weightArray[$key]['id'] = $key;
-                    $weightArray[$key]['weight'] = 1;
-                    $weightArrayTmp[] = $weightArray[$key];
-                }
-            }
-        }
-
-        self::$_weightArray = $weightArrayTmp;
-        self::$_gcd = self::getGcd(self::$_weightArray);
-        self::$_max = self::getMaxWeight(self::$_weightArray);
-        self::$_n = count($weightArray);
+        $this->weightArray = $weightArray;
     }
 
-    private static function getGcd(array $weightArray)
+    /**
+     * 随机返回一个配制
+     *
+     * @return array
+     */
+    public function getDbConfig()
     {
-        $temp = array_shift($weightArray);
-        $min = $temp['weight'];
-        $status = false;
-        foreach ($weightArray as $val) {
-            $min = min($val['weight'], $min);
+        //只有一个从配制时直接使用该配制
+        if (count($this->weightArray) == 1) {
+            return $this->weightArray[0];
         }
 
-        if ($min == 1) {
-            return 1;
-        } else {
-            for ($i = $min; $i > 1; --$i) {
-                foreach ($weightArray as $val) {
-                    if (is_int($val['weight'] / $i)) {
-                        $status = true;
-                    } else {
-                        $status = false;
-                        break;
-                    }
-                }
-                if ($status) {
-                    return $i;
-                } else {
-                    return 1;
-                }
+        if($this->tempWeightArray){
+            shuffle($this->tempWeightArray);
+            return $this->tempWeightArray[mt_rand(0,$this->weightNum-1)];
+        }
+
+        foreach($this->weightArray as $key=>$val){
+            if (!isset($val['weight']) || $val['weight'] <= 0) {
+                continue;
+            }
+
+            $this->weightNum += $val['weight'];
+            for($i=0; $i < $val['weight']; $i++){
+                $this->tempWeightArray[] = $val;
             }
         }
-    }
 
-    private static function getMaxWeight(array $weightArray)
-    {
-        if (empty($weightArray)) {
-            return false;
-        }
-        $temp = array_shift($weightArray);
-        $max = $temp['weight'];
-        foreach ($weightArray as $val) {
-            $max = max($val['weight'], $max);
+        //若全都未设置weight，则随时返回一个配制
+        if(!$this->tempWeightArray && $this->weightArray){
+            shuffle($this->weightArray);
+            return $this->weightArray[array_rand($this->weightArray)];
         }
 
-        return $max;
-    }
-
-    public function getWeight()
-    {
-        while (true) {
-            self::$_i = ((int) self::$_i + 1) % (int) self::$_n;
-            if (self::$_i == 0) {
-                self::$_cw = (int) self::$_cw - (int) self::$_gcd;
-                if (self::$_cw <= 0) {
-                    self::$_cw = (int) self::$_max;
-                    if (self::$_cw == 0) {
-                        return null;
-                    }
-                }
-            }
-            if ((int) (self::$_weightArray[self::$_i]['weight']) >= self::$_cw) {
-                return self::$_weightArray[self::$_i];
-            }
-        }
+        shuffle($this->tempWeightArray);
+        return $this->tempWeightArray[mt_rand(0,$this->weightNum-1)];
     }
 }
