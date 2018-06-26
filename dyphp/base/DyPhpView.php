@@ -196,17 +196,17 @@ class DyPhpView
              extract($this->viewData);
          }
  
-         ob_start();
+         $contentObStart = ob_start();
          include $this->viewFile;
          $content = ob_get_contents();
-         if (ob_get_length()) {
+         if ($contentObStart) {
              ob_end_clean();
          }
          DyStatic::cssJsMove();
  
-         ob_start(array($this, 'formatViewLayoutRender'));
+         $layoutObStart = ob_start(array($this, 'formatViewLayoutRender'));
          include $this->layoutFile;
-         if (ob_get_length()) {
+         if ($layoutObStart) {
             $this->flush ? ob_end_flush() : ob_end_clean();
          }
      }
