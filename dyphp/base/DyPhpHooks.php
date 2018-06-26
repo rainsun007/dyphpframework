@@ -58,9 +58,9 @@ class DyPhpHooks
             $this->incOnce($key);
             $userHook = new $key;
             foreach ($val as $k=>$v) {
-                ob_start();
+                $hookObStart = ob_start();
                 is_int($k) ? $userHook->$v() : $userHook->$k($v);
-                if (ob_get_length()) {
+                if ($hookObStart) {
                     ob_end_clean();
                 }
             }
