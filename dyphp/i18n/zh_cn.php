@@ -35,7 +35,6 @@ return array(
     'vendor does not exist'=>'vendor不存在', 
     'GD is not loaded' => 'GD扩展没有加载',
     'sql criteria error'=>'sql条件错误',
-    'hook type error'=>'hook类型错误',
     'hook Undefined or data type error'=>'hook未定义或数据类型错误',
     'hook does not exist'=>'hook文件不存在',
     'needLogin method error'=>'needLogin方法必须返回一个数组',
