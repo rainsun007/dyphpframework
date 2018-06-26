@@ -18,7 +18,7 @@ class DyPhpHooks
     private $incOnce = array();
 
     /**
-     * hook调用
+     * hook调用执行
      * @param    $hookType
      *
      * 配制格式
@@ -34,7 +34,7 @@ class DyPhpHooks
     final public function invokeHook($hookType)
     {
         $hook = DyPhpConfig::item('hooks');
-        
+
         //判断是否关闭所有hook
         $enable = isset($hook['enable']) && is_bool($hook['enable']) ? $hook['enable'] : false;
         if (!$enable) {
@@ -47,8 +47,6 @@ class DyPhpHooks
             return;
         }
 
-        ob_start();
-
         //hook配制验证
         if (!isset($hook[$hookType]) || !is_array($hook[$hookType])) {
             DyPhpBase::throwException('hook Undefined or data type error', $hookType);
@@ -60,13 +58,12 @@ class DyPhpHooks
             $this->incOnce($key);
             $userHook = new $key;
             foreach ($val as $k=>$v) {
+                ob_start();
                 is_int($k) ? $userHook->$v() : $userHook->$k($v);
+                if (ob_get_length()) {
+                    ob_end_clean();
+                }
             }
-        }
-
-        if (ob_get_length()) {
-            ob_end_clean();
-            //ob_end_flush();
         }
     }
 
