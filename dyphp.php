@@ -14,14 +14,14 @@ define('DYPHP_PATH', dirname(__FILE__));
 define('DS', DIRECTORY_SEPARATOR);
 //文件扩展名
 defined('EXT') or define('EXT', '.php');
+
 /**
  * 框架版本
  * 版本号规则：
  * 主版本号(较大的变动).子版本号(功能变化或新特性增加).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
  * 上一级版本号变动时下级版本号归零
  **/
-define('DYPHP_VERSION', '2.5.0-release');
-
+define('DYPHP_VERSION', '2.5.1-release');
 
 //简单别名
 class Dy extends DyPhpBase
