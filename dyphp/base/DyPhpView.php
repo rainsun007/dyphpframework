@@ -37,7 +37,7 @@ class DyPhpView
     public function render($view, $data = array())
     {
         //hook调用
-        DyPhpBase::app()->hook->invokeHook('before_view_render');
+        DyPhpBase::app()->hook->invokeHook(DyPhpHooks::BEFORE_VIEW_RENDER);
 
         $this->flush = true;
         $this->viewLayoutRender($view, $data);
@@ -67,8 +67,6 @@ class DyPhpView
      **/
     public function renderPartial($view, $data = array(), $moduleTheme = '')
     {
-        //$layout = explode('/',trim($this->defaultLayout,'/'));
-        //$moduleTheme = count($layout) > 1 ? $layout[0] : '';
         $this->attrSet($view, $data, $moduleTheme);
 
         if (!file_exists($this->viewFile)) {

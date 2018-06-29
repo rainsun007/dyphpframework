@@ -101,7 +101,7 @@ class DyPhpController
         $controllerRun->$actionName();
 
         //hook调用: action执行完成之后
-        DyPhpBase::app()->hook->invokeHook('after_action');
+        DyPhpBase::app()->hook->invokeHook(DyPhpHooks::AFTER_ACTION);
     }
 
     /**
@@ -142,7 +142,7 @@ class DyPhpController
         DyPhpBase::app()->aid = $controllerRun->aid;
 
         //hook调用: controller实例化之后执行
-        DyPhpBase::app()->hook->invokeHook('after_controller_constructor');
+        DyPhpBase::app()->hook->invokeHook(DyPhpHooks::AFTER_CONTROLLER_CONSTRUCTOR);
 
         //need login处理 判断返回值类型  对必须登录才可以访问的方法进行验证与拦截
         if (!is_array($controllerRun->needLogin())) {

@@ -17,6 +17,17 @@ class DyPhpHooks
     //hook文件加载单例
     private $incOnce = array();
 
+    private $afterActionEnable = false;
+    private $beforeViewRenderInvoke = false;
+
+
+    public function __construct()
+    {
+        $hook = DyPhpConfig::item('hooks');
+        $this->afterActionEnable = isset($hook[self::AFTER_ACTION]['enable']) && is_bool($hook[self::AFTER_ACTION]['enable']) ? $hook[self::AFTER_ACTION]['enable'] : false;
+    }
+
+
     /**
      * hook调用执行
      * @param    $hookType
@@ -34,6 +45,13 @@ class DyPhpHooks
     final public function invokeHook($hookType)
     {
         $hook = DyPhpConfig::item('hooks');
+
+        //after_action中可能会操作cookie session,重定向等,所以要在headers already sent之前先开启ob_start
+        //如action中不调用render,ob_start不必开启
+        if($hookType == self::BEFORE_VIEW_RENDER && $this->afterActionEnable){
+            $this->beforeViewRenderInvoke = true;
+            ob_start();
+        }
 
         //判断是否关闭所有hook
         $enable = isset($hook['enable']) && is_bool($hook['enable']) ? $hook['enable'] : false;
@@ -58,12 +76,12 @@ class DyPhpHooks
             $this->incOnce($key);
             $userHook = new $key;
             foreach ($val as $k=>$v) {
-                $hookObStart = ob_start();
                 is_int($k) ? $userHook->$v() : $userHook->$k($v);
-                if ($hookObStart) {
-                    ob_end_clean();
-                }
             }
+        }
+
+        if($hookType == self::AFTER_ACTION && $this->afterActionEnable && $this->beforeViewRenderInvoke){
+            ob_end_flush();
         }
     }
 
