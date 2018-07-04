@@ -40,8 +40,8 @@ class DyPhpConfig{
     private static $urlManager = array();
     //数据库配制
     private static $db = array();
-    //缓存配制
     /*
+    缓存配制
     配制格式
     'cache'=>array( 
         'c1'=>array('type'=>'file','gcOpen'=>true),  //文件缓存多时 不建议打开gc 会导致性能低下  可以使用shell处理
@@ -78,25 +78,29 @@ class DyPhpConfig{
      * 运行app配制入口
      * @param array app配制
      **/ 
-    public static function runConfig($config = null){
-        $config = require $config;
+    public static function runConfig($appConfig){
+        $config = require $appConfig;
 
         //language load
         //异常信息输出语言 现只支持zh_cn
         self::$language = isset($config['language']) ? $config['language'] : 'zh_cn';
 
-        //app config
+        //check app config
         if (!is_array($config)) {
             DyPhpBase::throwException('config is not an array');
         }
 
         //check secretKey
-        //app密钥 cookie session string等加密  不同应用此密钥应唯一
+        //app密钥 cookie,session,string等加密使用  不同应用此密钥应唯一
         if (!array_key_exists('secretKey', $config) || empty($config['secretKey'])) {
             DyPhpBase::throwException('secretKey Undefined');
         }
-        //生成app唯一id session key的前缀中使用到 解决多应用session冲突（当前版本只有这一个用途）
-        self::$appID = md5($config['secretKey']);
+
+        //check environment
+        //运行环境，用于加载不同环境的constants文件;为secretKey加环境后缀（当前版本只有这两个用途）
+        if(array_key_exists('env', $config) && !in_array($config['env'],array('dev','test','pro','pre',''))){
+            DyPhpBase::throwException('run environment defined invalid');
+        }
 
         //check appPath and setting define
         if (!array_key_exists('appPath', $config)) {
@@ -106,17 +110,12 @@ class DyPhpConfig{
         define('APP_PATH', self::$appPath);
         define('APP_PARENT_PATH', dirname(APP_PATH));
 
-        //check environment
-        //运行环境，用于加载不同环境的constants文件，不设置或为空时加载constants.php（当前版本只有这一个用途）
-        if(array_key_exists('env', $config) && !in_array($config['env'],array('dev','test','pro','pre',''))){
-            DyPhpBase::throwException('run environment defined invalid');
-        }
-
         //get appHttpPath 获取url层级地址，以支持将应用部署到web根目录下的子目录下，DyRequest::createUrl()方法中使用
         self::$appHttpPath = isset($_SERVER["SCRIPT_NAME"]) ? trim(str_replace(array('\\','\\\\','//'),'/',dirname($_SERVER["SCRIPT_NAME"])),'/') : trim(str_replace($_SERVER['DOCUMENT_ROOT'],"",dirname($_SERVER['SCRIPT_FILENAME'])),'/');
 
         //初始化handler
-        //建议：按console web类型，配合DYPHP_DEFAULT_CONTROLLER定义 在action中做不同处理
+        //建议方案一: 按console，web类型，配合DYPHP_DEFAULT_CONTROLLER定义 在action中做不同处理
+        //建议方案二: 按console，web类型在不同的入口文件中引用不同的配制文件，在配制中分别配制
         self::$errorHandler = DYPHP_DEFAULT_CONTROLLER.'/error';
         self::$loginHandler = DYPHP_DEFAULT_CONTROLLER.'/login';
         self::$messageHandler = DYPHP_DEFAULT_CONTROLLER.'/message';
@@ -135,6 +134,12 @@ class DyPhpConfig{
                 self::${$val} = $config[$val];
             }
         }
+
+        //为secretKey加上环境后缀,自动按环境生成不同的secretKey
+        self::$secretKey = empty(self::$env) ? self::$secretKey.'_pro' : self::$secretKey.'_'.self::$env;
+
+        //生成app唯一id,在session key的前缀中使用到,解决多应用session冲突（当前版本只有这一个用途）
+        self::$appID = md5(self::$secretKey);
 
         //import加载
         $import = array_key_exists('import', $config) && is_array($config['import']) ? $config['import'] : array();
@@ -192,7 +197,7 @@ class DyPhpConfig{
     }
 
     /**
-     * @brief  别名映射,  调用方式如：Dy::app()->dbc
+     * 别名映射,调用方式如：Dy::app()->dbc
      * 
      * @param  array  $aliasArr
      * 实例
@@ -260,7 +265,7 @@ class DyPhpConfig{
     }
 
     /**
-     * @brief    获取映射，autoload将调用该方法
+     * 获取映射，autoload将调用该方法
      * @param    $aliasName
      * @return   array
      **/
@@ -272,7 +277,7 @@ class DyPhpConfig{
     }
 
     /**
-     * @brief    获取配制项
+     * 获取配制项
      * @param    $itemName
      * @return   mixed
      **/
@@ -311,7 +316,7 @@ class DyPhpConfig{
     }
 
     /**
-     * @brief    获取自定义包含路径，autoload将调用该方法
+     * 获取自定义包含路径，autoload将调用该方法
      * @return   string
      **/
     public static function getIncludePath(){
@@ -319,7 +324,7 @@ class DyPhpConfig{
     }
 
     /**
-     * @brief    加载配制及工具
+     * 加载配制及工具
      **/
     private static function loadCommon(){
         //constants 非必须文件 不存在就不加载 不会给出报错信息
