@@ -468,6 +468,7 @@ class DyPhpModel
             return $dbConfig[$this->dbCnf];
         }
 
+        //使用主从时，主从必须都要配制，支持强制使用主库，从库支持按权重负载均衡
         if ($dbms == 'master' || $this->forceMaster) {
             if (!isset($dbConfig[$this->dbCnf]['master'])) {
                 DyPhpBase::throwException('database config undefined', $this->dbCnf.'[master]', 0);
@@ -479,19 +480,20 @@ class DyPhpModel
                 DyPhpBase::throwException('database config undefined', $this->dbCnf.'[slaves]', 0);
             }
 
+            //支持用户自定义从库重负载均衡
             $dbLbs = $this->lbs();
             if (!is_array($dbLbs)) {
-                //用户自定义lbs返回值判断
                 DyPhpBase::throwException('database lbs return error', 'getDbConfigArr error', 0);
             }
-            if (empty($dbLbs)) {
-                if(!$this->weightRound){
-                    $this->weightRound = new DyphpWeightRound($dbConfig[$this->dbCnf]['slaves']);
-                }
-                return $this->weightRound->getDbConfig();
-            } else {
+            if($dbLbs){
                 return $dbLbs;
             }
+
+            //按权重负载均衡选择从库
+            if(!$this->weightRound){
+                $this->weightRound = new DyphpWeightRound($dbConfig[$this->dbCnf]['slaves']);
+            }
+            return $this->weightRound->getDbConfig();
         }
     }
 
@@ -804,9 +806,11 @@ final class DyPhpModelManage
  **/
 class DyphpWeightRound
 {
+    //从库配制数组
     private $weightArray = array();
+    //从库权重计算临时数组
     private $tempWeightArray = array();
-
+    //权重计数器
     private $weightNum = 0;
 
     public function __construct($weightArray)
@@ -828,7 +832,8 @@ class DyphpWeightRound
 
         if($this->tempWeightArray){
             shuffle($this->tempWeightArray);
-            return $this->tempWeightArray[mt_rand(0,$this->weightNum-1)];
+            $waKey = $this->tempWeightArray[mt_rand(0,$this->weightNum-1)];
+            return $this->weightArray[$waKey];
         }
 
         foreach($this->weightArray as $key=>$val){
@@ -838,7 +843,7 @@ class DyphpWeightRound
 
             $this->weightNum += $val['weight'];
             for($i=0; $i < $val['weight']; $i++){
-                $this->tempWeightArray[] = $val;
+                $this->tempWeightArray[] = $key;
             }
         }
 
@@ -849,6 +854,7 @@ class DyphpWeightRound
         }
 
         shuffle($this->tempWeightArray);
-        return $this->tempWeightArray[mt_rand(0,$this->weightNum-1)];
+        $waKey = $this->tempWeightArray[mt_rand(0,$this->weightNum-1)];
+        return $this->weightArray[$waKey];
     }
 }
