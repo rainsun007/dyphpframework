@@ -45,6 +45,12 @@ class DyPhpHooks
     final public function invokeHook($hookType)
     {
         $hook = DyPhpConfig::item('hooks');
+        
+        //所有hook都关闭直接返回
+        $enable = isset($hook['enable']) && is_bool($hook['enable']) ? $hook['enable'] : false;
+        if (!$enable) {
+            return;
+        }
 
         //after_action中可能会操作cookie session,重定向等,所以要在headers already sent之前先开启ob_start
         //如action中不调用render,ob_start不必开启
@@ -53,30 +59,22 @@ class DyPhpHooks
             ob_start();
         }
 
-        //判断是否关闭所有hook
-        $enable = isset($hook['enable']) && is_bool($hook['enable']) ? $hook['enable'] : false;
-        if (!$enable) {
-            return;
-        }
-
-        //判断是否只关闭当前 $hookType 的hook
+        //执行开启的hook
         $itemEnable = isset($hook[$hookType]['enable']) && is_bool($hook[$hookType]['enable']) ? $hook[$hookType]['enable'] : false;
-        if (!$itemEnable) {
-            return;
-        }
+        if ($itemEnable) {
+            //hook配制验证
+            if (!isset($hook[$hookType]) || !is_array($hook[$hookType])) {
+                DyPhpBase::throwException('hook Undefined or data type error', $hookType);
+            }
 
-        //hook配制验证
-        if (!isset($hook[$hookType]) || !is_array($hook[$hookType])) {
-            DyPhpBase::throwException('hook Undefined or data type error', $hookType);
-        }
-
-        //hook执行
-        unset($hook[$hookType]['enable']);
-        foreach ($hook[$hookType] as $key=>$val) {
-            $this->incOnce($key);
-            $userHook = new $key;
-            foreach ($val as $k=>$v) {
-                is_int($k) ? $userHook->$v() : $userHook->$k($v);
+            //hook执行
+            unset($hook[$hookType]['enable']);
+            foreach ($hook[$hookType] as $key=>$val) {
+                $this->incOnce($key);
+                $userHook = new $key;
+                foreach ($val as $k=>$v) {
+                    is_int($k) ? $userHook->$v() : $userHook->$k($v);
+                }
             }
         }
 
