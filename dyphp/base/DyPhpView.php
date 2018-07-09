@@ -33,14 +33,19 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
+     * @param bool   是否执行完此方法后直接退出(执行exit), 默认为不退出, 注意：如设置为true，AFTER_ACTION hook将不会执行
      **/
-    public function render($view, $data = array())
+    public function render($view, $data = array(),$exit = false)
     {
         //hook调用
         DyPhpBase::app()->hook->invokeHook(DyPhpHooks::BEFORE_VIEW_RENDER);
 
         $this->flush = true;
         $this->viewLayoutRender($view, $data);
+
+        if($exit){
+            exit();
+        }
     }
 
     /**
