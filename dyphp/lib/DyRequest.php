@@ -6,7 +6,7 @@
  *
  * @link http://www.dyphp.com/
  *
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  */
 class DyRequest
 {

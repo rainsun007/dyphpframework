@@ -3,7 +3,7 @@
  * dyphp-framework 缓存抽象类文件
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  **/
 abstract class DyPhpCache
 {

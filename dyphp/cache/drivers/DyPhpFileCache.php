@@ -3,7 +3,7 @@
  * 文件缓存类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  */
 class DyPhpFileCache extends DyPhpCache
 {
@@ -116,6 +116,13 @@ class DyPhpFileCache extends DyPhpCache
         return false;
     }
 
+    /**
+     * 验证key是否存在
+     *
+     * @param string $key
+     *
+     * @return bool
+     */
     public function exists($key)
     {
         $hashFile = $this->file($key, false);

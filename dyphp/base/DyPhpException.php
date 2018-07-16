@@ -6,7 +6,7 @@
  *
  * @link http://www.dyphp.com/
  *
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  **/
 class DyException extends DyPhpException
 {
@@ -79,27 +79,45 @@ class DyPhpException extends Exception
     }
 
     /**
+     * 设置是否把异常向外层抛出
+     * 此方法可在运行中动态开启和关闭，若开启在处理逻辑结束后关闭
+     *
+     * @param  bool 设置为true框架将会把异常向外层抛出,应用中可自行catch,如未处理异常最终还会被框架接管
+     **/
+    public static function setAppCatch($isCatch = false)
+    {
+        self::$appCatch = $isCatch;
+    }
+
+    /**
+     * 获取异常向外层抛出设置
+     *
+     * @return bool
+     **/
+    public static function getAppCatch()
+    {
+        return self::$appCatch;
+    }
+
+    /**
      * 错误处理器.
      *
-     * @param string     类型
-     * @param string     错误信息
-     * @param string 错误信息跟踪
+     * @param string 错误信息title
+     * @param string 错误信息说明
+     * @param string 错误运行跟踪
      **/
     private static function centralizeHandler($title, $message, $traceString)
     {
         //log记录所有异常报告
         self::logs($title, $message, $traceString);
 
-        //进入此逻辑框架将会把异常向外层抛出,应用中必须自己catch
-        //此方法可在运行中动态开启和关闭，若使用最好是关联使用并在处理逻辑结束后闭关
-        //此逻辑不区分是否为debug模式，如无需要不建议使用此方法
+        //设置了异常向外层抛出，将异常抛出给app
         if (self::$appCatch) {
             throw new Exception($message, 0, self::$dyPrevious);
         }
 
-        // This error code is not included in error_reporting
-        //进入此逻辑会使error_reporting(0) && DyPhpBase::$debug == false时页面空白（即不调用config中自定义的errorHandler）
-        if (!(error_reporting() & self::$eReport) && !DyPhpBase::$debug) {
+        //进入此逻辑如设置满足error_reporting(0) && DyPhpBase::$debug == false时，页面空白（不会调用errorHandler）
+        if (!(error_reporting() & self::$eReport) && DyPhpBase::$debug == false) {
             return;
         }
 
@@ -118,9 +136,10 @@ class DyPhpException extends Exception
             }
             self::$errorHandlerInvoked = true;
 
+            Dy::app()->setPreInsAttr();
+
             $errorHandlerArr = explode('/', trim(DyPhpConfig::item('errorHandler'), '/'));
             $exceptionMessage = array('dyExcType' => $title, 'errType' => $errType, 'msg' => $message);
-            Dy::app()->setPreInsAttr();
             DyPhpController::run($errorHandlerArr[0], $errorHandlerArr[1], $exceptionMessage);
             exit();
         }
@@ -143,9 +162,9 @@ class DyPhpException extends Exception
     /**
      * 错误log记录, 每月一个独立log.
      *
-     * @param int|string 错误号|类型
-     * @param string     错误信息title
-     * @param string|obj 错误信息body|错误运行跟踪
+    * @param string 错误信息title
+    * @param string 错误信息说明
+    * @param string 错误运行跟踪
      **/
     private static function logs($title, $message, $traceString)
     {
@@ -164,31 +183,6 @@ class DyPhpException extends Exception
             fwrite($fp, $data);
             fclose($fp);
         }
-    }
-
-    /**
-     * @brief    设置是否把异常向外层抛出
-     * 设置为true框架将会把异常向外层抛出,应用中可自行catch,如未处理异常最终还会被框架接管
-     * 此方法可在运行中动态开启和关闭，若使用最好是关联使用并在处理逻辑结束后关闭
-     * 此方法不区分是否为debug模式，如无需要不建议使用此方法
-     *
-     * @param   $isCatch
-     *
-     * @return
-     **/
-    public static function setAppCatch($isCatch = false)
-    {
-        self::$appCatch = $isCatch;
-    }
-
-    /**
-     * @brief    获取异常向外层抛出设置
-     *
-     * @return
-     **/
-    public static function getAppCatch()
-    {
-        return self::$appCatch;
     }
 
     /**
@@ -211,6 +205,8 @@ class DyPhpException extends Exception
           case E_COMPILE_WARNING:
           case E_WARNING:
           case E_USER_WARNING:
+          case E_DEPRECATED:
+          case E_USER_DEPRECATED:
               $errType = 'WARNING';
               break;
           case E_NOTICE:
@@ -219,7 +215,6 @@ class DyPhpException extends Exception
               break;
           case E_STRICT:
               $errType = 'STRICT';
-              // no break
           default:
               $errType = 'Unknown';
               break;

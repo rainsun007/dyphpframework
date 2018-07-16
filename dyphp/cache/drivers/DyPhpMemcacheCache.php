@@ -3,7 +3,7 @@
  * memcache缓存类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  */
 class DyPhpMemcacheCache extends DyPhpCache
 {
@@ -103,6 +103,13 @@ class DyPhpMemcacheCache extends DyPhpCache
         return $this->connection->delete($key);
     }
 
+    /**
+     * 验证key是否存在
+     *
+     * @param string $key
+     *
+     * @return bool
+     */
     public function exists($key)
     {
         if ($this->connection->get($key) === false) {

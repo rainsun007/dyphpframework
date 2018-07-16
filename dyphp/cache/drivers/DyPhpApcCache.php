@@ -3,7 +3,7 @@
  * apc缓存类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  *
  */
 class DyPhpApcCache extends DyPhpCache
@@ -54,6 +54,13 @@ class DyPhpApcCache extends DyPhpCache
         return $this->apcu ? apcu_fetch($key) : apc_delete($key);
     }
 
+    /**
+     * 验证key是否存在
+     *
+     * @param string $key
+     *
+     * @return bool
+     */
     public function exists($key)
     {
         return $this->apcu ? apcu_exists($key) : apc_exists($key);

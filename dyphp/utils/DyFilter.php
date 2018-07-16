@@ -1,16 +1,10 @@
 <?php
 /**
- * @file DyFilter.php
- * @brief  数据过滤器
+ * 数据验证过滤器
  *
  * @author QingYu.Sun Email:dyphp.com@gmail.com
- *
- * @version 1.0
- *
- * @copyright dyphp.com
- *
  * @link http://www.dyphp.com
- * @date 2014-01-15
+ * @copyright dyphp.com
  **/
 class DyFilter
 {

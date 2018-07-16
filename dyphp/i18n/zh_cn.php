@@ -3,7 +3,7 @@
  * 中文系统错误信息
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright dyphp.com 
  **/
 return array(
     'config is not an array'=>'配制文件不是数组',
@@ -31,6 +31,7 @@ return array(
     'cache config format error'=>'缓存配制格式错误', 
     'apc extension does not open'=>'apc扩展没有开启', 
     'data type error'=>'数据类型错误', 
+    'the secretKey length is no less than 32' => 'secretKey长度不可小于32位',
     'widget view does not exist'=>'widget view不存在', 
     'vendor does not exist'=>'vendor不存在', 
     'GD is not loaded' => 'GD扩展没有加载',

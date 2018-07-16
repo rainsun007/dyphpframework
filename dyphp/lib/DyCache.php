@@ -3,7 +3,7 @@
  * 缓存工具类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright dyphp.com 
  **/
 class DyCache{
     private static $cacheTypes = array('file','memcache','apc');
@@ -38,7 +38,7 @@ class DyCache{
                 $driver->serversKey = $memCacheServersKey;
                 $driver->run();
             }elseif($cache[$cacheKey]['type'] == 'file'){
-                $driver->gcOpen = isset($cache[$cacheKey]['gcOpen']) ? $cache[$cacheKey]['gcOpen'] : true;
+                $driver->gcOpen = isset($cache[$cacheKey]['gcOpen']) ? $cache[$cacheKey]['gcOpen'] : false;
             }
             
             self::$instances[$cacheCalss] = $driver;

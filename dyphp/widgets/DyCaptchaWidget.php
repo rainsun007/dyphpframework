@@ -3,7 +3,7 @@
  * 验证码widget
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright dyphp.com 
  **/
 class DyCaptchaWidget extends DyPhpWidgets{
     public function run($options=array()){

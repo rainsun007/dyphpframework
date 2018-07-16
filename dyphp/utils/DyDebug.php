@@ -3,7 +3,7 @@
  * debug工具类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright dyphp.com 
  **/
 class DyDebug extends DyPhpDebug{
     public static function show($showType='sql,param,file'){
