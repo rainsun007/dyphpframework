@@ -3,7 +3,7 @@
  * dyphp-framework base file
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  **/
 
 //系统运行开始时间
@@ -21,7 +21,7 @@ defined('EXT') or define('EXT', '.php');
  * 主版本号(较大的变动).子版本号(功能变化或新特性增加).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
  * 上一级版本号变动时下级版本号归零
  **/
-define('DYPHP_VERSION', '2.6.0-release');
+define('DYPHP_VERSION', '2.7.0-release');
 
 //简单别名
 class Dy extends DyPhpBase
@@ -63,7 +63,7 @@ class DyPhpBase
         }
 
         //运行自动登录逻辑
-        self::app()->auth->autoLoginStatus();
+        self::app()->auth->runAutoLogin();
         DyPhpRoute::runWeb();
         exit;
     }
@@ -97,14 +97,17 @@ class DyPhpBase
         require DYPHP_PATH.self::$coreClasses['DyPhpException'];
         require DYPHP_PATH.self::$coreClasses['DyPhpConfig'];
         require DYPHP_PATH.self::$coreClasses['DyPhpRoute'];
+        require DYPHP_PATH.self::$coreClasses['DyPhpController'];
+        require DYPHP_PATH.self::$coreClasses['DyPhpView'];
+        require DYPHP_PATH.self::$coreClasses['DyPhpHooks'];
         if ($appType == 'web') {
             require DYPHP_PATH.self::$coreClasses['DyPhpUserIdentity'];
         }
-        require DYPHP_PATH.self::$coreClasses['DyPhpController'];
-        require DYPHP_PATH.self::$coreClasses['DyPhpHooks'];
 
+        //异常拦截注册
         self::debug($debug);
-        self::$dyApp = new DyPhpApp(self::$coreClasses);
+        
+        //配制解析
         DyPhpConfig::runConfig($config);
     }
 
@@ -212,7 +215,12 @@ class DyPhpBase
      **/
     public static function app()
     {
-        return self::$dyApp;
+        if(self::$dyApp){
+            return self::$dyApp;
+        }else{
+            self::$dyApp = new DyPhpApp();
+            return self::$dyApp;
+        }
     }
 
     /**
@@ -332,7 +340,7 @@ class DyPhpBase
 
         echo $br.'[Framework limit]';
         echo $splitLine;
-        echo 'php current version:'.PHP_VERSION.' status: '.(version_compare(PHP_VERSION, '5.3.0', '>=') ? '√ OK' : '× minimum version of 5.2.2');
+        echo 'php current version:'.PHP_VERSION.' status: '.(version_compare(PHP_VERSION, '5.3.0', '>=') ? '√ OK' : '× minimum version of 5.3.0');
         echo $br.'Current running SAPI : '.PHP_SAPI.$br;
         echo PHP_SAPI !== 'cli' ? 'Framework retain key for $_GET : ca,ext_name,page' : '';
         
@@ -487,7 +495,7 @@ final class DyPhpApp
     }
 
     /**
-     * 设置controller实例全局属性的前一次运行属性, 记录来源(前一次运行)module,controller,action
+     * 设置controller实例全局属性的前一次运行属性, 记录来源(前一次运行module,controller,action)
      */
     public function setPreInsAttr()
     {

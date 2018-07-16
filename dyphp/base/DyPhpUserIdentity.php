@@ -6,80 +6,65 @@
  *
  * @link http://www.dyphp.com/
  *
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  **/
 abstract class DyPhpUserIdentity
 {
     //登陆用户信息前缀
     protected $infoPre = 'au_';
-    //使用cookie保存登陆状态
+
+    //使用cookie保存登陆状态及setInfo数据, 为false时使用session保存登录状态及setInfo数据
     protected $isCookieUserAuth = false;
-    //用户身份索引值
-    private $userIndexValue = '';
 
     /**
-     * 必须实现认证方法.
+     * [必须]身份认证.
+     * 如不使用框架的认证规则，可实现此方法后return false;
      *
-     * @param int    自动登陆有效期 单位：秒
-     * @param string 用户验证加密串，如加密后的密码（如md5('password')等,保持加密一至即可）
-     *               虽不强制但基于安全考虑此处最好不要使用明文（相关校验逻辑在实现方法中完成），
-     *               需要注意的是框架调用此方法时此参数为空字
-     **/
-    abstract public function authenticate($expire = 0, $encryptPassword = '');
-
-    /**
-     * 登陆状态设置.
-     *
-     * @param string 用户身份索引值
-     * @param 过期时间 单位：秒
-     **/
-    final protected function setStatus($userIndexValue = '', $expire = 0)
-    {
-        $expire = intval($expire);
-
-        //login status setting
-        if ($this->getIsCookieUserAuth()) {
-            DyCookie::set($this->getAutoLoginKey(), 'cookie_logined');
-        } else {
-            DySession::set($this->loginStateKey(), true);
-        }
-
-        //记住登陆处理 cookie设置 未传入有效数据则视为不设置自动登陆
-        if (!empty($userIndexValue) && $expire > 0) {
-            $delayExpire = time() + $expire + 1;
-            $rememberArr = array(
-                'token' => $this->getAutoLoginToken($userIndexValue, $delayExpire),
-                'userIndexValue' => $userIndexValue,
-                'expire' => $delayExpire,
-            );
-            DyCookie::set($this->loginStateKey('cookie'), json_encode($rememberArr), $delayExpire);
-        }
-    }
-
-    /**
-     * 自动登陆处理器(框架会自动调用此方法).
-     *
+     * @param string [必须]用户身份索引值,如：id,email,电话,用户名,昵称等
+     * @param string [必须]用户验证加密串，如加密后的密码（如md5('password')等,保持加密一至即可）
+     *               基于安全考虑此处不要使用明文（相关校验逻辑需在实现中完成）
+     * @param int    自动登陆有效期，单位：秒，0为不使用自动登陆
+     * 
      * @return bool
      **/
-    final public function autoLoginStatus()
+    abstract public function authenticate($userIndexValue = '', $encryptPassword = '' , $autoLoginExpire = 0);
+
+    /**
+     * [必须]登陆状态设置. 此方法必须在authenticate实现中显示调用
+     *
+     * @param string [必须]用户身份索引值,如：id,email,电话,用户名,昵称等
+     * @param string [必须]用户验证加密串，如加密后的密码（如md5('password')等,保持加密一至即可）
+     *               基于安全考虑此处不要使用明文（相关校验逻辑需在实现中完成）
+     * @param int    自动登陆有效期，单位：秒，0为不使用自动登陆
+     * 
+     * @return bool
+     **/
+    final public function setLoginStatus($userIndexValue = '', $encryptPassword = '', $expire = 0)
     {
-        $cookieAuth = $this->getIsCookieUserAuth();
-
-        //session记录登陆状态
-        if (!$cookieAuth) {
-            if (DySession::get($this->loginStateKey()) === true) {
-                return true;
-            }
-
-            return $this->checkAutoLogin();
+        if(!$userIndexValue || !$encryptPassword){
+            return false;
         }
 
-        //cookie记录登陆状态
-        if (DyCookie::get($this->getAutoLoginKey())) {
+        if ($this->isCookieUserAuth) {
+            DyCookie::set($this->getLoginStateKey('cookie').'_cl', 'cookie_logined');
+        }else{
+            DySession::set($this->getLoginStateKey(), true);
+        }
+
+        if($expire == 0){
             return true;
         }
 
-        return $this->checkAutoLogin();
+        //自动登陆cookie设置
+        $time = time();
+        $rememberArr = array(
+            'token' => $this->getAutoLoginToken($userIndexValue, $encryptPassword, $time, $expire),
+            'iv' => $userIndexValue,
+            'ep' => $encryptPassword,
+            'time' => $time,
+            'expire' => $expire
+        );
+        return DyCookie::set($this->getLoginStateKey('cookie'), json_encode($rememberArr), $expire);
     }
 
     /**
@@ -87,10 +72,10 @@ abstract class DyPhpUserIdentity
      **/
     final public function isGuest()
     {
-        if ($this->getIsCookieUserAuth()) {
-            return DyCookie::get($this->getAutoLoginKey()) ? false : true;
+        if ($this->isCookieUserAuth) {
+            return DyCookie::get($this->getLoginStateKey('cookie').'_cl') === 'cookie_logined' ? false : true;
         } else {
-            return DySession::get($this->loginStateKey()) ? false : true;
+            return DySession::get($this->getLoginStateKey()) ? false : true;
         }
     }
 
@@ -104,14 +89,14 @@ abstract class DyPhpUserIdentity
     }
 
     /**
-     * @brief    设置登陆状态下信息
+     * 设置登陆状态下信息
      *
-     * @param   $name
-     * @param   $value
+     * @param string
+     * @param mixed
      **/
     final public function setInfo($name, $value)
     {
-        $this->getIsCookieUserAuth() ? DyCookie::set($this->infoPre.$name, $value) : DySession::set($this->infoPre.$name, $value);
+        $this->isCookieUserAuth ? DyCookie::set($this->infoPre.$name, $value) : DySession::set($this->infoPre.$name, $value);
     }
 
     /**
@@ -119,19 +104,49 @@ abstract class DyPhpUserIdentity
      **/
     final public function __get($name)
     {
-        return $this->getIsCookieUserAuth() ? DyCookie::get($this->infoPre.$name) : DySession::get($this->infoPre.$name);
+        return $this->isCookieUserAuth ? DyCookie::get($this->infoPre.$name) : DySession::get($this->infoPre.$name);
     }
 
     /**
-     * 加密登陆状态key.
+     * 自动登陆处理器(框架会自动调用此方法).
      *
-     * @param  类型
+     * @return bool
+     **/
+    final public function runAutoLogin()
+    {
+        if(!$this->isGuest()){
+            return true;
+        }
+
+        $remember = DyCookie::get($this->getLoginStateKey('cookie'));
+        if (!$remember) {
+            return false;
+        }
+
+        $rememberMe = json_decode($remember, true);
+        if ($rememberMe['time'] + $rememberMe['expire'] - time() <= 0) {
+            return false;
+        }
+        
+        $checkToken = $this->getAutoLoginToken($rememberMe['iv'], $rememberMe['ep'], $rememberMe['time'],$rememberMe['expire'],$rememberMe['token']);
+        if (!$checkToken) {
+            return false;
+        }
+
+        //调用项目自定义认证逻辑
+        return $this->authenticate($rememberMe['iv'], $rememberMe['ep'], $rememberMe['expire']);
+    }
+
+    /**
+     * 防止多应用在同一服务器运行时冲突，生成登陆状态key.
+     *
+     * @param  string 类型
      *
      * @return string
      **/
-    private function loginStateKey($type = 'session')
+    private function getLoginStateKey($type = 'session')
     {
-        $loginStateKey = $this->cookieCryptStr().'@Dyphp~User_login-status&key#String%+^!=*/';
+        $loginStateKey = $this->getCookieCryptKey();
         if ($type == 'session') {
             return substr(md5($loginStateKey), 0, 8);
         } elseif ($type == 'cookie') {
@@ -144,74 +159,32 @@ abstract class DyPhpUserIdentity
      *
      * @return string
      **/
-    private function cookieCryptStr()
+    private function getCookieCryptKey()
     {
-        return DyPhpConfig::item('secretKey') ? md5(DyPhpConfig::item('secretKey')) : '';
+        $cookieArr = DyPhpConfig::item('cookie');
+        $cookieSecretKey = isset($cookieArr['secretKey']) ? $cookieArr['secretKey'] : '@Dyphp0~User9_login1-8status2&key7#3String6%+^4!=*/5';
+        
+        return DyPhpConfig::item('secretKey').$cookieSecretKey;
     }
 
     /**
-     * 获取cookie登陆状态key(通过此key获取到value不为空则为已登录状态).
-     **/
-    private function getAutoLoginKey()
-    {
-        return $this->loginStateKey('cookie').'_al';
-    }
-
-    /**
-     * 获取是否为Cookie验证
-     **/
-    private function getIsCookieUserAuth()
-    {
-        return is_bool($this->isCookieUserAuth) ? $this->isCookieUserAuth : false;
-    }
-
-    /**
-     * @brief    获取自动登陆token
+     * 获取自动登陆token
      *
-     * @param   $userIndexValue
-     * @param   $expire
+     * @param  string  用户身份索引值
+     * @param  int     token生成时间戳
+     * @param  int     token过期时间
+     * @param  string  token值，验证token是否有效时使用
      *
-     * @return
+     * @return  mixed
      **/
-    private function getAutoLoginToken($userIndexValue = '', $expire = 0)
+    private function getAutoLoginToken($userIndexValue = '', $encryptPassword = '', $time = 0, $expire = 0, $token = '')
     {
-        $value = $userIndexValue.$expire.DyPhpConfig::item('secretKey');
+        $value = md5($userIndexValue.$encryptPassword.$time.$expire).md5($this->getCookieCryptKey());
 
-        return md5(DyString::encodeStr($value, $this->cookieCryptStr(), $expire)).md5($value);
-    }
-
-    /**
-     * @brief    获取用户身份索引值
-     *
-     * @return
-     **/
-    protected function getUserIndexValue()
-    {
-        return $this->userIndexValue;
-    }
-
-    /**
-     * @brief    自动登陆验证
-     *
-     * @return
-     **/
-    private function checkAutoLogin()
-    {
-        $remember = DyCookie::get($this->loginStateKey('cookie'));
-        if ($remember) {
-            $rememberMe = json_decode($remember, true);
-            if ($rememberMe['expire'] - time() <= 0) {
-                return false;
-            }
-            $token = $this->getAutoLoginToken($rememberMe['userIndexValue'], $rememberMe['expire']);
-            if ($token != $rememberMe['token']) {
-                return false;
-            }
-            $this->userIndexValue = $rememberMe['userIndexValue'];
-
-            return DyPhpBase::app()->auth->authenticate($rememberMe['expire'], '');
+        if($token){
+            return DyString::decodeStr($token, $this->getCookieCryptKey()) == $value;
         }
 
-        return false;
+        return DyString::encodeStr($value, $this->getCookieCryptKey(), $expire);
     }
 }

@@ -1,12 +1,10 @@
 <?php 
 /**
- * @file DyDownload.php
- * @brief
+ * 文件下载
+ * 
  * @author QingYu.Sun Email:dyphp.com@gmail.com
- * @version 1.0
- * @copyright dyphp.com
  * @link http://www.dyphp.com
- * @date 2013-07-12
+ * @copyright dyphp.com
  **/
 class DyDownload
 {

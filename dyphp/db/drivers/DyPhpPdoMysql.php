@@ -3,7 +3,7 @@
  * mysql pdo驱动类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  **/
 final class DyPhpPdoMysql extends PDO{
     private $host = '';

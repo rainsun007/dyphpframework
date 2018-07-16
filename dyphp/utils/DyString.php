@@ -3,14 +3,14 @@
  * 字符串加密，解密工具类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  **/
 class DyString{
     /**
      * 加密字符串
      * @param string 要加密的字符串
      * @param string 加密密钥
-     * @param int    加密过期时间 0为不过期 -1为加密作废
+     * @param int    加密过期时间,单位：秒， 0为不过期 -1为加密作废
      **/
     public static function encodeStr($string,$key='',$expiry=0){
         if(empty($string) || $expiry<-1){
@@ -19,7 +19,7 @@ class DyString{
 
         $key = !empty($key) ? $key : DyPhpConfig::item('secretKey');
         if(extension_loaded('openssl')){
-            $expiry = $expiry > 0 ? time()+$expiry : $expiry;
+            $expiry = $expiry > 0 ? time() + $expiry : $expiry;
             $string = openssl_encrypt($expiry.'|'.$string.'_dysc_'.mt_rand(0,999), "AES-256-CBC", substr(md5($key),0,16), 0, "3081468300170825");
             $string = base64_encode($string);
         }elseif(extension_loaded('mcrypt') && version_compare(PHP_VERSION, '7.1.0', '<')){
@@ -301,11 +301,13 @@ class DyString{
         if($decryptStr == ''){
             return '';
         }
-          //解密字符串转为数组用以验证是否过期
+
+        //解密字符串转为数组用以验证是否过期
         $re = explode('|',substr($decryptStr,0,strrpos($decryptStr,'_dysc_')));
         if(count($re) != 2){
             return '';
         }
+
         //判断过期时间的合法性，处理设置为过期的字符串,
         if(!is_numeric($re[0]) || $re[0] == -1){
             return '';
@@ -314,7 +316,7 @@ class DyString{
         if($re[0] == 0){
             return $re[1]; //永不过期直接返回数据
         }else{
-            return $re[0]<time() ? '' : $re[1];
+            return $re[0] < time() ? '' : $re[1];
         }
     }
 

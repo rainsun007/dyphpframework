@@ -1,9 +1,9 @@
 <?php
 /**
- * 配制处理 
+ * 配制处理
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright dyphp.com
  **/
 
 //默认controller配制
@@ -12,10 +12,12 @@ defined('DYPHP_DEFAULT_CONTROLLER') or define('DYPHP_DEFAULT_CONTROLLER', 'app')
 defined('DYPHP_DEFAULT_ACTION') or define('DYPHP_DEFAULT_ACTION', 'index');
 
 //简单别名
-class DyCfg extends DyPhpConfig{
+class DyCfg extends DyPhpConfig
+{
 }
 
-class DyPhpConfig{
+class DyPhpConfig
+{
     //app唯一id
     private static $appID = '';
     //系统提示信息
@@ -43,7 +45,7 @@ class DyPhpConfig{
     /*
     缓存配制
     配制格式
-    'cache'=>array( 
+    'cache'=>array(
         'c1'=>array('type'=>'file','gcOpen'=>true),  //文件缓存多时 不建议打开gc 会导致性能低下  可以使用shell处理
         'c2'=>array('type'=>'apc'),
         'c3'=>array(
@@ -73,13 +75,16 @@ class DyPhpConfig{
     private static $hooks = array();
     //autoload包含路径
     private static $includePath = array();
+    //用户自定义配制
+    private static $userConfig = array();
 
     /**
      * 运行app配制入口
-     * @param array app配制
-     **/ 
-    public static function runConfig($appConfig){
-        $config = require $appConfig;
+     * @param array app配制文件
+     **/
+    public static function runConfig($appConfigFile)
+    {
+        $config = require $appConfigFile;
 
         //language load
         //异常信息输出语言 现只支持zh_cn
@@ -98,7 +103,7 @@ class DyPhpConfig{
 
         //check environment
         //运行环境，用于加载不同环境的constants文件;为secretKey加环境后缀（当前版本只有这两个用途）
-        if(array_key_exists('env', $config) && !in_array($config['env'],array('dev','test','pro','pre',''))){
+        if (array_key_exists('env', $config) && !in_array($config['env'], array('dev','test','pro','pre',''))) {
             DyPhpBase::throwException('run environment defined invalid');
         }
 
@@ -106,12 +111,12 @@ class DyPhpConfig{
         if (!array_key_exists('appPath', $config)) {
             DyPhpBase::throwException('appPath Undefined');
         }
-        self::$appPath = rtrim(realpath($config['appPath']),'/');
+        self::$appPath = rtrim(realpath($config['appPath']), '/');
         define('APP_PATH', self::$appPath);
         define('APP_PARENT_PATH', dirname(APP_PATH));
 
-        //get appHttpPath 获取url层级地址，以支持将应用部署到web根目录下的子目录下，DyRequest::createUrl()方法中使用
-        self::$appHttpPath = isset($_SERVER["SCRIPT_NAME"]) ? trim(str_replace(array('\\','\\\\','//'),'/',dirname($_SERVER["SCRIPT_NAME"])),'/') : trim(str_replace($_SERVER['DOCUMENT_ROOT'],"",dirname($_SERVER['SCRIPT_FILENAME'])),'/');
+        //获取url层级地址，以支持将应用部署到web根目录下的子目录下，DyRequest::createUrl()、DyPhpRoute::urlCrop()方法中使用
+        self::$appHttpPath = isset($_SERVER["SCRIPT_NAME"]) ? trim(str_replace(array('\\','\\\\','//'), '/', dirname($_SERVER["SCRIPT_NAME"])), '/') : trim(str_replace($_SERVER['DOCUMENT_ROOT'], "", dirname($_SERVER['SCRIPT_FILENAME'])), '/');
 
         //初始化handler
         //建议方案一: 按console，web类型，配合DYPHP_DEFAULT_CONTROLLER定义 在action中做不同处理
@@ -120,42 +125,49 @@ class DyPhpConfig{
         self::$loginHandler = DYPHP_DEFAULT_CONTROLLER.'/login';
         self::$messageHandler = DYPHP_DEFAULT_CONTROLLER.'/message';
 
-        //设置配制属性
+        //校验及设置配制属性
         $configArr = array(
-            'db','cache','cookie','urlManager','params','aliasMap','hooks',
+            'db','cache','cookie','urlManager','params','import','aliasMap','hooks',
             'errorHandler','messageHandler','loginHandler','appName','secretKey','env'
         );
-        foreach($configArr as $key=>$val){
-            if (array_key_exists($val, $config)) {
-                $isType = $key<=6 ? is_array($config[$val]) : is_string($config[$val]);
-                if(!$isType){
-                    DyPhpBase::throwException('data type error',$val);
+        foreach ($config as $key => $value) {
+            $cnfSearch = array_search($key, $configArr);
+            if ($cnfSearch !== false) {
+                $isType = $cnfSearch<=7 ? is_array($value) : is_string($value);
+                if (!$isType) {
+                    DyPhpBase::throwException('data type error', $key);
                 }
-                self::${$val} = $config[$val];
+                //系统属性设置
+                self::${$key} = $value;
+            } else {
+                //用户自定义配制设置
+                self::$userConfig[$key] = $value;
             }
         }
+        unset($config);
 
         //为secretKey加上环境后缀,自动按环境生成不同的secretKey
+        if(strlen(self::$secretKey) < 32){
+            DyPhpBase::throwException('the secretKey length is no less than 32', 'secretKey');
+        }
         self::$secretKey = empty(self::$env) ? self::$secretKey.'_pro' : self::$secretKey.'_'.self::$env;
 
         //生成app唯一id,在session key的前缀中使用到,解决多应用session冲突（当前版本只有这一个用途）
         self::$appID = md5(self::$secretKey);
 
         //import加载
-        $import = array_key_exists('import', $config) && is_array($config['import']) ? $config['import'] : array();
-        self::import($import);
+        self::import(self::$import);
 
         //aliasMap加载
-        $aliasMap = array_key_exists('aliasMap', $config) && is_array($config['aliasMap']) ? $config['aliasMap'] : array();
-        self::aliasMap($aliasMap);
+        self::aliasMap(self::$aliasMap);
 
-        unset($config);
+        //加载配制及工具
         self::loadCommon();
     }
 
     /**
      * 解析app配制中的包含文件，autoload将调用该配制
-     * 
+     *
      * @param array
      * 实例
      * 'import' => array(
@@ -163,14 +175,15 @@ class DyPhpConfig{
      *       'app.widgets.*',
      *       'app.utils.*',
      *       'com.utils.*',
-     *   ), 
+     *   ),
      **/
-    private static function import($pathArr){
+    private static function import($pathArr)
+    {
         $appImport = array(
             'app.models.*',
             'app.components.*',
         );
-        $pathArr = array_unique(array_merge($appImport,$pathArr));
+        $pathArr = array_unique(array_merge($appImport, $pathArr));
 
         foreach ($pathArr as $path) {
             $path = self::getRealPath($path);
@@ -180,25 +193,25 @@ class DyPhpConfig{
                 if (!file_exists($file)) {
                     DyPhpBase::throwException('file does not exist', $file);
                 }
-                $className = substr($path,strrpos($path,DIRECTORY_SEPARATOR));
+                $className = substr($path, strrpos($path, DIRECTORY_SEPARATOR));
                 self::$import[$className] = $file;
                 continue;
             }
 
             $incPath = rtrim($path, '*');
-            if(is_dir($incPath)){
+            if (is_dir($incPath)) {
                 self::$includePath[] = $incPath;
             }
         }
 
         if (self::$includePath) {
-            set_include_path(get_include_path() . PATH_SEPARATOR . implode(PATH_SEPARATOR,self::$includePath));
+            set_include_path(get_include_path() . PATH_SEPARATOR . implode(PATH_SEPARATOR, self::$includePath));
         }
     }
 
     /**
      * 别名映射,调用方式如：Dy::app()->dbc
-     * 
+     *
      * @param  array  $aliasArr
      * 实例
      * 'aliasMap' => array(
@@ -208,15 +221,16 @@ class DyPhpConfig{
      *       'auth'=>'app.components.UserIdentity',
      *  );
      **/
-    private static function aliasMap($aliasArr){
-        self::setPathOfAlias('dysys',DYPHP_PATH);
+    private static function aliasMap($aliasArr)
+    {
+        self::setPathOfAlias('dysys', DYPHP_PATH);
         $loadAlias = array(
             'captcha'=>'dysys.dyphp.lib.DyCaptcha',
             'dbc'=>'dysys.dyphp.db.DyDbCriteria',
             'hook'=>'dysys.dyphp.base.DyPhpHooks',
             'auth'=>'app.components.UserIdentity',
         );
-        $aliasArr = array_unique(array_merge($loadAlias,$aliasArr));
+        $aliasArr = array_unique(array_merge($loadAlias, $aliasArr));
 
         foreach ($aliasArr as $key=>$path) {
             $file = self::getRealPath($path).EXT;
@@ -231,14 +245,15 @@ class DyPhpConfig{
      * 获取import与aliasMap的文件或目录真实路径
      *
      * @param string  $path
-     * @return string 
+     * @return string
      */
-    private static function getRealPath($path){
+    private static function getRealPath($path)
+    {
         if (strpos($path, 'app') === 0) {
             $path = strtr($path, array('app' => self::$appPath, '.' =>DIRECTORY_SEPARATOR));
-        }else{
-            $alias = substr($path,0,strpos($path, '.'));
-            if(!isset(self::$pathOfAlias[$alias])){
+        } else {
+            $alias = substr($path, 0, strpos($path, '.'));
+            if (!isset(self::$pathOfAlias[$alias])) {
                 DyPhpBase::throwException('path alias error', $alias);
             }
             $path = strtr($path, array($alias=>self::$pathOfAlias[$alias], '.' =>DIRECTORY_SEPARATOR));
@@ -251,7 +266,8 @@ class DyPhpConfig{
      * @param string 别名
      * @param string 路径(相对、绝对路径均可)
      **/
-     public static function setPathOfAlias($alias,$path){
+    public static function setPathOfAlias($alias, $path)
+    {
         self::$pathOfAlias[$alias] = $path;
     }
 
@@ -260,7 +276,8 @@ class DyPhpConfig{
      * @param 类名
      * @return array
      **/
-    public static  function getImport($className){
+    public static function getImport($className)
+    {
         return isset(self::$import[$className]) ? self::$import[$className] : false;
     }
 
@@ -269,11 +286,12 @@ class DyPhpConfig{
      * @param    $aliasName
      * @return   array
      **/
-    public static  function getAliasMap($aliasName){
-        if(!isset(self::$aliasMap[$aliasName])){
+    public static function getAliasMap($aliasName)
+    {
+        if (!isset(self::$aliasMap[$aliasName])) {
             return false;
         }
-        return array('name'=>basename(self::$aliasMap[$aliasName],EXT), 'file'=>self::$aliasMap[$aliasName]);
+        return array('name'=>basename(self::$aliasMap[$aliasName], EXT), 'file'=>self::$aliasMap[$aliasName]);
     }
 
     /**
@@ -281,18 +299,22 @@ class DyPhpConfig{
      * @param    $itemName
      * @return   mixed
      **/
-    public static function item($itemName){
-        if(isset(self::${$itemName})){
+    public static function item($itemName)
+    {
+        if (isset(self::${$itemName})) {
             return self::${$itemName};
+        } elseif (isset(self::$userConfig[$itemName])) {
+            return self::$userConfig[$itemName];
         }
-        DyPhpBase::throwException('config does not exist',$itemName);
+        DyPhpBase::throwException('config does not exist', $itemName);
     }
 
     /**
      * 获取是否隐藏index.php设置
      * @return bool
      **/
-    public static function getHideIndex(){
+    public static function getHideIndex()
+    {
         $urlmanager = self::$urlManager;
         return isset($urlmanager['urlStyle']['hideIndex']) && $urlmanager['urlStyle']['hideIndex'] == 'yes' ? true : false;
     }
@@ -301,7 +323,8 @@ class DyPhpConfig{
      * 获取url是否以rest风格访问
      * @return bool
      **/
-    public static function getRestCa(){
+    public static function getRestCa()
+    {
         $urlmanager = self::$urlManager;
         return isset($urlmanager['urlStyle']['restCa']) && $urlmanager['urlStyle']['restCa'] == 'yes' ? true : false;
     }
@@ -311,7 +334,8 @@ class DyPhpConfig{
      * @param string
      * @return mixed
      **/
-    public static function getParams($param){
+    public static function getParams($param)
+    {
         return !empty(self::$params[$param]) ? self::$params[$param] : null;
     }
 
@@ -319,27 +343,27 @@ class DyPhpConfig{
      * 获取自定义包含路径，autoload将调用该方法
      * @return   string
      **/
-    public static function getIncludePath(){
+    public static function getIncludePath()
+    {
         return self::$includePath;
     }
 
     /**
      * 加载配制及工具
      **/
-    private static function loadCommon(){
+    private static function loadCommon()
+    {
         //constants 非必须文件 不存在就不加载 不会给出报错信息
         $constants = empty(self::$env) ? 'constants' : self::$env.'_constants';
         $constants = self::$appPath.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$constants.EXT;
-        if(file_exists($constants)){
+        if (file_exists($constants)) {
             require $constants;
         }
 
         //functions 非必须文件 不存在就不加载 不会给出报错信息
         $funs = self::$appPath.DIRECTORY_SEPARATOR.'utils'.DIRECTORY_SEPARATOR.'functions'.EXT;
-        if(file_exists($funs)){
+        if (file_exists($funs)) {
             require $funs;
         }
     }
 }
-
-

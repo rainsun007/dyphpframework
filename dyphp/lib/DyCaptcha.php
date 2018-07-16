@@ -5,7 +5,7 @@
  * 建议自定义背景图片与扭曲功能不要同时使用 因为此版本背景也会被扭曲
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright 2011 dyphp.com 
+ * @copyright Copyright dyphp.com 
  **/
 class DyCaptcha{
     /** 图片宽度(px) **/

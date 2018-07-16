@@ -6,13 +6,10 @@
  *
  * @link http://www.dyphp.com/
  *
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  **/
 class DyPhpController
 {
-    //默认使用的action
-    protected $defaultAction = DYPHP_DEFAULT_ACTION;
-
     //run方法 和 forward方法 所传递的参数，在init方法执行前就已设置生效
     protected $caParam = array();
 
@@ -22,11 +19,11 @@ class DyPhpController
     //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginHandler属性不受限制）
     protected $allNeedLogin = false;
 
-    //当前运行的module,controller,action名，首字母为小写
-    protected $cid = '';
-    protected $aid = '';
-    protected $pcid = '';
+    //当前运行的module,controller,module/controller,action名，首字母为小写
     protected $module = '';
+    protected $cid = '';
+    protected $pcid = '';
+    protected $aid = '';
 
     //当前时间戳
     protected $time = 0;
@@ -123,7 +120,7 @@ class DyPhpController
     }
 
     /**
-     * @brief    解析action
+     * 解析action
      *
      * @param   string $controllerRun controller实例
      * @param   string $action
@@ -133,12 +130,12 @@ class DyPhpController
     private static function parseAction($controllerRun, $action)
     {
         //action 解析
-        $actionNameStr = $action ? $action : $controllerRun->defaultAction;
+        $actionNameStr = $action ? $action : DYPHP_DEFAULT_ACTION;
         $actionName = 'action'.ucfirst($actionNameStr);
         if (!method_exists($controllerRun, $actionName)) {
             DyPhpBase::throwException('action does not exist', $actionName);
         }
-        $controllerRun->aid = self::lcfirst($actionNameStr);
+        $controllerRun->aid = lcfirst($actionNameStr);
         DyPhpBase::app()->aid = $controllerRun->aid;
 
         //hook调用: controller实例化之后执行
@@ -152,6 +149,7 @@ class DyPhpController
         //未登录不可访问的action,重定向到登录页
         $loginHandler = empty($controllerRun->loginHandler) ? DyPhpConfig::item('loginHandler') : $controllerRun->loginHandler;
         if ($controllerRun->pcid.'/'.$controllerRun->aid != trim($loginHandler, '/') && DyPhpBase::app()->auth->isGuest() && ($controllerRun->allNeedLogin || in_array($controllerRun->aid, $controllerRun->needLogin()))) {
+            DyPhpBase::app()->auth->logout();
             DyRequest::redirect($loginHandler);
         }
 
@@ -159,7 +157,7 @@ class DyPhpController
     }
 
     /**
-     * @brief    解析controller
+     * 解析controller
      *
      * @param   string $controllerPname
      *
@@ -186,37 +184,15 @@ class DyPhpController
         $controllerRun = new $controller();
 
         //设置全局公共属性
-        $controllerRun->cid = self::lcfirst($controllerName);
-        $controllerRun->pcid = self::lcfirst($controllerPname);
-        $controllerRun->module = rtrim(self::lcfirst($controllerPath), '/');
+        $controllerRun->cid = lcfirst($controllerName);
+        $controllerRun->pcid = lcfirst($controllerPname);
+        $controllerRun->module = rtrim(lcfirst($controllerPath), '/');
         DyPhpBase::app()->cid = $controllerRun->cid;
         DyPhpBase::app()->pcid = $controllerRun->pcid;
         DyPhpBase::app()->module = $controllerRun->module;
         DyPhpBase::app()->runingController = $controllerRun;
 
         return $controllerRun;
-    }
-
-    /**
-     * @brief    首字母小写
-     *
-     * @param  string $string
-     *
-     * @return string
-     **/
-    private static function lcfirst($string)
-    {
-        if (false === function_exists('lcfirst')) {
-            $string = (string) $string;
-            if (empty($string)) {
-                return '';
-            }
-            $string{0} = strtolower($string{0});
-
-            return $string;
-        } else {
-            return lcfirst($string);
-        }
     }
 
     public function __call($key, $Args)

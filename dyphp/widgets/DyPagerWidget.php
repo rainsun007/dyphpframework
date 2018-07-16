@@ -6,7 +6,7 @@
  *
  * @link http://www.dyphp.com/
  *
- * @copyright Copyright 2011 dyphp.com
+ * @copyright Copyright dyphp.com
  **/
 class DyPagerWidget extends DyPhpWidgets
 {
@@ -49,9 +49,9 @@ class DyPagerWidget extends DyPhpWidgets
         $this->previous = !empty($options['pre']) ? $options['pre'] : 'Prev';
         $this->next = !empty($options['next']) ? $options['next'] : 'Next';
 
-        $dyPagerStyle = !empty($options['style']) ? $options['style'] : 'default';
-        $dyPagerStyle = DyRequest::createUrl('static/widgets/dypager').'/'.$dyPagerStyle.'.css';
-        $dyPagerStyle = !empty($options['cdnStyle']) ? $options['cdnStyle'] : $dyPagerStyle;
+        $dyPhpPagerStyle = !empty($options['style']) ? $options['style'] : 'default';
+        $dyPhpPagerStyle = DyRequest::createUrl('static/widgets/dypager').'/'.$dyPhpPagerStyle.'.css';
+        $dyPhpPagerStyle = !empty($options['cdnStyle']) ? $options['cdnStyle'] : $dyPhpPagerStyle;
 
         //当前翻页数
         $this->pageCount = ceil($this->count / $this->pageSize);
@@ -71,9 +71,12 @@ class DyPagerWidget extends DyPhpWidgets
             $this->url = DyRequest::createUrl(DyPhpBase::app()->pcid.'/'.DyPhpBase::app()->aid);
         }
 
-        $dyPhpPager = $this->show();
-        if ($dyPhpPager != '') {
-            $this->sysRender('dyPager', compact('dyPhpPager', 'dyPagerStyle'));
+        $dyPhpPagerShow = $this->show();
+        if ($dyPhpPagerShow != '') {
+            $dyPhpPagerDataCount = $this->count;
+            $dyPhpPagerPageCount = $this->pageCount;
+            $dyPhpPagerCurrentPage = $this->thisPage;
+            $this->sysRender('dyPager', compact('dyPhpPagerShow', 'dyPhpPagerStyle','dyPhpPagerDataCount','dyPhpPagerPageCount','dyPhpPagerCurrentPage'));
         }
     }
 
