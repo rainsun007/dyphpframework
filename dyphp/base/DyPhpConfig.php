@@ -42,22 +42,7 @@ class DyPhpConfig
     private static $urlManager = array();
     //数据库配制
     private static $db = array();
-    /*
-    缓存配制
-    配制格式
-    'cache'=>array(
-        'c1'=>array('type'=>'file','gcOpen'=>true),  //文件缓存多时 不建议打开gc 会导致性能低下  可以使用shell处理
-        'c2'=>array('type'=>'apc'),
-        'c3'=>array(
-            'type'=>'memcache',
-            'isMemd'=>false,
-            'servers_one'=>array(
-                array('host','port','weight'),
-                array('host','port','weight'),
-            ),
-        ),
-    ),
-    */
+    //缓存配制
     private static $cache = array();
     //cookie配制
     private static $cookie = array();
@@ -80,14 +65,37 @@ class DyPhpConfig
 
     /**
      * 运行app配制入口
-     * @param array app配制文件
+     * 
+     * @param string|array app配制文件
      **/
     public static function runConfig($appConfigFile)
     {
-        $config = require $appConfigFile;
+        if(is_array($appConfigFile)){
+            if(!isset($appConfigFile['p']) || !isset($appConfigFile['c'])){
+                DyPhpBase::throwException('config key is not exists','"p" or "c"');
+            }elseif(!file_exists($appConfigFile['p']) || !file_exists($appConfigFile['c'])){
+                DyPhpBase::throwException('config file is not exists','"p" or "c"');
+            }
+            
+            $parentConfig = require $appConfigFile['p'];
+            $childConfig = require $appConfigFile['c'];
+            $excludeConfig = isset($appConfigFile['e']) ? (array)$appConfigFile['e'] : array();
+            $config = array_merge((array)$parentConfig,(array)$childConfig);
+            foreach ($excludeConfig as $key => $value) {
+                if(isset($parentConfig[$value])){
+                    $config[$value] = $parentConfig[$value];
+                }elseif(isset($config[$value])){
+                    unset($config[$value]);
+                }
+            }
+        }else{
+            if(!file_exists($appConfigFile)){
+                DyPhpBase::throwException('config file is not exists',$appConfigFile);
+            }
+            $config = require $appConfigFile;
+        }
 
-        //language load
-        //异常信息输出语言 现只支持zh_cn
+        //language load  异常信息输出语言 现只支持zh_cn
         self::$language = isset($config['language']) ? $config['language'] : 'zh_cn';
 
         //check app config
@@ -228,8 +236,10 @@ class DyPhpConfig
             'captcha'=>'dysys.dyphp.lib.DyCaptcha',
             'dbc'=>'dysys.dyphp.db.DyDbCriteria',
             'hook'=>'dysys.dyphp.base.DyPhpHooks',
-            'auth'=>'app.components.UserIdentity',
         );
+        if(DyPhpBase::$appType == 'web'){
+            $loadAlias['auth'] = 'app.components.UserIdentity';
+        }
         $aliasArr = array_unique(array_merge($loadAlias, $aliasArr));
 
         foreach ($aliasArr as $key=>$path) {

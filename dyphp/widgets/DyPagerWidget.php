@@ -30,6 +30,9 @@ class DyPagerWidget extends DyPhpWidgets
     //传入url参数该值为false
     private $autoUrl = true;
 
+    //ajax分页回调js函数名
+    private $ajaxCallback = '';
+
     private $url;
     private $first;
     private $last;
@@ -44,13 +47,15 @@ class DyPagerWidget extends DyPhpWidgets
 
         $this->paramName = !empty($options['pageName']) ? $options['pageName'] : 'page';
 
+        $this->ajaxCallback = !empty($options['ajaxCallback']) ? $options['ajaxCallback'] : '';
+
         $this->first = !empty($options['first']) ? $options['first'] : 'First';
         $this->last = !empty($options['last']) ? $options['last'] : 'Last';
         $this->previous = !empty($options['pre']) ? $options['pre'] : 'Prev';
         $this->next = !empty($options['next']) ? $options['next'] : 'Next';
 
-        $dyPhpPagerStyle = !empty($options['style']) ? $options['style'] : 'default';
-        $dyPhpPagerStyle = DyRequest::createUrl('static/widgets/dypager').'/'.$dyPhpPagerStyle.'.css';
+        $dyPhpPagerStyle = !empty($options['style']) ? $options['style'] : '/static/widgets/dypager/default.css';
+        $dyPhpPagerStyle = (DyCfg::item('appHttpPath') != '' ? '/'.DyCfg::item('appHttpPath') : '').$dyPhpPagerStyle;
         $dyPhpPagerStyle = !empty($options['cdnStyle']) ? $options['cdnStyle'] : $dyPhpPagerStyle;
 
         //当前翻页数
@@ -62,7 +67,7 @@ class DyPagerWidget extends DyPhpWidgets
         }
 
         if (!empty($options['url'])) {
-            //手动指定分页url及参数处理
+            //指定分页url及参数处理
             $this->url = $options['url'];
             $this->params = isset($options['params']) && is_array($options['params']) ? $options['params'] : array();
             $this->autoUrl = false;
@@ -126,31 +131,34 @@ class DyPagerWidget extends DyPhpWidgets
      */
     private function getLink($page, $text)
     {
-        //手动指定分页url及参数处理
+        $getParam = '';
         if (!$this->autoUrl) {
-            $getParam = '';
+            //指定分页url及参数处理
             foreach ($this->params as $key => $val) {
                 $getParam .= $key.'='.$val.'&';
             }
             $getParam = substr($getParam, 0, -1);
             $getParam = $getParam ? '?'.$this->paramName.'='.$page.'&'.$getParam : '?'.$this->paramName.'='.$page;
-
-            return '<a href="'.$this->url.$getParam.'">'.$text.'</a>';
-        }
-
-        //根据url风格配制自动转换url
-        $getArr = $_GET;
-        $getArr[$this->paramName] = $page;
-        $getParam = $this->isRest ? '/' : '&';
-        foreach ($getArr as $key => $val) {
-            if ($key == 'ca' || empty($key) || trim($val) === '') {
-                continue;
+        }else{
+            //根据url风格配制自动转换url
+            $getArr = array();
+            foreach ($_GET as $key => $value) {
+                $getArr[$key] = addslashes($value);
             }
-            $getParam .= $this->isRest ? $key.'/'.$val.'/' : $key.'='.$val.'&';
+            $getArr[$this->paramName] = $page;
+            
+            $getParam = $this->isRest ? '/' : '&';
+            foreach ($getArr as $key => $val) {
+                if ($key == 'ca' || empty($key) || trim($val) === '') {
+                    continue;
+                }
+                $getParam .= $this->isRest ? $key.'/'.$val.'/' : $key.'='.$val.'&';
+            }
+            $getParam = substr($getParam, 0, -1);
         }
-        $getParam = substr($getParam, 0, -1);
 
-        return '<a href="'.$this->url.$getParam.'">'.$text.'</a>';
+        $ajax = $this->ajaxCallback ? ' onclick="'.$this->ajaxCallback.'(\''.$this->url.$getParam.'\');return false;" ' : '';
+        return '<a '.$ajax.' href="'.$this->url.$getParam.'">'.$text.'</a>';
     }
 
     /**

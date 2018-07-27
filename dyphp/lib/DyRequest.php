@@ -1,6 +1,6 @@
 <?php
 /**
- * http请求处理工具类.
+ * http请求处理库.
  *
  * @author 大宇 Email:dyphp.com@gmail.com
  *
@@ -11,14 +11,12 @@
 class DyRequest
 {
     /**
-     * @brief    url重定向
+     * url重定向
      *
-     * @param   $url    站内重定向该参数为controller/action 完整url重定向需要将$param参数设置为bool类型
-     * @param   $param  默认为array类型  为bool类型且值为false时将不进行url重组，直接执行重定向
-     * @param   $code
-     * @param   $method
-     *
-     * @return  null
+     * @param $url    站内重定向该参数为controller/action 完整url重定向需要将$param参数设置为bool类型
+     * @param $param  默认为array类型  为bool类型且值为false时将不进行url重组，直接执行重定向
+     * @param $code
+     * @param $method
      **/
     public static function redirect($url, $param = array(), $code = 302, $method = 'location')
     {
@@ -28,9 +26,9 @@ class DyRequest
     }
 
     /**
-     * @brief    获取站点根url
+     * 获取站点根url
      *
-     * @return   string
+     * @return string
      **/
     public static function getSiteRootUrl()
     {
@@ -39,6 +37,7 @@ class DyRequest
 
     /**
      * 框架支持restful风格的url使用此方法可创建兼容性URL,使得url风格配制修改对生成的url无影响
+     * 注意：此方法对urlManager配制的url重写不兼容
      *
      * @param string controller或controller/action
      * @param array  get参数
@@ -378,7 +377,7 @@ class DyRequest
     }
 
     /**
-     * 发起 post 请求
+     * 简单的post请求
      *
      * @param string  接受请求的url
      * @param array   提交的数据
@@ -392,86 +391,57 @@ class DyRequest
         $userAgent = $userAgent ? $userAgent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36';
 
         $postString = http_build_query($postArray, '', '&');
+
         if (function_exists('curl_init')) {
-            return self::runCurlRequest($url, $postString, $timeOut, $userAgent);
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postString);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeOut);
+            curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
+            $postResult = curl_exec($ch);
+            curl_close($ch);
+            return $postResult;
         } else {
-            return self::runFileRequest($url, $postString, $timeOut, $userAgent);
-        }
-    }
-
-    /**
-     * @brief    使用curl发送post请求
-     *
-     * @param   $postUrl
-     * @param   $postString
-     * @param   $timeOut
-     *
-     * @return  string
-     **/
-    private static function runCurlRequest($postUrl, $postString, $timeOut, $userAgent)
-    {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $postUrl);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postString);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $timeOut);
-        curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
-        $postResult = curl_exec($ch);
-        curl_close($ch);
-        return $postResult;
-    }
-
-    /**
-     * @brief    使用fopen发送请求
-     *
-     * @param   $postUrl
-     * @param   $postString
-     * @param   $timeOut
-     *
-     * @return  string
-     **/
-    private static function runFileRequest($postUrl, $postString, $timeOut, $userAgent)
-    {
-        $context = array(
-            'http' => array(
-                'method' => 'POST',
-                'timeout' => $timeOut,
-                'user_agent' => $userAgent,
-                'header' => 'Content-Type: application/x-www-form-urlencoded'."\r\n".
-                'Content-Length: '.strlen($postString)."\r\n",
-                'content' => $postString,
-            ),
-        );
-        $contextID = stream_context_create($context);
-
-        //第一获取方案
-        $postResult = file_get_contents($postUrl, false, $contextID);
-        if ($postResult !== false) {
+            $context = array(
+                'http' => array(
+                    'method' => 'POST',
+                    'timeout' => $timeOut,
+                    'user_agent' => $userAgent,
+                    'header' => 'Content-Type: application/x-www-form-urlencoded'."\r\n".
+                    'Content-Length: '.strlen($postString)."\r\n",
+                    'content' => $postString,
+                ),
+            );
+            $contextID = stream_context_create($context);
+    
+            $postResult = file_get_contents($postUrl, false, $contextID);
+            if ($postResult !== false) {
+                return $postResult;
+            }
+    
+            $sock = fopen($postUrl, 'r', false, $contextID);
+            $postResult = '';
+            if ($sock) {
+                while (!feof($sock)) {
+                    $postResult .= fgets($sock, 4096);
+                }
+                fclose($sock);
+            }
             return $postResult;
         }
-
-        //备用获取方案
-        $sock = fopen($postUrl, 'r', false, $contextID);
-        $postResult = '';
-        if ($sock) {
-            while (!feof($sock)) {
-                $postResult .= fgets($sock, 4096);
-            }
-            fclose($sock);
-        }
-        return $postResult;
     }
 
     /**
-     * @brief    获取提交的原始数据
+     * 获取提交的原始数据
      *
-     * @param   $paramKey
-     * @param   $method
-     * @param   $default
+     * @param $paramKey
+     * @param $method
+     * @param $default
      *
-     * @return  mix
+     * @return  mixed
      **/
     private static function getOriginalParam($paramKey = '', $method = 'get', $default = '')
     {
@@ -515,9 +485,9 @@ class DyRequest
     }
 
     /**
-     * @brief   处理浮点型数据
+     * 处理浮点型数据
      *
-     * @param   float 需要被验证的值
+     * @param float 需要被验证的值
      *
      * @return float 返回验证过的值
      **/
@@ -529,23 +499,22 @@ class DyRequest
     /**
      * 字符串转义.
      *
-     * @param string  需要转义的字符串
+     * @param string|array  需要转义的字符串或数组
      *
-     * @return string 转义后的字符串
+     * @return mixed 转义后的字符串
      **/
-    private static function strAddslashes($string)
+    private static function strAddslashes($requestValue)
     {
         if (!get_magic_quotes_gpc()) {
-            if (is_array($string)) {
+            if (is_array($requestValue)) {
                 foreach ($string as $key => $val) {
-                    $string[$key] = self::strAddslashes($val);
+                    $requestValue[$key] = self::strAddslashes($val);
                 }
             } else {
-                $string = trim($string);
-                $string = function_exists('addslashes') ? addslashes($string) : mysql_real_escape_string($string);
+                $requestValue = addslashes(trim($requestValue));
             }
         }
 
-        return $string;
+        return $requestValue;
     }
 }

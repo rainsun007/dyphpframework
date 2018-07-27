@@ -4,7 +4,21 @@
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
  * @copyright Copyright dyphp.com
- **/
+ *
+ *   配制格式
+ *   'cache'=>array(
+ *       'c1'=>array('type'=>'file','gcOpen'=>true),  //文件缓存多时 不建议打开gc 会导致性能低下  可以使用shell处理
+ *       'c2'=>array('type'=>'apc'),
+ *       'c3'=>array(
+ *           'type'=>'memcache',
+ *           'isMemd'=>false,
+ *           'servers_one'=>array(
+ *               array('host','port','weight'),
+ *               array('host','port','weight'),
+ *           ),
+ *       ),
+ *   ),
+ */
 abstract class DyPhpCache
 {
     //获取缓存
