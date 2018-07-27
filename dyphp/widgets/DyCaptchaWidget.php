@@ -7,9 +7,9 @@
  **/
 class DyCaptchaWidget extends DyPhpWidgets{
     public function run($options=array()){
-        $options['request'] = isset($options['request']) ? $options['request'] : '';
-        $options['buttonLabel'] = isset($options['buttonLabel']) ? $options['buttonLabel'] : 'Get a new code';
-        $this->sysRender('dyCaptcha',compact('options'));
+        $dycwRequest = isset($options['request']) ? $options['request'] : '';
+        $dycwButtonLabel = isset($options['buttonLabel']) ? $options['buttonLabel'] : 'Get a new code';
+        $this->sysRender('dyCaptcha',compact('dycwRequest','dycwButtonLabel'));
     }
     
 }

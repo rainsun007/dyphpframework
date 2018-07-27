@@ -141,16 +141,19 @@ class DyPhpController
         //hook调用: controller实例化之后执行
         DyPhpBase::app()->hook->invokeHook(DyPhpHooks::AFTER_CONTROLLER_CONSTRUCTOR);
 
-        //need login处理 判断返回值类型  对必须登录才可以访问的方法进行验证与拦截
-        if (!is_array($controllerRun->needLogin())) {
-            DyPhpBase::throwException('needLogin method error');
-        }
+        //只有web项目需要进行访问认证验证
+        if (DyPhpBase::$appType == 'web') {
+            //need login处理 判断返回值类型  对必须登录才可以访问的方法进行验证与拦截
+            if (!is_array($controllerRun->needLogin())) {
+                DyPhpBase::throwException('needLogin method error');
+            }
 
-        //未登录不可访问的action,重定向到登录页
-        $loginHandler = empty($controllerRun->loginHandler) ? DyPhpConfig::item('loginHandler') : $controllerRun->loginHandler;
-        if ($controllerRun->pcid.'/'.$controllerRun->aid != trim($loginHandler, '/') && DyPhpBase::app()->auth->isGuest() && ($controllerRun->allNeedLogin || in_array($controllerRun->aid, $controllerRun->needLogin()))) {
-            DyPhpBase::app()->auth->logout();
-            DyRequest::redirect($loginHandler);
+            //未登录不可访问的action,重定向到登录页
+            $loginHandler = empty($controllerRun->loginHandler) ? DyPhpConfig::item('loginHandler') : $controllerRun->loginHandler;
+            if ($controllerRun->pcid.'/'.$controllerRun->aid != trim($loginHandler, '/') && DyPhpBase::app()->auth->isGuest() && ($controllerRun->allNeedLogin || in_array($controllerRun->aid, $controllerRun->needLogin()))) {
+                DyPhpBase::app()->auth->logout();
+                DyRequest::redirect($loginHandler);
+            }
         }
 
         return $actionName;

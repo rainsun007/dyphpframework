@@ -89,7 +89,7 @@ class DyPhpRoute
     private static function getRegParam()
     {
         foreach (self::$regularGetParams as $key => $value) {
-            self::$regularGetParams[$key] = function_exists('addslashes') ? addslashes($value) : mysql_real_escape_string($value);
+            self::$regularGetParams[$key] = addslashes($value);
         }
 
         return self::$regularGetParams;

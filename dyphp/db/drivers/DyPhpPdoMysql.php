@@ -22,7 +22,6 @@ final class DyPhpPdoMysql extends PDO{
 
     /**
      * 运行入口
-     * @param 数据库配制键值
      **/
     public function run(){
         $dbConfigArr = $this->dbConfigArr;
@@ -34,9 +33,8 @@ final class DyPhpPdoMysql extends PDO{
         $this->dbName = $dbConfigArr['dbName'];
         $this->pconn = $dbConfigArr['pconn'];
 
-        $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName}";
-
         //连接模式
+        $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName}";
         $arrOptions = array(PDO::ATTR_PERSISTENT=>$this->pconn,PDO::MYSQL_ATTR_USE_BUFFERED_QUERY=>true);
 
         try{
@@ -56,7 +54,7 @@ final class DyPhpPdoMysql extends PDO{
 
 
     /**
-     * @brief    获取数据大小
+     * 获取数据大小
      * @return
      **/
     public function getDataSize(){
@@ -73,7 +71,7 @@ final class DyPhpPdoMysql extends PDO{
     }
 
     /**
-     * @brief    获取版本号
+     * 获取版本号
      * @return
      **/
     public function getVersion(){

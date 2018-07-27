@@ -7,6 +7,8 @@
  **/
 return array(
     'config is not an array'=>'配制文件不是数组',
+    'config key is not exists'=>'配制key不存在',
+    'config file is not exists'=>'配制文件不存在',
     'appPath Undefined'=>'appPath未定义', 
     'secretKey Undefined'=>'secretKey未定义', 
     'file does not exist'=>'文件不存在', 
