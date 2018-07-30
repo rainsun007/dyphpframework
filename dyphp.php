@@ -21,7 +21,7 @@ defined('EXT') or define('EXT', '.php');
  * 主版本号(较大的变动).子版本号(功能变化或新特性增加).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
  * 上一级版本号变动时下级版本号归零
  **/
-define('DYPHP_VERSION', '2.8.0-release');
+define('DYPHP_VERSION', '2.8.1-release');
 
 //简单别名
 class Dy extends DyPhpBase
