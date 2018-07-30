@@ -81,7 +81,8 @@ class DyPagerWidget extends DyPhpWidgets
             $dyPhpPagerDataCount = $this->count;
             $dyPhpPagerPageCount = $this->pageCount;
             $dyPhpPagerCurrentPage = $this->thisPage;
-            $this->sysRender('dyPager', compact('dyPhpPagerShow', 'dyPhpPagerStyle','dyPhpPagerDataCount','dyPhpPagerPageCount','dyPhpPagerCurrentPage'));
+            $dyPhpPagerPageSize = $this->pageSize;
+            $this->sysRender('dyPager', compact('dyPhpPagerShow', 'dyPhpPagerStyle','dyPhpPagerDataCount','dyPhpPagerPageCount','dyPhpPagerCurrentPage','dyPhpPagerPageSize'));
         }
     }
 
