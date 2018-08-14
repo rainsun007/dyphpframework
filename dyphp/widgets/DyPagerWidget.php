@@ -42,8 +42,8 @@ class DyPagerWidget extends DyPhpWidgets
     public function run($options = array())
     {
         $this->count = !empty($options['count']) && $options['count'] > 0 ? $options['count'] : 0;
-        $this->pageSize = !empty($options['pageSize']) && $options['pageSize'] > 0 ? $options['pageSize'] : 15;
-        $this->offset = !empty($options['offset']) && $options['offset'] > 0 ? $options['offset'] : 2;
+        $this->pageSize = !empty($options['pageSize']) && $options['pageSize'] > 0 ? $options['pageSize'] : 20;
+        $this->offset = !empty($options['offset']) && $options['offset'] > 0 ? $options['offset'] : 5;
 
         $this->paramName = !empty($options['pageName']) ? $options['pageName'] : 'page';
 
@@ -82,7 +82,7 @@ class DyPagerWidget extends DyPhpWidgets
             $dyPhpPagerPageCount = $this->pageCount;
             $dyPhpPagerCurrentPage = $this->thisPage;
             $dyPhpPagerPageSize = $this->pageSize;
-            $this->sysRender('dyPager', compact('dyPhpPagerShow', 'dyPhpPagerStyle','dyPhpPagerDataCount','dyPhpPagerPageCount','dyPhpPagerCurrentPage','dyPhpPagerPageSize'));
+            $this->sysRender('dyPager', compact('dyPhpPagerShow', 'dyPhpPagerStyle', 'dyPhpPagerDataCount', 'dyPhpPagerPageCount', 'dyPhpPagerCurrentPage', 'dyPhpPagerPageSize'));
         }
     }
 
@@ -140,7 +140,7 @@ class DyPagerWidget extends DyPhpWidgets
             }
             $getParam = substr($getParam, 0, -1);
             $getParam = $getParam ? '?'.$this->paramName.'='.$page.'&'.$getParam : '?'.$this->paramName.'='.$page;
-        }else{
+        } else {
             //根据url风格配制自动转换url
             $getArr = array();
             foreach ($_GET as $key => $value) {

@@ -54,7 +54,7 @@ class DyPhpHooks
 
         //after_action中可能会操作cookie session,重定向等,所以要在headers already sent之前先开启ob_start
         //如action中不调用render,ob_start不必开启
-        if($hookType == self::BEFORE_VIEW_RENDER && $this->afterActionEnable){
+        if ($hookType == self::BEFORE_VIEW_RENDER && $this->afterActionEnable) {
             $this->beforeViewRenderInvoke = true;
             ob_start();
         }
@@ -78,7 +78,7 @@ class DyPhpHooks
             }
         }
 
-        if($hookType == self::AFTER_ACTION && $this->afterActionEnable && $this->beforeViewRenderInvoke){
+        if ($hookType == self::AFTER_ACTION && $this->afterActionEnable && $this->beforeViewRenderInvoke) {
             ob_end_flush();
         }
     }

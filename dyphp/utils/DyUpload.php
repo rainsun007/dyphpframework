@@ -5,7 +5,8 @@
  * @link http://www.dyphp.com/
  * @copyright Copyright dyphp.com
  **/
-class DyUpload{
+class DyUpload
+{
     private $savePath = '';
     private $saveName = '';
     private $maxSize = 2;  //上传文件大小限制  单位MB
@@ -19,10 +20,11 @@ class DyUpload{
      * @param    $type
      * @return
      **/
-    public function setAllowExt($ext){
-        if(is_array($ext)){
-            $this->extensions = array_merge($this->extensions,$ext);
-        }elseif(!empty($ext) && !in_array($ext,$this->extensions)){
+    public function setAllowExt($ext)
+    {
+        if (is_array($ext)) {
+            $this->extensions = array_merge($this->extensions, $ext);
+        } elseif (!empty($ext) && !in_array($ext, $this->extensions)) {
             $this->extensions[] = $ext;
         }
         return $this;
@@ -33,7 +35,8 @@ class DyUpload{
      * @param    $maxSize  单位MB
      * @return
      **/
-    public function setMaxSize($maxSize){
+    public function setMaxSize($maxSize)
+    {
         $this->maxSize = $maxSize > 0 ? $maxSize : $this->maxSize;
         return $this;
     }
@@ -45,12 +48,13 @@ class DyUpload{
      * @param    $upFileName  表单控件名称
      * @return
      **/
-    public function up($savePath,$saveName,$upFileName){
+    public function up($savePath, $saveName, $upFileName)
+    {
         $this->savePath = $savePath;
         $this->saveName = $saveName;
 
         //上传表单存在性判断
-        if(!isset($_FILES[$upFileName])){
+        if (!isset($_FILES[$upFileName])) {
             return 10;
         }
 
@@ -64,7 +68,7 @@ class DyUpload{
         //6; 找不到临时文件夹。PHP 4.3.10 和 PHP 5.0.3 引进。
         //7; 文件写入失败。PHP 5.1.0 引进。
         $upPic = $_FILES[$upFileName];
-        if($upPic['error'] > 0){
+        if ($upPic['error'] > 0) {
             return $upPic['error'];
         }
 
@@ -74,15 +78,15 @@ class DyUpload{
         }
 
         //文件类型判断
-        $fileExtension = strtolower(substr(strrchr($upPic['name'],"."),1));
+        $fileExtension = strtolower(substr(strrchr($upPic['name'], "."), 1));
         $this->fileExtension = $fileExtension;
-        if(!in_array($fileExtension,$this->extensions)){
+        if (!in_array($fileExtension, $this->extensions)) {
             return 12;
         }
 
         //文件移动
         if (is_uploaded_file($upPic['tmp_name'])) {
-            $this->savePath = rtrim($this->savePath,'/');
+            $this->savePath = rtrim($this->savePath, '/');
             $pathName = $this->savePath . '/' . $this->saveName.'.'.$fileExtension;
             if ($this->moveUpload($upPic['tmp_name'], $pathName)) {
                 $this->fileSaveName = $this->saveName.'.'.$fileExtension;
@@ -98,14 +102,16 @@ class DyUpload{
     /**
      * @brief  获取保存后的文件名
      **/
-    public function getFileSaveName(){
+    public function getFileSaveName()
+    {
         return $this->fileSaveName;
     }
 
     /**
      * @brief  获取保存后的文件扩展名
      **/
-    public function getFileExt(){
+    public function getFileExt()
+    {
         return $this->fileExtension;
     }
 
@@ -115,7 +121,8 @@ class DyUpload{
      * @param string 返回上传状态
      * @param string 返回上传信息
      */
-    public function iframJsCallBack($callbackFunName='',$type='seccess',$msg="upload seccess"){
+    public function iframJsCallBack($callbackFunName='', $type='seccess', $msg="upload seccess")
+    {
         return '<script language="javascript" type="text/javascript">window.top.window.'.$callbackFunName.'(\''.$type."','".$msg.'\');</script>';
     }
 
@@ -126,7 +133,8 @@ class DyUpload{
      * @param string $new_file
      * @return bool
      */
-    private function moveUpload($tmp_file, $new_file){
+    private function moveUpload($tmp_file, $new_file)
+    {
         umask(0);
         if ($this->checkDir($this->savePath)) {
             if (move_uploaded_file($tmp_file, $new_file)) {
@@ -146,7 +154,8 @@ class DyUpload{
      * @param string $dir
      * @return bool
      */
-    private function checkDir($dir){
+    private function checkDir($dir)
+    {
         if (is_dir($dir)) {
             return true;
         } else {

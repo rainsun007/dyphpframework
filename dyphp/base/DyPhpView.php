@@ -35,7 +35,7 @@ class DyPhpView
      * @param array  view层数据
      * @param bool   是否执行完此方法后直接退出(执行exit), 默认为不退出, 注意：如设置为true，AFTER_ACTION hook将不会执行
      **/
-    public function render($view, $data = array(),$exit = false)
+    public function render($view, $data = array(), $exit = false)
     {
         //hook调用
         DyPhpBase::app()->hook->invokeHook(DyPhpHooks::BEFORE_VIEW_RENDER);
@@ -43,7 +43,7 @@ class DyPhpView
         $this->flush = true;
         $this->viewLayoutRender($view, $data);
 
-        if($exit){
+        if ($exit) {
             exit();
         }
     }
@@ -53,7 +53,7 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
-     * 
+     *
      * @return string
      **/
     public function getRenderHtml($view, $data = array())
@@ -162,7 +162,7 @@ class DyPhpView
      * @param  string  $script
      * @param  bool    $return
      *
-     * @return  string 
+     * @return  string
      **/
     protected function loadJs($script, $return = false)
     {
@@ -187,32 +187,32 @@ class DyPhpView
      * @param string 调用的view
      * @param array  view层数据
      **/
-     private function viewLayoutRender($view, $data = array())
-     {
-         $this->attrSet($view, $data);
+    private function viewLayoutRender($view, $data = array())
+    {
+        $this->attrSet($view, $data);
  
-         if (!file_exists($this->viewFile)) {
-             DyPhpBase::throwException('view does not exist', $view.':'.$this->viewFile);
-         }
+        if (!file_exists($this->viewFile)) {
+            DyPhpBase::throwException('view does not exist', $view.':'.$this->viewFile);
+        }
  
-         if (is_array($this->viewData)) {
-             extract($this->viewData);
-         }
+        if (is_array($this->viewData)) {
+            extract($this->viewData);
+        }
  
-         $contentObStart = ob_start();
-         include $this->viewFile;
-         $content = ob_get_contents();
-         if ($contentObStart) {
-             ob_end_clean();
-         }
-         DyStatic::cssJsMove();
+        $contentObStart = ob_start();
+        include $this->viewFile;
+        $content = ob_get_contents();
+        if ($contentObStart) {
+            ob_end_clean();
+        }
+        DyStatic::cssJsMove();
  
-         $layoutObStart = ob_start(array($this, 'formatViewLayoutRender'));
-         include $this->layoutFile;
-         if ($layoutObStart) {
+        $layoutObStart = ob_start(array($this, 'formatViewLayoutRender'));
+        include $this->layoutFile;
+        if ($layoutObStart) {
             $this->flush ? ob_end_flush() : ob_end_clean();
-         }
-     }
+        }
+    }
 
     /**
      * 属性设置.
@@ -221,8 +221,8 @@ class DyPhpView
      * @param array  view层数据
      * @param string 主题（优先级高于defaultTheme属性）
      **/
-     private function attrSet($view = '', $data = array(), $moduleTheme = '')
-     {
+    private function attrSet($view = '', $data = array(), $moduleTheme = '')
+    {
         $moduleTheme = $moduleTheme == '' ? $this->defaultTheme : $moduleTheme;
 
         $viewRoot = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR;
@@ -235,39 +235,39 @@ class DyPhpView
         $this->viewFile = $themeViewRoot.$view.EXT;
 
         $this->viewData = array_merge($this->viewData, $data);
-     }
+    }
  
-     /**
-      * 格式化完整view渲染,静态文件加载.
-      *
-      * @param string  缓冲输出文件内容
-      * 
-      * @return string 返回html及js,css加载处理结果
-      **/
-     private function formatViewLayoutRender($buffer)
-     {
-         if (empty($buffer)) {
-             return '';
-         }
+    /**
+     * 格式化完整view渲染,静态文件加载.
+     *
+     * @param string  缓冲输出文件内容
+     *
+     * @return string 返回html及js,css加载处理结果
+     **/
+    private function formatViewLayoutRender($buffer)
+    {
+        if (empty($buffer)) {
+            return '';
+        }
  
-         $headCssScript = DyStatic::viewCssLoad().DyStatic::viewHeadScriptLoad();
-         if ($headCssScript != '') {
-             $buffer = str_replace('</head>', $headCssScript.'</head>', $buffer);
-         }
+        $headCssScript = DyStatic::viewCssLoad().DyStatic::viewHeadScriptLoad();
+        if ($headCssScript != '') {
+            $buffer = str_replace('</head>', $headCssScript.'</head>', $buffer);
+        }
  
-         $bodyScript = DyStatic::viewBodyScriptLoad();
-         if ($bodyScript != '') {
-             if (preg_match('/<body.*?>/i', $buffer, $regs)) {
-                 $buffer = str_replace($regs[0], $regs[0].$bodyScript, $buffer);
-             }
-         }
+        $bodyScript = DyStatic::viewBodyScriptLoad();
+        if ($bodyScript != '') {
+            if (preg_match('/<body.*?>/i', $buffer, $regs)) {
+                $buffer = str_replace($regs[0], $regs[0].$bodyScript, $buffer);
+            }
+        }
  
-         $footScript = DyStatic::viewFootScriptLoad();
-         if ($footScript != '') {
-             $buffer = str_replace('</body>', $footScript.'</body>', $buffer);
-         }
+        $footScript = DyStatic::viewFootScriptLoad();
+        if ($footScript != '') {
+            $buffer = str_replace('</body>', $footScript.'</body>', $buffer);
+        }
 
-         $this->renderHtml = !$this->flush ? $buffer : '';
-         return $buffer;
-     }
+        $this->renderHtml = !$this->flush ? $buffer : '';
+        return $buffer;
+    }
 }

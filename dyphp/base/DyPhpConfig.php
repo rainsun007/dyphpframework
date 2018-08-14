@@ -65,32 +65,32 @@ class DyPhpConfig
 
     /**
      * 运行app配制入口
-     * 
+     *
      * @param string|array app配制文件
      **/
     public static function runConfig($appConfigFile)
     {
-        if(is_array($appConfigFile)){
-            if(!isset($appConfigFile['p']) || !isset($appConfigFile['c'])){
-                DyPhpBase::throwException('config key is not exists','"p" or "c"');
-            }elseif(!file_exists($appConfigFile['p']) || !file_exists($appConfigFile['c'])){
-                DyPhpBase::throwException('config file is not exists','"p" or "c"');
+        if (is_array($appConfigFile)) {
+            if (!isset($appConfigFile['p']) || !isset($appConfigFile['c'])) {
+                DyPhpBase::throwException('config key is not exists', '"p" or "c"');
+            } elseif (!file_exists($appConfigFile['p']) || !file_exists($appConfigFile['c'])) {
+                DyPhpBase::throwException('config file is not exists', '"p" or "c"');
             }
             
             $parentConfig = require $appConfigFile['p'];
             $childConfig = require $appConfigFile['c'];
             $excludeConfig = isset($appConfigFile['e']) ? (array)$appConfigFile['e'] : array();
-            $config = array_merge((array)$parentConfig,(array)$childConfig);
+            $config = array_merge((array)$parentConfig, (array)$childConfig);
             foreach ($excludeConfig as $key => $value) {
-                if(isset($parentConfig[$value])){
+                if (isset($parentConfig[$value])) {
                     $config[$value] = $parentConfig[$value];
-                }elseif(isset($config[$value])){
+                } elseif (isset($config[$value])) {
                     unset($config[$value]);
                 }
             }
-        }else{
-            if(!file_exists($appConfigFile)){
-                DyPhpBase::throwException('config file is not exists',$appConfigFile);
+        } else {
+            if (!file_exists($appConfigFile)) {
+                DyPhpBase::throwException('config file is not exists', $appConfigFile);
             }
             $config = require $appConfigFile;
         }
@@ -155,7 +155,7 @@ class DyPhpConfig
         unset($config);
 
         //为secretKey加上环境后缀,自动按环境生成不同的secretKey
-        if(strlen(self::$secretKey) < 32){
+        if (strlen(self::$secretKey) < 32) {
             DyPhpBase::throwException('the secretKey length is no less than 32', 'secretKey');
         }
         self::$secretKey = empty(self::$env) ? self::$secretKey.'_pro' : self::$secretKey.'_'.self::$env;
@@ -237,7 +237,7 @@ class DyPhpConfig
             'dbc'=>'dysys.dyphp.db.DyDbCriteria',
             'hook'=>'dysys.dyphp.base.DyPhpHooks',
         );
-        if(DyPhpBase::$appType == 'web'){
+        if (DyPhpBase::$appType == 'web') {
             $loadAlias['auth'] = 'app.components.UserIdentity';
         }
         $aliasArr = array_unique(array_merge($loadAlias, $aliasArr));

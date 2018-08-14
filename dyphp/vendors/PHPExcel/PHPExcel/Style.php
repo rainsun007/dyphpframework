@@ -114,7 +114,7 @@ class PHPExcel_Style extends PHPExcel_Style_Supervisor implements PHPExcel_IComp
         $this->_isSupervisor = $isSupervisor;
 
         // Initialise values
-        $this->_conditionalStyles	= array();
+        $this->_conditionalStyles    = array();
         $this->_font              = new PHPExcel_Style_Font($isSupervisor, $isConditional);
         $this->_fill              = new PHPExcel_Style_Fill($isSupervisor, $isConditional);
         $this->_borders           = new PHPExcel_Style_Borders($isSupervisor, $isConditional);
@@ -163,16 +163,16 @@ class PHPExcel_Style extends PHPExcel_Style_Supervisor implements PHPExcel_IComp
         return $this->_parent;
     }
 
-	/**
-	 * Build style array from subcomponents
-	 *
-	 * @param array $array
-	 * @return array
-	 */
-	public function getStyleArray($array)
-	{
-		return array('quotePrefix' => $array);
-	}
+    /**
+     * Build style array from subcomponents
+     *
+     * @param array $array
+     * @return array
+     */
+    public function getStyleArray($array)
+    {
+        return array('quotePrefix' => $array);
+    }
 
     /**
      * Apply styles from array
@@ -218,7 +218,6 @@ class PHPExcel_Style extends PHPExcel_Style_Supervisor implements PHPExcel_IComp
     {
         if (is_array($pStyles)) {
             if ($this->_isSupervisor) {
-
                 $pRange = $this->getSelectedCells();
 
                 // Uppercase coordinate
@@ -341,7 +340,7 @@ class PHPExcel_Style extends PHPExcel_Style_Supervisor implements PHPExcel_IComp
                             unset($regionStyles['borders']['inside']);
 
                             // what are the inner edges of the region when looking at the selection
-                            $innerEdges = array_diff( array('top', 'right', 'bottom', 'left'), $edges );
+                            $innerEdges = array_diff(array('top', 'right', 'bottom', 'left'), $edges);
 
                             // inner edges that are not touching the region should take the 'inside' border properties if they have been set
                             foreach ($innerEdges as $innerEdge) {
@@ -379,7 +378,7 @@ class PHPExcel_Style extends PHPExcel_Style_Supervisor implements PHPExcel_IComp
                 // Selection type, inspect
                 if (preg_match('/^[A-Z]+1:[A-Z]+1048576$/', $pRange)) {
                     $selectionType = 'COLUMN';
-                } else if (preg_match('/^A[0-9]+:XFD[0-9]+$/', $pRange)) {
+                } elseif (preg_match('/^A[0-9]+:XFD[0-9]+$/', $pRange)) {
                     $selectionType = 'ROW';
                 } else {
                     $selectionType = 'CELL';
@@ -461,7 +460,6 @@ class PHPExcel_Style extends PHPExcel_Style_Supervisor implements PHPExcel_IComp
                         }
                         break;
                 }
-
             } else {
                 // not a supervisor, just apply the style array directly on style object
                 if (array_key_exists('fill', $pStyles)) {
@@ -664,5 +662,4 @@ class PHPExcel_Style extends PHPExcel_Style_Supervisor implements PHPExcel_IComp
     {
         $this->_index = $pValue;
     }
-
 }

@@ -4,7 +4,7 @@
  * PHP QR Code encoder
  *
  * Tool for merging all library files into one, simpler to incorporate.
- * 
+ *
  * MAKE SURE THAT RESULTING PHPQRCode.php (and its dir) ARE WRITABLE!
  *
  * PHP QR Code is distributed under LGPL 3
@@ -51,20 +51,18 @@
     
     $outputCode = '';
     
-    foreach($fileList as $fileName) {
+    foreach ($fileList as $fileName) {
         $outputCode .= "\n\n".'//---- '.basename($fileName).' -----------------------------'."\n\n";
         $anotherCode = file_get_contents($fileName);
-        $anotherCode = preg_replace ('/^<\?php/', '', $anotherCode);
-        $anotherCode = preg_replace ('/\?>\*$/', '', $anotherCode);
+        $anotherCode = preg_replace('/^<\?php/', '', $anotherCode);
+        $anotherCode = preg_replace('/\?>\*$/', '', $anotherCode);
         $outputCode .= "\n\n".$anotherCode."\n\n";
     }
     
-	$versionDataEx = explode("\n", file_get_contents($versionFile));
-	
+    $versionDataEx = explode("\n", file_get_contents($versionFile));
+    
     $outputContents = file_get_contents($headerFile);
     $outputContents .= "\n\n/*\n * Version: ".trim($versionDataEx[0])."\n * Build: ".trim($versionDataEx[1])."\n */\n\n";
     $outputContents .= $outputCode;
     
     file_put_contents($outputFile, $outputContents);
-    
-    

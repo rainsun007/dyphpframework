@@ -65,7 +65,7 @@ class PHPExcel_Reader_Excel5_MD5
 
     /**
      * Get MD5 stream context
-     * 
+     *
      * @return string
      */
     public function getContext()
@@ -85,7 +85,7 @@ class PHPExcel_Reader_Excel5_MD5
 
     /**
      * Add data to context
-     * 
+     *
      * @param string $data Data to add
      */
     public function add($data)

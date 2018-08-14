@@ -49,7 +49,8 @@ class PHPExcel_Autoloader
      * Register the Autoloader with SPL
      *
      */
-    public static function Register() {
+    public static function Register()
+    {
         if (function_exists('__autoload')) {
             //    Register any existing autoloader function with SPL, so we don't get any clashes
             spl_autoload_register('__autoload');
@@ -64,22 +65,22 @@ class PHPExcel_Autoloader
      *
      * @param    string    $pClassName        Name of the object to load
      */
-    public static function Load($pClassName){
-        if ((class_exists($pClassName,FALSE)) || (strpos($pClassName, 'PHPExcel') !== 0)) {
+    public static function Load($pClassName)
+    {
+        if ((class_exists($pClassName, false)) || (strpos($pClassName, 'PHPExcel') !== 0)) {
             //    Either already loaded, or not a PHPExcel class request
-            return FALSE;
+            return false;
         }
 
         $pClassFilePath = PHPEXCEL_ROOT .
-                          str_replace('_',DIRECTORY_SEPARATOR,$pClassName) .
+                          str_replace('_', DIRECTORY_SEPARATOR, $pClassName) .
                           '.php';
 
-        if ((file_exists($pClassFilePath) === FALSE) || (is_readable($pClassFilePath) === FALSE)) {
+        if ((file_exists($pClassFilePath) === false) || (is_readable($pClassFilePath) === false)) {
             //    Can't load
-            return FALSE;
+            return false;
         }
 
         require($pClassFilePath);
     }   //    function Load()
-
 }

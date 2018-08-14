@@ -264,11 +264,11 @@ class DyDbCriteria
 
         switch ($condition) {
             case 'in':
-                $val = "'".join("','",explode(',',$val))."'";
+                $val = "'".join("','", explode(',', $val))."'";
                 $where = "{$key} IN({$val}) ";
                 break;
             case 'notin':
-                $val = "'".join("','",explode(',',$val))."'";
+                $val = "'".join("','", explode(',', $val))."'";
                 $where = "{$key} NOT IN({$val}) ";
                 break;
             case 'like':

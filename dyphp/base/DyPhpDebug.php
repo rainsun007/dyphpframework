@@ -70,7 +70,7 @@ class DyPhpDebug
             return '';
         }
 
-        $line = str_repeat('-',120).PHP_EOL;
+        $line = str_repeat('-', 120).PHP_EOL;
         echo PHP_EOL.'[INCLUDE FILES]'.PHP_EOL;
         echo  $line;
         echo '|Index | Size    | File '.PHP_EOL;
@@ -126,7 +126,7 @@ class DyPhpDebug
             return '';
         }
 
-        $line = str_repeat('-',120).PHP_EOL;
+        $line = str_repeat('-', 120).PHP_EOL;
         $time = 0;
         echo PHP_EOL.'[EXPLAIN SQL]'.PHP_EOL;
         echo  $line;
@@ -219,13 +219,13 @@ class DyPhpDebug
             'EXECUTE' => 'Module:'.DyPhpBase::app()->module.' Controller:'.DyPhpBase::app()->cid.' Action:'.DyPhpBase::app()->aid,
         );
 
-        $line = str_repeat('-',120).PHP_EOL;
+        $line = str_repeat('-', 120).PHP_EOL;
         echo PHP_EOL.'[PARAMS]'.PHP_EOL;
         echo  $line;
         echo '|Type    | Content '.PHP_EOL;
         echo  $line;
         foreach ($paramsArr as $key => $val) {
-            $val = is_array($val) ? var_export($val,true) : $val;
+            $val = is_array($val) ? var_export($val, true) : $val;
             echo '|'.$key.' | '.$val.PHP_EOL;
             echo  $line;
         }

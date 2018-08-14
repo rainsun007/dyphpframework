@@ -3,21 +3,23 @@
  * debug工具类
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright dyphp.com 
+ * @copyright Copyright dyphp.com
  **/
-class DyDebug extends DyPhpDebug{
-    public static function show($showType='sql,param,file'){
-        if(!DyPhpBase::$debug || empty($showType)){
+class DyDebug extends DyPhpDebug
+{
+    public static function show($showType='sql,param,file')
+    {
+        if (!DyPhpBase::$debug || empty($showType)) {
             return;
         }
 
-        $showTypeArr = array_unique(explode(',',$showType));
+        $showTypeArr = array_unique(explode(',', $showType));
         foreach ($showTypeArr as $key=>$val) {
-            if($val == 'sql'){
+            if ($val == 'sql') {
                 PHP_SAPI == 'cli' ? self::getLoadQueryConsole() : self::getLoadQuery();
-            }elseif($val == 'param'){
+            } elseif ($val == 'param') {
                 PHP_SAPI == 'cli' ? self::getGlobalParamsConsole() : self::getGlobalParams();
-            }elseif($val == 'file' || $val == 'allfile'){
+            } elseif ($val == 'file' || $val == 'allfile') {
                 $onlyApp = $val == 'allfile' ? false : true;
                 PHP_SAPI == 'cli' ? self::getLoadFilesConsole() : self::getLoadFiles($onlyApp);
             }
