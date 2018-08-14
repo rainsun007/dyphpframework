@@ -149,14 +149,14 @@ class DyPhpModel
      *
      * @return int
      */
-    public function incr($setArr = array(),$criteria = '')
+    public function incr($setArr = array(), $criteria = '')
     {
         $upSetArr = $columnOperationArr = array();
         foreach ($setArr as $key => $value) {
             $upSetArr[$key] = $key.'+'.$value;
             $columnOperationArr[] = $key;
         }
-        return $this->update($upSetArr,$criteria,$columnOperationArr);
+        return $this->update($upSetArr, $criteria, $columnOperationArr);
     }
 
     /**
@@ -167,14 +167,14 @@ class DyPhpModel
      *
      * @return int
      */
-    public function decr($setArr = array(),$criteria = '')
+    public function decr($setArr = array(), $criteria = '')
     {
         $upSetArr = $columnOperationArr = array();
         foreach ($setArr as $key => $value) {
             $upSetArr[$key] = $key.'-'.$value;
             $columnOperationArr[] = $key;
         }
-        return $this->update($upSetArr,$criteria,$columnOperationArr);
+        return $this->update($upSetArr, $criteria, $columnOperationArr);
     }
 
     /**
@@ -215,7 +215,7 @@ class DyPhpModel
      *
      * @param mixed  $criteria  DyDbCriteria类实例 或 完整sql语句 或 是where语句
      * @param string $select    查询字段  当$criteria为where条件时有效
-     * 
+     *
      * @return object
      **/
     public function getOne($criteria = '', $select = '*')
@@ -236,7 +236,7 @@ class DyPhpModel
      *
      * @param mixed  $criteria  DyDbCriteria类实例 或 完整sql语句 或 是where语句
      * @param string $select    查询字段  当$criteria为where条件时有效
-     * 
+     *
      * @return array
      **/
     public function getAll($criteria = '', $select = '*')
@@ -293,14 +293,14 @@ class DyPhpModel
      * 分页查询获取记录
      *
      * @param mixed  $criteria DyDbCriteria类实例 或 完整sql语句 或 是where语句
-     * @param int    $pageSize 
+     * @param int    $pageSize
      * @param string $page     此参数为int类型时直接做为页数使用  为字符串时做为$_GET的key使用(默认为page)
      *
      * @return
      **/
-    public function getAllForPage($criteria, $pageSize = 15, $page = 'page')
+    public function getAllForPage($criteria, $pageSize = 20, $page = 'page')
     {
-        $limit = $pageSize > 0 ? $pageSize : 15;
+        $limit = $pageSize > 0 ? $pageSize : 20;
         $cpage = is_int($page) ? $page : DyRequest::getInt($page, 0);
         $offset = $cpage > 0 ? ($cpage - 1) * $limit : 0;
 
@@ -311,7 +311,7 @@ class DyPhpModel
             $criteria->offset($offset);
             $data = $this->getAll($criteria);
             $counts = $this->count($criteria);
-        }else{
+        } else {
             $criteriaLimit = $criteria." LIMIT {$offset},{$limit}";
             $data = $this->getAll($criteriaLimit);
             $counts = $this->count($criteria);
@@ -453,7 +453,7 @@ class DyPhpModel
      * 获取数据库配制数组
      *
      * @param string  $dbms 主/从数据库
-     * 
+     *
      * @return array
      **/
     private function getDbConfigArr($dbms = 'master')
@@ -485,12 +485,12 @@ class DyPhpModel
             if (!is_array($dbLbs)) {
                 DyPhpBase::throwException('database lbs return error', 'getDbConfigArr error', 0);
             }
-            if($dbLbs){
+            if ($dbLbs) {
                 return $dbLbs;
             }
 
             //按权重负载均衡选择从库
-            if(!$this->weightRound){
+            if (!$this->weightRound) {
                 $this->weightRound = new DyphpWeightRound($dbConfig[$this->dbCnf]['slaves']);
             }
             return $this->weightRound->getDbConfig();
@@ -502,7 +502,7 @@ class DyPhpModel
      *
      * @param string  查询语句
      * @param bool    是否执行查询分析
-     * 
+     *
      * @return mixed
      **/
     private function fetchAll($query, $explain = true)
@@ -538,7 +538,7 @@ class DyPhpModel
      *
      * @param string  查询语句
      * @param bool    是否执行查询分析
-     * 
+     *
      * @return mixed
      **/
     private function fetch($query, $explain = true)
@@ -629,7 +629,7 @@ class DyPhpModel
      * @param mixed   $criteria DyDbCriteria类实例 或 完整sql语句 或 是where语句
      * @param string  $select   查询字段  当$criteria为where条件时有效
      * @param bool    $isCount  是否为查询总数
-     * 
+     *
      * @return string
      **/
     private function querySql($criteria, $select = '*', $isCount = false)
@@ -830,31 +830,31 @@ class DyphpWeightRound
             return $this->weightArray[0];
         }
 
-        if($this->tempWeightArray){
+        if ($this->tempWeightArray) {
             shuffle($this->tempWeightArray);
-            $waKey = $this->tempWeightArray[mt_rand(0,$this->weightNum-1)];
+            $waKey = $this->tempWeightArray[mt_rand(0, $this->weightNum-1)];
             return $this->weightArray[$waKey];
         }
 
-        foreach($this->weightArray as $key=>$val){
+        foreach ($this->weightArray as $key=>$val) {
             if (!isset($val['weight']) || $val['weight'] <= 0) {
                 continue;
             }
 
             $this->weightNum += $val['weight'];
-            for($i=0; $i < $val['weight']; $i++){
+            for ($i=0; $i < $val['weight']; $i++) {
                 $this->tempWeightArray[] = $key;
             }
         }
 
         //若全都未设置weight，则随时返回一个配制
-        if(!$this->tempWeightArray && $this->weightArray){
+        if (!$this->tempWeightArray && $this->weightArray) {
             shuffle($this->weightArray);
             return $this->weightArray[array_rand($this->weightArray)];
         }
 
         shuffle($this->tempWeightArray);
-        $waKey = $this->tempWeightArray[mt_rand(0,$this->weightNum-1)];
+        $waKey = $this->tempWeightArray[mt_rand(0, $this->weightNum-1)];
         return $this->weightArray[$waKey];
     }
 }

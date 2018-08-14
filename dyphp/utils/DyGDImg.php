@@ -34,7 +34,7 @@ class DyGDImg
      **/
     public static function cut($srcimg, $save_path, $save_name, $width, $heigth, $srcx=0, $srcy=0)
     {
-        $info = self::getSaveInfo($srcimg,$save_path, $save_name, $width);
+        $info = self::getSaveInfo($srcimg, $save_path, $save_name, $width);
         return self::instance()->resize($srcimg, $info['path'], $info['name'], $width, $heigth, $srcx, $srcy, true) ? $info : false;
     }
 
@@ -42,7 +42,7 @@ class DyGDImg
      * 按照原图比例生成缩略图
      * 实例
      * DyGDImg::resize('/tmp/a.jpg','/www/upload/','b.jpg',125,125);
-     * 
+     *
      * @param string 源图片地址 如：$_FILES['files']['tmp_name']
      * @param string 保存生成图像的地址(目录如不存在会自动创建)
      * @param string 生成图像的文件名
@@ -52,7 +52,7 @@ class DyGDImg
      **/
     public static function resize($srcimg, $save_path, $save_name, $width, $heigth)
     {
-        $info = self::getSaveInfo($srcimg,$save_path, $save_name, $width);
+        $info = self::getSaveInfo($srcimg, $save_path, $save_name, $width);
         return self::instance()->resize($srcimg, $info['path'], $info['name'], $width, $heigth, 0, 0, false) ? $info : false;
     }
 
@@ -78,11 +78,11 @@ class DyGDImg
      * @brief  获取保存后的文件扩展名
      * @return string
      **/
-     public static function getFileExt()
-     {
-         $info = self::instance()->getInfo();
-         return $info['type'];
-     }
+    public static function getFileExt()
+    {
+        $info = self::instance()->getInfo();
+        return $info['type'];
+    }
 
     /**
      * @brief  获取保存后的文件名
@@ -123,7 +123,7 @@ class DyGDImg
      * @param string $save_name
      * @return void
      */
-    private static function getSaveInfo($srcimg,$save_path, $save_name, $width)
+    private static function getSaveInfo($srcimg, $save_path, $save_name, $width)
     {
         $save_path = $save_path ? $save_path : dirname($srcimg);
         $save_name = $save_name ? $save_name : substr(basename($srcimg), 0, strrpos(basename($srcimg), '.')).'_'.$width.strrchr(basename($srcimg), '.');
@@ -132,7 +132,7 @@ class DyGDImg
             'type' => strrchr(basename($srcimg), '.'),
             'name' => $save_name,
             'path' => $save_path,
-            'path_name' => rtrim($save_path,'/').'/'.$save_name
+            'path_name' => rtrim($save_path, '/').'/'.$save_name
         );
     }
 }

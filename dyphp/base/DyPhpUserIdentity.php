@@ -24,10 +24,10 @@ abstract class DyPhpUserIdentity
      * @param string [必须]用户验证加密串，如加密后的密码（如md5('password')等,保持加密一至即可）
      *               基于安全考虑此处不要使用明文（相关校验逻辑需在实现中完成）
      * @param int    自动登陆有效期，单位：秒，0为不使用自动登陆
-     * 
+     *
      * @return bool
      **/
-    abstract public function authenticate($userIndexValue = '', $encryptPassword = '' , $autoLoginExpire = 0);
+    abstract public function authenticate($userIndexValue = '', $encryptPassword = '', $autoLoginExpire = 0);
 
     /**
      * [必须]登陆状态设置. 此方法必须在authenticate实现中显示调用
@@ -36,22 +36,22 @@ abstract class DyPhpUserIdentity
      * @param string [必须]用户验证加密串，如加密后的密码（如md5('password')等,保持加密一至即可）
      *               基于安全考虑此处不要使用明文（相关校验逻辑需在实现中完成）
      * @param int    自动登陆有效期，单位：秒，0为不使用自动登陆
-     * 
+     *
      * @return bool
      **/
     final public function setLoginStatus($userIndexValue = '', $encryptPassword = '', $expire = 0)
     {
-        if(!$userIndexValue || !$encryptPassword){
+        if (!$userIndexValue || !$encryptPassword) {
             return false;
         }
 
         if ($this->isCookieUserAuth) {
             DyCookie::set($this->getLoginStateKey('cookie').'_cl', 'cookie_logined');
-        }else{
+        } else {
             DySession::set($this->getLoginStateKey(), true);
         }
 
-        if($expire == 0){
+        if ($expire == 0) {
             return true;
         }
 
@@ -114,7 +114,7 @@ abstract class DyPhpUserIdentity
      **/
     final public function runAutoLogin()
     {
-        if(!$this->isGuest()){
+        if (!$this->isGuest()) {
             return true;
         }
 
@@ -128,7 +128,7 @@ abstract class DyPhpUserIdentity
             return false;
         }
         
-        $checkToken = $this->getAutoLoginToken($rememberMe['iv'], $rememberMe['ep'], $rememberMe['time'],$rememberMe['expire'],$rememberMe['token']);
+        $checkToken = $this->getAutoLoginToken($rememberMe['iv'], $rememberMe['ep'], $rememberMe['time'], $rememberMe['expire'], $rememberMe['token']);
         if (!$checkToken) {
             return false;
         }
@@ -181,7 +181,7 @@ abstract class DyPhpUserIdentity
     {
         $value = md5($userIndexValue.$encryptPassword.$time.$expire).md5($this->getCookieCryptKey());
 
-        if($token){
+        if ($token) {
             return DyString::decodeStr($token, $this->getCookieCryptKey()) == $value;
         }
 

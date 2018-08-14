@@ -1,22 +1,23 @@
 <?php
 /**
  * 验证码类
- * 
+ *
  * 建议自定义背景图片与扭曲功能不要同时使用 因为此版本背景也会被扭曲
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
- * @copyright Copyright dyphp.com 
+ * @copyright Copyright dyphp.com
  **/
-class DyCaptcha{
+class DyCaptcha
+{
     /** 图片宽度(px) **/
     public $width = 150;
     
     /** 图片高度(px) **/
     public $height = 40;
     
-    /** 
+    /**
      * 内建图像比例 用于生成品质较高的图片
-     * (1低 2标准 3高) 
+     * (1低 2标准 3高)
      **/
     public $scale = 2;
     
@@ -26,8 +27,8 @@ class DyCaptcha{
     /** 验证码个数 **/
     public $wordLength = array(4,6);
     
-    /** 
-     * 验证码模式  
+    /**
+     * 验证码模式
      * 0只字母  1只数字  2字母和数字 3为+ - x运算
      **/
     public $model = 0;
@@ -39,26 +40,26 @@ class DyCaptcha{
     /** 最大旋转 **/
     public $maxRotation = 8;
     
-    /** 
-     * 干扰线条数 
+    /**
+     * 干扰线条数
      * 0为不使用干扰线
      **/
     public $noiseLine = 5;
     
-    /** 
-     * 干扰点个数 
+    /**
+     * 干扰点个数
      * 0为不使用干扰点
      **/
     public $noise = 15;
 
-    /** 
+    /**
      * 验证码扭曲设置
      * 不使用验证码扭曲 设置该属性为false
      **/
     public $waveWord = array('Yperiod'=>12,'Yamplitude'=>14,'Xperiod'=>11,'Xamplitude'=>5);
     
     /**
-     * 背景(背景图路径字符串 或 RGB色值数组eg array(27,78,181)) 
+     * 背景(背景图路径字符串 或 RGB色值数组eg array(27,78,181))
      * 默认为随机生成(rand_letter_color 或 rand_color)
      * rand:默认  rand_letter:杂乱的字母数字(背景为白色)  rand_color:纯色  rand_letter_color:rand_letter+rand_color
      **/
@@ -105,10 +106,11 @@ class DyCaptcha{
     //确定的验证码结果
     private $verifyCode;
     
-   /**
-    * 创建验证码 
-    **/
-    public function createImage() {
+    /**
+     * 创建验证码
+     **/
+    public function createImage()
+    {
         $this->resourcesPath = dirname(__FILE__).'/resources';
         //初始化图像
         $this->initImage();
@@ -127,9 +129,10 @@ class DyCaptcha{
     }
     
     /**
-     * 初始化图片资源 
+     * 初始化图片资源
      **/
-     protected function initImage() {
+    protected function initImage()
+    {
         //清除处理
         if (!empty($this->im)) {
             imagedestroy($this->im);
@@ -140,17 +143,18 @@ class DyCaptcha{
         
         $this->im = imagecreatetruecolor($this->sWidth, $this->sHeight);
         $this->background();
-     }
+    }
 
-   /**
-    * 创建验证码
-    */
-    protected function createWord() {
+    /**
+     * 创建验证码
+     */
+    protected function createWord()
+    {
         //获取到验证码
         $text = $this->createText();
         //获取字体
         $fontcfg  = $this->fonts[array_rand($this->fonts)];
-        $fontfile = $this->getResources('fonts',$fontcfg['font']);
+        $fontfile = $this->getResources('fonts', $fontcfg['font']);
 
         //获取颜色
         $color = $this->colors[array_rand($this->colors)];
@@ -167,50 +171,53 @@ class DyCaptcha{
             $fontsize = rand($fontcfg['minSize'], $fontcfg['maxSize'])*$this->scale*$fontSizefactor;
             $letter   = substr($text, $i, 1);
 
-            $coords = imagettftext($this->im, $fontsize, $degree,$x, $y,$this->gdFgColor, $fontfile, $letter);
+            $coords = imagettftext($this->im, $fontsize, $degree, $x, $y, $this->gdFgColor, $fontfile, $letter);
             $x += ($coords[2]-$x) + ($fontcfg['spacing']*$this->scale);
-        } 
+        }
     }
 
-   /**
-    * 验证码扭曲处理
-    */
-    protected function waveWord() {
-        if(!$this->waveWord){
+    /**
+     * 验证码扭曲处理
+     */
+    protected function waveWord()
+    {
+        if (!$this->waveWord) {
             return;
         }
         // X-axis wave generation
-        $xp = $this->scale*$this->waveWord['Xperiod']*rand(1,3);
+        $xp = $this->scale*$this->waveWord['Xperiod']*rand(1, 3);
         $k = rand(0, 100);
         for ($i = 0; $i < ($this->sWidth); $i++) {
-            imagecopy($this->im, $this->im,$i-1, sin($k+$i/$xp) * ($this->scale*$this->waveWord['Xamplitude']),$i, 0, 1, $this->sHeight);
+            imagecopy($this->im, $this->im, $i-1, sin($k+$i/$xp) * ($this->scale*$this->waveWord['Xamplitude']), $i, 0, 1, $this->sHeight);
         }
         // Y-axis wave generation
         $k = rand(0, 100);
-        $yp = $this->scale*$this->waveWord['Yperiod']*rand(1,2);
+        $yp = $this->scale*$this->waveWord['Yperiod']*rand(1, 2);
         for ($i = 0; $i < ($this->sHeight); $i++) {
-            imagecopy($this->im, $this->im,sin($k+$i/$yp) * ($this->scale*$this->waveWord['Yamplitude']), $i-1,0, $i, $this->sWidth, 1);
+            imagecopy($this->im, $this->im, sin($k+$i/$yp) * ($this->scale*$this->waveWord['Yamplitude']), $i-1, 0, $i, $this->sWidth, 1);
         }
     }
     
-     /**
-      * 加干扰点
-      **/
-      protected function drawNoise() {
+    /**
+     * 加干扰点
+     **/
+    protected function drawNoise()
+    {
         if ($this->noise <= 0) {
             return;
         }
 
         for ($i = 0; $i < $this->noise; ++$i) {
-            imagefilledarc($this->im, rand(10, $this->sWidth), rand(10, $this->sHeight), rand(7, 10), rand(7, 10), rand(0,90),rand(180,360), $this->gdFgColor, IMG_ARC_PIE);
+            imagefilledarc($this->im, rand(10, $this->sWidth), rand(10, $this->sHeight), rand(7, 10), rand(7, 10), rand(0, 90), rand(180, 360), $this->gdFgColor, IMG_ARC_PIE);
         }
-      }
+    }
     
-     /**
-      * 加干扰线 
-      **/
-      protected function noiseLine() {
-        if($this->noiseLine<=0){
+    /**
+     * 加干扰线
+     **/
+    protected function noiseLine()
+    {
+        if ($this->noiseLine<=0) {
             return;
         }
         
@@ -241,12 +248,13 @@ class DyCaptcha{
                 imagefilledrectangle($this->im, $x, $y, $x + $lwid, $y + $lwid, $this->gdFgColor);
             }
         }
-     }
+    }
      
-    /** 
+    /**
      * 输出图像
      **/
-     protected function outputImage() {
+    protected function outputImage()
+    {
         //大小还原
         $this->restoreImage();
         
@@ -262,39 +270,41 @@ class DyCaptcha{
         }
         imagedestroy($this->im);
         exit;
-     }
+    }
 
-   /**
-    * 保存验证码 
-    **/
-    protected function saveWord() {  
+    /**
+     * 保存验证码
+     **/
+    protected function saveWord()
+    {
         $time = time()+$this->expire;
-        if($this->saveType == 'session'){
-            DySession::set($this->saveName,array($this->verifyCode,$time));
-        }else{
-            if(DyCookie::is_set($this->saveName)){
+        if ($this->saveType == 'session') {
+            DySession::set($this->saveName, array($this->verifyCode,$time));
+        } else {
+            if (DyCookie::is_set($this->saveName)) {
                 DyCookie::delete($this->saveName);
             }
-            DyCookie::set($this->saveName,json_encode(array($this->verifyCode,$time)),$this->expire);
-        }  
-     }
+            DyCookie::set($this->saveName, json_encode(array($this->verifyCode,$time)), $this->expire);
+        }
+    }
     
     /**
-     * 背景设置 
+     * 背景设置
      **/
-     protected function background() {
+    protected function background()
+    {
         $randModel = array('rand','rand_letter','rand_color','rand_letter_color');
-        if(in_array($this->background,$randModel)){
+        if (in_array($this->background, $randModel)) {
             switch ($this->background) {
                case 'rand':
                             $this->colorBackground();
-                            if(rand(0,1)){
+                            if (rand(0, 1)) {
                                 $this->letterBackground();
                             }
                             return;
-               case 'rand_letter': 
+               case 'rand_letter':
                             $randBg = imagecolorallocate($this->im, 255, 255, 255);
-                            imagefill($this->im, 0, 0, $randBg); 
+                            imagefill($this->im, 0, 0, $randBg);
                             $this->letterBackground();
                             return;
                case 'rand_color':
@@ -307,45 +317,58 @@ class DyCaptcha{
             }
         }
         
-        if(is_array($this->background)){
+        if (is_array($this->background)) {
             $bg = imagecolorallocate($this->im, $this->background[0], $this->background[1], $this->background[2]);
-            imagefill($this->im, 0, 0, $bg); 
-        }else{
-            $background = strrpos(str_replace('\\','/',$this->background),'/') !== false ? $this->background : $this->getResources('backgrounds',$this->background);
-            if (empty($this->background) || !is_file($background) || !is_readable($background)){
+            imagefill($this->im, 0, 0, $bg);
+        } else {
+            $background = strrpos(str_replace('\\', '/', $this->background), '/') !== false ? $this->background : $this->getResources('backgrounds', $this->background);
+            if (empty($this->background) || !is_file($background) || !is_readable($background)) {
                 return;
             }
             $dat = @getimagesize($background);
-            if($dat == false) { 
+            if ($dat == false) {
                 return;
             }
 
-            switch($dat[2]) {
+            switch ($dat[2]) {
             case 1:  $bgIm = @imagecreatefromgif($background); break;
             case 2:  $bgIm = @imagecreatefromjpeg($background); break;
             case 3:  $bgIm = @imagecreatefrompng($background); break;
             default: return;
             }
-            if(!$bgIm) return;
+            if (!$bgIm) {
+                return;
+            }
 
-            imagecopyresized($this->im, $bgIm, 0, 0, 0, 0,
-                $this->sWidth, $this->sHeight,
-                imagesx($bgIm), imagesy($bgIm));
-        }   
-     }
+            imagecopyresized(
+                $this->im,
+                $bgIm,
+                0,
+                0,
+                0,
+                0,
+                $this->sWidth,
+                $this->sHeight,
+                imagesx($bgIm),
+                imagesy($bgIm)
+            );
+        }
+    }
      
-     /**
-      * 纯色背景 
-      **/
-      protected function colorBackground() {
+    /**
+     * 纯色背景
+     **/
+    protected function colorBackground()
+    {
         $randBg = imagecolorallocate($this->im, mt_rand(100, 255), mt_rand(100, 255), mt_rand(100, 255));
-        imagefill($this->im, 0, 0, $randBg);    
-      }
+        imagefill($this->im, 0, 0, $randBg);
+    }
       
-      /**
-      * 字母背景 
-      **/
-      protected function letterBackground() {
+    /**
+    * 字母背景
+    **/
+    protected function letterBackground()
+    {
         $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
         for ($i = 0; $i < 10; $i ++) {
             $fColor = imagecolorallocate($this->im, mt_rand(100, 150), mt_rand(100, 255), mt_rand(0, 255));
@@ -353,14 +376,15 @@ class DyCaptcha{
                 imagestring($this->im, $j, mt_rand(-10, $this->sWidth), mt_rand(-10, $this->sHeight), $chars{mt_rand(0, 35)}, $fColor);
             }
         }
-      }
+    }
     
     /**
-     * 生成验证码文本 
+     * 生成验证码文本
      **/
-     protected function createText(){
+    protected function createText()
+    {
         //验证码个数
-        $wordNum = mt_rand($this->wordLength[0],$this->wordLength[1]);
+        $wordNum = mt_rand($this->wordLength[0], $this->wordLength[1]);
         //验证码模式 0只字母  1只数字  2字母和数字  3数字运算
         $text = $r = '';
         switch ($this->model) {
@@ -379,13 +403,13 @@ class DyCaptcha{
                 break;
            case 1:
                 $words = '1234567890';
-                for ($i = 0; $i < $wordNum; $i++){
+                for ($i = 0; $i < $wordNum; $i++) {
                     $text .= $words{mt_rand(0, 9)};
                 }
                 break;
            case 2:
                 $words = 'abcdefghijklmnopqrstuvwxyz1234567890';
-                for ($i = 0; $i < $wordNum; $i++){
+                for ($i = 0; $i < $wordNum; $i++) {
                     $text .= $words{mt_rand(0, 35)};
                 }
                 break;
@@ -394,11 +418,11 @@ class DyCaptcha{
                 $sign  = $signs[rand(0, 2)];
                 $left = rand($this->model3Min, $this->model3Max);
                 $right = rand($this->model3Min, $this->model3Max);
-                switch($sign) {
+                switch ($sign) {
                     case 'x': $r = $left *  $right; break;
                     case '-':
                         $right = rand($this->model3Min, $left);
-                        $r = $left - $right; 
+                        $r = $left - $right;
                         break;
                     default:  $r = $left + $right; break;
                 }
@@ -407,34 +431,44 @@ class DyCaptcha{
         }
         $this->verifyCode = $this->model == 3 ? $r : $text;
         return $text;
-     }
+    }
      
-     /**
-      * 获取资源 
-      * @param string $this->resourcesPath下的子目录
-      * @param string 文件名
-      * @return string 完整的文件地址
-      **/
-      protected function getResources($path,$fileName) {
-        return rtrim($this->resourcesPath,'/').'/'.trim($path,'/').'/'.$fileName;
-      }
+    /**
+     * 获取资源
+     * @param string $this->resourcesPath下的子目录
+     * @param string 文件名
+     * @return string 完整的文件地址
+     **/
+    protected function getResources($path, $fileName)
+    {
+        return rtrim($this->resourcesPath, '/').'/'.trim($path, '/').'/'.$fileName;
+    }
      
-     /**
-      * 随机数 
-      **/
-     protected function frand(){
-        return 0.0001 * rand(0,9999);
-     }
+    /**
+     * 随机数
+     **/
+    protected function frand()
+    {
+        return 0.0001 * rand(0, 9999);
+    }
      
-     /**
-      * 还原图片大小 
-      **/
-     protected function restoreImage() {
+    /**
+     * 还原图片大小
+     **/
+    protected function restoreImage()
+    {
         $imRestore = imagecreatetruecolor($this->width, $this->height);
-        imagecopyresampled($imRestore, $this->im,
-            0, 0, 0, 0,
-            $this->width, $this->height,
-            $this->sWidth, $this->sHeight
+        imagecopyresampled(
+            $imRestore,
+            $this->im,
+            0,
+            0,
+            0,
+            0,
+            $this->width,
+            $this->height,
+            $this->sWidth,
+            $this->sHeight
         );
         $this->im = $imRestore;
     }
@@ -446,8 +480,9 @@ class DyCaptcha{
      * @param string 生成验证码时指定的saveName
      * @return bool
      **/
-     public function sessionCheck($verifyCode,$saveName='') {
-        if(!empty($saveName)){
+    public function sessionCheck($verifyCode, $saveName='')
+    {
+        if (!empty($saveName)) {
             $this->saveName = $saveName;
         }
         
@@ -456,32 +491,33 @@ class DyCaptcha{
         DySession::delete($this->saveName);
         
         //验证码不合法
-        if(empty($verifyCode) || !$sVer || !is_array($sVer) || count($sVer) != 2){
+        if (empty($verifyCode) || !$sVer || !is_array($sVer) || count($sVer) != 2) {
             return false;
         }
         
         //过期,输入错误
-        if(time()>$sVer[1] || strtolower($verifyCode) != $sVer[0]){
+        if (time()>$sVer[1] || strtolower($verifyCode) != $sVer[0]) {
             return false;
         }
         return true;
-     }
+    }
      
-     /**
-      * 验证以cookie模式存储的验证码是否正确 调用验证方法无论正确与否验证码都失效
-      * 如不在同一些实例验证 需实例本类并注意$saveName的值应与创建验证码时相同
-      * @param string 用户输入的验证码
-      * @param string 生成验证码时指定的saveName
-      * @return bool
-      **/
-      public function cookieCheck($verifyCode,$saveName=''){
-        if(!empty($saveName)){
+    /**
+     * 验证以cookie模式存储的验证码是否正确 调用验证方法无论正确与否验证码都失效
+     * 如不在同一些实例验证 需实例本类并注意$saveName的值应与创建验证码时相同
+     * @param string 用户输入的验证码
+     * @param string 生成验证码时指定的saveName
+     * @return bool
+     **/
+    public function cookieCheck($verifyCode, $saveName='')
+    {
+        if (!empty($saveName)) {
             $this->saveName = $saveName;
         }
         
         $sVer = DyCookie::get($this->saveName);
         //过期
-        if(!$sVer && DyCookie::is_set($this->saveName)){
+        if (!$sVer && DyCookie::is_set($this->saveName)) {
             DyCookie::delete($this->saveName);
             return false;
         }
@@ -490,17 +526,15 @@ class DyCaptcha{
         DyCookie::delete($this->saveName);
         
         //验证码不合法
-        $sVer = json_decode($sVer,true);
-        if(empty($verifyCode) || !$sVer || !is_array($sVer) || count($sVer) != 2){
+        $sVer = json_decode($sVer, true);
+        if (empty($verifyCode) || !$sVer || !is_array($sVer) || count($sVer) != 2) {
             return false;
         }
         
         //过期,输入错误验证码
-        if(time()>$sVer[1] || strtolower($verifyCode) != $sVer[0]){
+        if (time()>$sVer[1] || strtolower($verifyCode) != $sVer[0]) {
             return false;
         }
         return true;
-      }
+    }
 }
-
-

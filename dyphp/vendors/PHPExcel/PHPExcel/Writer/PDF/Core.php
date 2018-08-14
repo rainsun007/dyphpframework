@@ -54,14 +54,14 @@ abstract class PHPExcel_Writer_PDF_Core extends PHPExcel_Writer_HTML
      *
      * @var string
      */
-    protected $_orientation    = NULL;
+    protected $_orientation    = null;
 
     /**
      * Paper size (Over-ride)
      *
      * @var int
      */
-    protected $_paperSize    = NULL;
+    protected $_paperSize    = null;
 
 
     /**
@@ -69,7 +69,7 @@ abstract class PHPExcel_Writer_PDF_Core extends PHPExcel_Writer_HTML
      *
      * @var string
      */
-	private $_saveArrayReturnType;
+    private $_saveArrayReturnType;
 
     /**
      * Paper Sizes xRef List
@@ -219,7 +219,7 @@ abstract class PHPExcel_Writer_PDF_Core extends PHPExcel_Writer_HTML
     public function __construct(PHPExcel $phpExcel)
     {
         parent::__construct($phpExcel);
-        $this->setUseInlineCss(TRUE);
+        $this->setUseInlineCss(true);
         $this->_tempDir = PHPExcel_Shared_File::sys_get_temp_dir();
     }
 
@@ -325,7 +325,7 @@ abstract class PHPExcel_Writer_PDF_Core extends PHPExcel_Writer_HTML
      *  @param     string     $pFilename   Name of the file to save as
      *  @throws    PHPExcel_Writer_Exception
      */
-    protected function prepareForSave($pFilename = NULL)
+    protected function prepareForSave($pFilename = null)
     {
         //  garbage collect
         $this->_phpExcel->garbageCollect();
@@ -335,14 +335,14 @@ abstract class PHPExcel_Writer_PDF_Core extends PHPExcel_Writer_HTML
 
         //  Open file
         $fileHandle = fopen($pFilename, 'w');
-        if ($fileHandle === FALSE) {
+        if ($fileHandle === false) {
             throw new PHPExcel_Writer_Exception("Could not open file $pFilename for writing.");
         }
 
         //  Set PDF
-        $this->_isPdf = TRUE;
+        $this->_isPdf = true;
         //  Build CSS
-        $this->buildCSS(TRUE);
+        $this->buildCSS(true);
 
         return $fileHandle;
     }
@@ -360,5 +360,4 @@ abstract class PHPExcel_Writer_PDF_Core extends PHPExcel_Writer_HTML
 
         PHPExcel_Calculation::setArrayReturnType($this->_saveArrayReturnType);
     }
-
 }

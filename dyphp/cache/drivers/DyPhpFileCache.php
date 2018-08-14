@@ -130,7 +130,7 @@ class DyPhpFileCache extends DyPhpCache
             if (filemtime($hashFile) < time()) {
                 //unlink($hashFile);
                 return false;
-            }else{
+            } else {
                 return true;
             }
         }

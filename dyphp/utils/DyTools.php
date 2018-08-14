@@ -46,7 +46,7 @@ class DyTools
      * @param integer $just     $period=true时“刚刚”的时间周期
      * @param integer $minute   $period=true时“分钟”的时间周期
      * @param integer $hour     $period=true时“小时”的时间周期
-     * 
+     *
      * @return string
      */
     public static function formatTime($time, $period = false, $just = 60, $minute = 3600, $hour = 86400)
@@ -69,9 +69,9 @@ class DyTools
 
     /**
      * @abstract  树型分类格式化
-     * 
+     *
      * @param   $items  以id为key的二维数组
-     * 
+     *
      * @example
      * $classArr = array();
      * foreach($nav as $val){
@@ -85,7 +85,7 @@ class DyTools
      *
      * @return  array
      **/
-    public static function treeFormat($items,$childKeyName = 'child')
+    public static function treeFormat($items, $childKeyName = 'child')
     {
         foreach ($items as $item) {
             $items[$item['pid']][$childKeyName][$item['id']] = &$items[$item['id']];

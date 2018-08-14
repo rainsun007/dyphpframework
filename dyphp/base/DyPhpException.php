@@ -215,6 +215,7 @@ class DyPhpException extends Exception
               break;
           case E_STRICT:
               $errType = 'STRICT';
+              break;
           default:
               $errType = 'Unknown';
               break;

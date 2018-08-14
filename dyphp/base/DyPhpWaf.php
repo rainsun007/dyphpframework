@@ -3,7 +3,7 @@
  * web防火墙，防护XSS,SQL,代码执行等攻击
  * 基于“云体检通用漏洞防护补丁v1.1”
  * 注意：技术社区类，cms类等可以提交富文本的网站，可能被误杀; 另外此功能会对所有的访问都进行检查对性能有所影响（可忽略不计）
- * 
+ *
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
  * @copyright Copyright dyphp.com

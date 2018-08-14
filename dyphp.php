@@ -215,9 +215,9 @@ class DyPhpBase
      **/
     public static function app()
     {
-        if(self::$dyApp){
+        if (self::$dyApp) {
             return self::$dyApp;
-        }else{
+        } else {
             self::$dyApp = new DyPhpApp();
             return self::$dyApp;
         }
@@ -230,7 +230,7 @@ class DyPhpBase
      **/
     public static function powerBy($link = true)
     {
-        return $link ? 'Powered by <a href="http://www.dyphp.com" target="_blank">DYPHP-Framework '.DYPHP_VERSION.'</a>' : 'Powered by DYPHP-Framework '.DYPHP_VERSION;
+        return $link ? 'Powered By <a href="http://www.dyphp.com" target="_blank">DYPHP-Framework '.DYPHP_VERSION.'</a>' : 'Powered by DYPHP-Framework '.DYPHP_VERSION;
     }
 
     /**

@@ -46,9 +46,9 @@ class PHPExcel_Settings
     const CHART_RENDERER_JPGRAPH    = 'jpgraph';
 
     /**    Optional PDF Rendering libraries */
-    const PDF_RENDERER_TCPDF		= 'tcPDF';
-    const PDF_RENDERER_DOMPDF		= 'DomPDF';
-    const PDF_RENDERER_MPDF 		= 'mPDF';
+    const PDF_RENDERER_TCPDF        = 'tcPDF';
+    const PDF_RENDERER_DOMPDF        = 'DomPDF';
+    const PDF_RENDERER_MPDF        = 'mPDF';
 
 
     private static $_chartRenderers = array(
@@ -79,14 +79,14 @@ class PHPExcel_Settings
      *
      * @var string
      */
-    private static $_chartRendererName = NULL;
+    private static $_chartRendererName = null;
 
     /**
      * Directory Path to the external Library used for rendering charts
      *
      * @var string
      */
-    private static $_chartRendererPath = NULL;
+    private static $_chartRendererPath = null;
 
 
     /**
@@ -96,14 +96,14 @@ class PHPExcel_Settings
      *
      * @var string
      */
-    private static $_pdfRendererName = NULL;
+    private static $_pdfRendererName = null;
 
     /**
      * Directory Path to the external Library used for rendering PDF files
      *
      * @var string
      */
-    private static $_pdfRendererPath = NULL;
+    private static $_pdfRendererPath = null;
 
     /**
      * Default options for libxml loader
@@ -124,9 +124,9 @@ class PHPExcel_Settings
         if (($zipClass === self::PCLZIP) ||
             ($zipClass === self::ZIPARCHIVE)) {
             self::$_zipClass = $zipClass;
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     } // function setZipClass()
 
 
@@ -174,10 +174,9 @@ class PHPExcel_Settings
      * @return boolean Success or failure
      */
     public static function setCacheStorageMethod(
-    	$method = PHPExcel_CachedObjectStorageFactory::cache_in_memory,
+        $method = PHPExcel_CachedObjectStorageFactory::cache_in_memory,
       $arguments = array()
-    )
-    {
+    ) {
         return PHPExcel_CachedObjectStorageFactory::initialize($method, $arguments);
     } // function setCacheStorageMethod()
 
@@ -205,8 +204,9 @@ class PHPExcel_Settings
      */
     public static function setChartRenderer($libraryName, $libraryBaseDir)
     {
-        if (!self::setChartRendererName($libraryName))
-            return FALSE;
+        if (!self::setChartRendererName($libraryName)) {
+            return false;
+        }
         return self::setChartRendererPath($libraryBaseDir);
     } // function setChartRenderer()
 
@@ -221,13 +221,13 @@ class PHPExcel_Settings
      */
     public static function setChartRendererName($libraryName)
     {
-        if (!in_array($libraryName,self::$_chartRenderers)) {
-            return FALSE;
+        if (!in_array($libraryName, self::$_chartRenderers)) {
+            return false;
         }
 
         self::$_chartRendererName = $libraryName;
 
-        return TRUE;
+        return true;
     } // function setChartRendererName()
 
 
@@ -240,11 +240,11 @@ class PHPExcel_Settings
     public static function setChartRendererPath($libraryBaseDir)
     {
         if ((file_exists($libraryBaseDir) === false) || (is_readable($libraryBaseDir) === false)) {
-            return FALSE;
+            return false;
         }
         self::$_chartRendererPath = $libraryBaseDir;
 
-        return TRUE;
+        return true;
     } // function setChartRendererPath()
 
 
@@ -286,8 +286,9 @@ class PHPExcel_Settings
      */
     public static function setPdfRenderer($libraryName, $libraryBaseDir)
     {
-        if (!self::setPdfRendererName($libraryName))
-            return FALSE;
+        if (!self::setPdfRendererName($libraryName)) {
+            return false;
+        }
         return self::setPdfRendererPath($libraryBaseDir);
     } // function setPdfRenderer()
 
@@ -304,13 +305,13 @@ class PHPExcel_Settings
      */
     public static function setPdfRendererName($libraryName)
     {
-        if (!in_array($libraryName,self::$_pdfRenderers)) {
-            return FALSE;
+        if (!in_array($libraryName, self::$_pdfRenderers)) {
+            return false;
         }
 
         self::$_pdfRendererName = $libraryName;
 
-        return TRUE;
+        return true;
     } // function setPdfRendererName()
 
 
@@ -323,11 +324,11 @@ class PHPExcel_Settings
     public static function setPdfRendererPath($libraryBaseDir)
     {
         if ((file_exists($libraryBaseDir) === false) || (is_readable($libraryBaseDir) === false)) {
-            return FALSE;
+            return false;
         }
         self::$_pdfRendererPath = $libraryBaseDir;
 
-        return TRUE;
+        return true;
     } // function setPdfRendererPath()
 
 
@@ -366,7 +367,7 @@ class PHPExcel_Settings
         if (is_null($options)) {
             $options = LIBXML_DTDLOAD | LIBXML_DTDATTR;
         }
-        @libxml_disable_entity_loader($options == (LIBXML_DTDLOAD | LIBXML_DTDATTR)); 
+        @libxml_disable_entity_loader($options == (LIBXML_DTDLOAD | LIBXML_DTDATTR));
         self::$_libXmlLoaderOptions = $options;
     } // function setLibXmlLoaderOptions
 
