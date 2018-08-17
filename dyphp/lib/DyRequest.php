@@ -236,7 +236,7 @@ class DyRequest
     }
 
     /**
-     * 获取get请求的字串(任何类型都可使用此方法，为了数据类型的严禁建议使用已提供的对应的方法).
+     * 获取get请求的字串
      *
      * @param string  get请求的变量名
      * @param string  默认值
@@ -290,7 +290,7 @@ class DyRequest
     }
 
     /**
-     * 获取post请求的字串(任何类型都可使用此方法，为了数据类型的严禁建议使用已提供的对应的方法).
+     * 获取post请求的字串
      *
      * @param string  post请求的变量名
      * @param string  默认值
@@ -344,7 +344,7 @@ class DyRequest
     }
 
     /**
-     * @brief    获取get提交原始数据 如系统开启了get_magic_quotes_gpc会数据进行stripcslashes操作 此方法要注册数据安全性  不建议使用
+     * @brief   获取get提交原始数据 如系统开启了get_magic_quotes_gpc会数据进行stripcslashes操作 此方法要注意数据安全性
      *
      * @param   $paramKey
      * @param   $default
@@ -357,7 +357,7 @@ class DyRequest
     }
 
     /**
-     * @brief    获取post提交原始数据 如系统开启了get_magic_quotes_gpc会数据进行stripcslashes操作 此方法要注册数据安全性  不建议使用
+     * @brief    获取post提交原始数据 如系统开启了get_magic_quotes_gpc会数据进行stripcslashes操作 此方法要注意数据安全性
      *
      * @param   $paramKey
      * @param   $default
@@ -372,6 +372,7 @@ class DyRequest
     /**
      * 通过输入流获取json数据并转为array返回
      * enctype="multipart/form-data" 的时候 php://input 是无效的
+     * 
      * @return array
      **/
     public static function getJosnInput()
@@ -512,7 +513,7 @@ class DyRequest
     {
         if (!get_magic_quotes_gpc()) {
             if (is_array($requestValue)) {
-                foreach ($string as $key => $val) {
+                foreach ($requestValue as $key => $val) {
                     $requestValue[$key] = self::strAddslashes($val);
                 }
             } else {

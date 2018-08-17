@@ -57,12 +57,14 @@ class DyGDImg
     }
 
     /**
-     * @brief    上传图片
+     * 上传图片
+     * 
      * @param    string $upFileName  表单上传控件name
      * @param    string $save_path   上传后保存的路径
      * @param    string $save_name   上传后保存的文件名（不带扩展名）
-     * @param    string|array $extensions 支持文件格式
      * @param    int    $maxSize    单位MB
+     * @param    string|array $extensions 支持文件格式
+     * 
      * @return   int
      **/
     public static function upload($upFileName, $save_path, $save_name, $maxSize=2, $extensions ='jpg|gif|bmp|png')
@@ -75,7 +77,8 @@ class DyGDImg
     }
 
     /**
-     * @brief  获取保存后的文件扩展名
+     * 获取保存后的文件扩展名
+     * 
      * @return string
      **/
     public static function getFileExt()
@@ -85,7 +88,8 @@ class DyGDImg
     }
 
     /**
-     * @brief  获取保存后的文件名
+     * 获取保存后的文件名
+     * 
      * @return string
      **/
     public static function getFileSaveName()
@@ -95,7 +99,8 @@ class DyGDImg
     }
 
     /**
-     * @brief  获取上传成功后的文件信息
+     * 获取上传成功后的文件信息
+     * 
      * @return array
      **/
     public static function getUploadInfo()
@@ -105,9 +110,11 @@ class DyGDImg
 
     /**
      * 无页面刷新框架上传 callback处理
+     * 
      * @param string callback
      * @param string 返回上传状态
      * @param string 返回上传信息
+     * 
      * @return string
      */
     public static function iframJsCallBack($callbackFunName='', $type='seccess', $msg="upload seccess")
@@ -121,7 +128,8 @@ class DyGDImg
      * @param string $srcimg
      * @param string $save_path
      * @param string $save_name
-     * @return void
+     * 
+     * @return array
      */
     private static function getSaveInfo($srcimg, $save_path, $save_name, $width)
     {
@@ -357,18 +365,18 @@ class DyGDImgRealize
     private function imImg()
     {
         switch ($this->type) {
-        case "jpg":
-            $this->im = imagecreatefromjpeg($this->srcimg);
-            break;
-        case "gif":
-            $this->im = imagecreatefromgif($this->srcimg);
-            break;
-        case "png":
-            $this->im = imagecreatefrompng($this->srcimg);
-            break;
-        case "bmp":
-            $this->im = imagecreatefromwbmp($this->srcimg);
-            break;
+            case "jpg":
+                $this->im = imagecreatefromjpeg($this->srcimg);
+                break;
+            case "gif":
+                $this->im = imagecreatefromgif($this->srcimg);
+                break;
+            case "png":
+                $this->im = imagecreatefrompng($this->srcimg);
+                break;
+            case "bmp":
+                $this->im = imagecreatefromwbmp($this->srcimg);
+                break;
         }
     }
 

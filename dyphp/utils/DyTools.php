@@ -216,19 +216,28 @@ class DyTools
     }
 
     /**
-     * @brief    简单json返回值格式化
+     * 简单json返回值格式化
      *
-     * @param   int     $status     状态
-     * @param   int     $code       代码
-     * @param   string  $message    信息
-     * @param   mixed   $data       数据
-     * @param   bool    $unescaped  以字面编码多字节 Unicode 字符(中文不被转码),自 PHP 5.4.0 起生效
+     * @param   int     $status       状态
+     * @param   int     $code         代码
+     * @param   string  $message      信息
+     * @param   mixed   $data         数据
+     * @param   bool    $printAndExit 是否直接输出并执行exit()
      *
      * @return  string
      **/
-    public static function apiJson($status = 1, $code = 200, $message = '', $data = '', $unescaped = false)
+    public static function apiJson($status = 1, $code = 200, $message = '', $data = '', $printAndExit = false)
     {
         $dataArr = array('status' => $status, 'code' => $code, 'message' => $message, 'data' => $data);
-        return $unescaped ? json_encode($dataArr, JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
+
+        //以字面编码多字节 Unicode 字符(中文不被转码),自 PHP 5.4.0 起生效
+        $result =  version_compare(PHP_VERSION, '5.4.0', '>=') ? json_encode($dataArr, JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
+        
+        if($printAndExit){
+            echo $result;
+            exit();
+        }else{
+            return $result;
+        }
     }
 }
