@@ -7,7 +7,7 @@
  *
  *   配制格式
  *   'cache'=>array(
- *       'c1'=>array('type'=>'file','gcOpen'=>true),  //文件缓存多时 不建议打开gc 会导致性能低下  可以使用shell处理
+ *       'c1'=>array('type'=>'file','gcOpen'=>false,'cacheRootPath'=>'/var/log/dyphpFramework/'),
  *       'c2'=>array('type'=>'apc'),
  *       'c3'=>array(
  *           'type'=>'memcache',

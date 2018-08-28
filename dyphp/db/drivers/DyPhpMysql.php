@@ -34,13 +34,13 @@ final class DyPhpMysql
     public function run()
     {
         $dbConfigArr = $this->dbConfigArr;
+        $this->pconn = isset($dbConfigArr['pconn']) ? $dbConfigArr['pconn'] : false;
         $this->host = $dbConfigArr['host'];
         $this->port = $dbConfigArr['port'];
         $this->charset = $dbConfigArr['charset'];
         $this->user = $dbConfigArr['user'];
         $this->pass = $dbConfigArr['pass'];
         $this->dbName = $dbConfigArr['dbName'];
-        $this->pconn = $dbConfigArr['pconn'];
 
         try {
             if ($this->pconn) {
