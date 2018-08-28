@@ -37,7 +37,7 @@ final class DyPhpPdoMysql extends PDO
         $this->user = $dbConfigArr['user'];
         $this->pass = $dbConfigArr['pass'];
         $this->dbName = $dbConfigArr['dbName'];
-        $this->pconn = $dbConfigArr['pconn'];
+        $this->pconn = isset($dbConfigArr['pconn']) ? $dbConfigArr['pconn'] : false;
 
         //连接模式
         $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName}";

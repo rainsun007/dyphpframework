@@ -7,15 +7,15 @@
  */
 class DyPhpFileCache extends DyPhpCache
 {
-    //缓存目录
-    private $cachePath = '';
+    //缓存根目录
+    public $cachePath = '';
 
-    //gc是否开启  缓存量大不建议开启
+    //gc是否开启  缓存量大不建议开启,可以使用shell处理
     public $gcOpen = false;
 
     public function __construct()
     {
-        $this->cachePath = rtrim(DyPhpConfig::item('appPath'), '/').'/cache/data';
+        //$this->cachePath = rtrim(DyPhpConfig::item('appPath'), '/').'/cache/data';
     }
 
     /**

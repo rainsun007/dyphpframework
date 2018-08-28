@@ -40,6 +40,7 @@ class DyCache
                 $driver->run();
             } elseif ($cache[$cacheKey]['type'] == 'file') {
                 $driver->gcOpen = isset($cache[$cacheKey]['gcOpen']) ? $cache[$cacheKey]['gcOpen'] : false;
+                $driver->cachePath = isset($cache[$cacheKey]['cacheRootPath']) && !empty($cache[$cacheKey]['cacheRootPath']) ? rtrim($cache[$cacheKey]['cacheRootPath'],'/').'/data' : rtrim(DyPhpConfig::item('appPath'), '/').'/cache/data';
             }
             
             self::$instances[$cacheCalss] = $driver;
