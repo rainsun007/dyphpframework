@@ -7,7 +7,7 @@
  *
  *   配制格式
  *   'cache'=>array(
- *       'c1'=>array('type'=>'file','gcOpen'=>false,'cacheRootPath'=>'/var/log/dyphpFramework/'), 
+ *       'c1'=>array('type'=>'file','gcOpen'=>false,'cacheRootPath'=>'/var/log/dyphpFramework/'),
  *       'c2'=>array('type'=>'apc'),
  *       'c3'=>array(
  *           'type'=>'memcache',

@@ -19,34 +19,34 @@ class DyCache
     public static function invoke($cacheKey, $memCacheServersKey='servers_one')
     {
         $cache = DyPhpConfig::item('cache');
-        if (array_key_exists($cacheKey, $cache)) {
-            if (!is_array($cache[$cacheKey]) || !array_key_exists('type', $cache[$cacheKey])) {
-                DyPhpBase::throwException('cache config format error', $cache[$cacheKey]['type']);
-            }
-            
-            if (!in_array($cache[$cacheKey]['type'], self::$cacheTypes)) {
-                DyPhpBase::throwException('cache type does not exist', $cache[$cacheKey]['type']);
-            }
-            
-            $cacheCalss = 'DyPhp'.ucfirst($cache[$cacheKey]['type']).'Cache';
-            if (isset(self::$instances[$cacheCalss])) {
-                return self::$instances[$cacheCalss];
-            }
-
-            $driver = new $cacheCalss;
-            if ($cache[$cacheKey]['type'] == 'memcache') {
-                $driver->cacheKey = $cacheKey;
-                $driver->serversKey = $memCacheServersKey;
-                $driver->run();
-            } elseif ($cache[$cacheKey]['type'] == 'file') {
-                $driver->gcOpen = isset($cache[$cacheKey]['gcOpen']) ? $cache[$cacheKey]['gcOpen'] : false;
-                $driver->cachePath = isset($cache[$cacheKey]['cacheRootPath']) && !empty($cache[$cacheKey]['cacheRootPath']) ? rtrim($cache[$cacheKey]['cacheRootPath'],'/').'/data' : rtrim(DyPhpConfig::item('appPath'), '/').'/cache/data';
-            }
-            
-            self::$instances[$cacheCalss] = $driver;
-            return $driver;
-        } else {
+        if (!array_key_exists($cacheKey, $cache)) {
             DyPhpBase::throwException('cache method does not exist', $cacheKey);
         }
+        
+        if (!is_array($cache[$cacheKey]) || !array_key_exists('type', $cache[$cacheKey])) {
+            DyPhpBase::throwException('cache config format error', $cache[$cacheKey]['type']);
+        }
+        
+        if (!in_array($cache[$cacheKey]['type'], self::$cacheTypes)) {
+            DyPhpBase::throwException('cache type does not exist', $cache[$cacheKey]['type']);
+        }
+        
+        $cacheCalss = 'DyPhp'.ucfirst($cache[$cacheKey]['type']).'Cache';
+        if (isset(self::$instances[$cacheCalss])) {
+            return self::$instances[$cacheCalss];
+        }
+
+        $driver = new $cacheCalss;
+        if ($cache[$cacheKey]['type'] == 'memcache') {
+            $driver->cacheKey = $cacheKey;
+            $driver->serversKey = $memCacheServersKey;
+            $driver->run();
+        } elseif ($cache[$cacheKey]['type'] == 'file') {
+            $driver->gcOpen = isset($cache[$cacheKey]['gcOpen']) ? $cache[$cacheKey]['gcOpen'] : false;
+            $driver->cachePath = isset($cache[$cacheKey]['cacheRootPath']) && !empty($cache[$cacheKey]['cacheRootPath']) ? rtrim($cache[$cacheKey]['cacheRootPath'],'/').'/data' : rtrim(DyPhpConfig::item('appPath'), '/').'/cache/data';
+        }
+        
+        self::$instances[$cacheCalss] = $driver;
+        return $driver;
     }
 }

@@ -13,11 +13,6 @@ class DyPhpFileCache extends DyPhpCache
     //gc是否开启  缓存量大不建议开启,可以使用shell处理
     public $gcOpen = false;
 
-    public function __construct()
-    {
-        //$this->cachePath = rtrim(DyPhpConfig::item('appPath'), '/').'/cache/data';
-    }
-
     /**
      * 取得缓存路径
      *
