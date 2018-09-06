@@ -2,7 +2,7 @@
 /**
  * web防火墙，防护XSS,SQL,代码执行等攻击
  * 基于“云体检通用漏洞防护补丁v1.1”
- * 注意：技术社区类，cms类等可以提交富文本的网站，可能被误杀; 另外此功能会对所有的访问都进行检查对性能有所影响（可忽略不计）
+ * 注意：技术社区类，cms类等可以提交富文本的网站，可能被误杀;
  *
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
@@ -70,12 +70,11 @@ class DyPhpWaf
      **/
     private function logs($message)
     {
-        $logDir = rtrim(DyPhpConfig::item('appPath'), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
+        $logDir = DyPhpConfig::getExceptionLogRootDir();
         if (!is_dir($logDir)) {
             mkdir($logDir, 0777, true);
         }
 
-        //按app类型写log信息
         $data = date('Y-m-d H:i:s', time()).' '.DyRequest::getClientIp().' '.DyRequest::getMethod().' '.$_SERVER['REQUEST_URI'].' '.$message.PHP_EOL;
         $fp = fopen($logDir.'waf.log', 'a');
         if ($fp) {
