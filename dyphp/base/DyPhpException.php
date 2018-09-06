@@ -168,7 +168,7 @@ class DyPhpException extends Exception
      **/
     private static function logs($title, $message, $traceString)
     {
-        $logDir = rtrim(DyPhpConfig::item('appPath'), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
+        $logDir = DyPhpConfig::getExceptionLogRootDir();
         if (!is_dir($logDir)) {
             mkdir($logDir, 0777, true);
         }

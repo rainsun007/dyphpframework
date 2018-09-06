@@ -38,6 +38,8 @@ class DyPhpConfig
     private static $loginHandler = '';
     //信息处理页面
     private static $messageHandler = '';
+    //异常log保存的根目录(必须保证要有写入权限)
+    private static $exceptionLogRootDir = '';
     //url重写管理
     private static $urlManager = array();
     //数据库配制
@@ -134,13 +136,14 @@ class DyPhpConfig
         self::$messageHandler = DYPHP_DEFAULT_CONTROLLER.'/message';
 
         //校验及设置配制属性
-        $configArr = array(
+        $configCheckArr = array(
             'db','cache','cookie','urlManager','params','import','aliasMap','hooks',
-            'errorHandler','messageHandler','loginHandler','appName','secretKey','env'
+            'errorHandler','messageHandler','loginHandler','exceptionLogRootDir','appName','secretKey','env'
         );
         foreach ($config as $key => $value) {
-            $cnfSearch = array_search($key, $configArr);
+            $cnfSearch = array_search($key, $configCheckArr);
             if ($cnfSearch !== false) {
+                //系统规定的配制数据类型只能是array或string
                 $isType = $cnfSearch<=7 ? is_array($value) : is_string($value);
                 if (!$isType) {
                     DyPhpBase::throwException('data type error', $key);
@@ -148,7 +151,7 @@ class DyPhpConfig
                 //系统属性设置
                 self::${$key} = $value;
             } else {
-                //用户自定义配制设置
+                //用户自定义配制设置，可自由定义key，对value数据类型无限制
                 self::$userConfig[$key] = $value;
             }
         }
@@ -317,6 +320,20 @@ class DyPhpConfig
             return self::$userConfig[$itemName];
         }
         DyPhpBase::throwException('config does not exist', $itemName);
+    }
+
+    /**
+     * 获取异常log存储根目录
+     *
+     * @return string
+     */
+    public static function getExceptionLogRootDir()
+    {
+        if(self::$exceptionLogRootDir == ''){
+            return rtrim(APP_PATH, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
+        }else{
+            return rtrim(self::$exceptionLogRootDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        }
     }
 
     /**
