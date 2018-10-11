@@ -84,7 +84,7 @@ class DyCaptcha
         array(214,36,7),  // red
     );
     
-    /** 存储方式 cookie 或 session **/
+    /** 存储方式:cookie, session, cache **/
     public $saveType = 'cookie';
     
     /** cookie或session键名 **/
@@ -93,29 +93,34 @@ class DyCaptcha
     /** 过期时间(second) **/
     public $expire = 300;
 
-    //资源目录
-    private $resourcesPath = '';
-    //resource
-    private $im;
     //内比宽度
     private $sWidth;
     //内比高度
     private $sHeight;
-    //确定的验证码结果、干扰线、噪点颜色
+    //resource
+    private $im;
+    //imagecolorallocate实例，应用于验证码结果、干扰线、噪点颜色
     private $gdFgColor;
-    //确定的验证码结果
-    private $verifyCode;
+
+    //验证码结果
+    private $verifyCodeResult;
+    //验证码字符
+    private $verifyCodeText;
     
     /**
-     * 创建验证码
+     * 创建并输出验证码
      **/
     public function createImage()
     {
-        $this->resourcesPath = dirname(__FILE__).'/resources';
         //初始化图像
         $this->initImage();
+
         //创建验证码
+        if($this->verifyCodeResult == ''){
+            $this->createText();
+        }
         $this->createWord();
+
         //扭曲验证码
         $this->waveWord();
         //加干扰点
@@ -126,6 +131,18 @@ class DyCaptcha
         $this->saveWord();
         //图片输出
         $this->outputImage();
+    }
+
+    /**
+     * 获取验证码结果
+     * createImage方法调用之前调用此方法
+     *
+     * @return string
+     */
+    public function getVerifyCodeResult()
+    {
+        $this->createText();
+        return $this->verifyCodeResult;
     }
     
     /**
@@ -151,7 +168,8 @@ class DyCaptcha
     protected function createWord()
     {
         //获取到验证码
-        $text = $this->createText();
+        $text = $this->verifyCodeText;
+        
         //获取字体
         $fontcfg  = $this->fonts[array_rand($this->fonts)];
         $fontfile = $this->getResources('fonts', $fontcfg['font']);
@@ -253,7 +271,7 @@ class DyCaptcha
     /**
      * 输出图像
      **/
-    protected function outputImage()
+    public function outputImage()
     {
         //大小还原
         $this->restoreImage();
@@ -279,12 +297,12 @@ class DyCaptcha
     {
         $time = time()+$this->expire;
         if ($this->saveType == 'session') {
-            DySession::set($this->saveName, array($this->verifyCode,$time));
-        } else {
+            DySession::set($this->saveName, array($this->verifyCodeResult,$time));
+        } elseif ($this->saveType == 'cookie') {
             if (DyCookie::is_set($this->saveName)) {
                 DyCookie::delete($this->saveName);
             }
-            DyCookie::set($this->saveName, json_encode(array($this->verifyCode,$time)), $this->expire);
+            DyCookie::set($this->saveName, json_encode(array($this->verifyCodeResult,$time)), $this->expire);
         }
     }
     
@@ -297,23 +315,23 @@ class DyCaptcha
         if (in_array($this->background, $randModel)) {
             switch ($this->background) {
                case 'rand':
-                            $this->colorBackground();
-                            if (rand(0, 1)) {
-                                $this->letterBackground();
-                            }
-                            return;
+                    $this->colorBackground();
+                    if (rand(0, 1)) {
+                        $this->letterBackground();
+                    }
+                    return;
                case 'rand_letter':
-                            $randBg = imagecolorallocate($this->im, 255, 255, 255);
-                            imagefill($this->im, 0, 0, $randBg);
-                            $this->letterBackground();
-                            return;
+                    $randBg = imagecolorallocate($this->im, 255, 255, 255);
+                    imagefill($this->im, 0, 0, $randBg);
+                    $this->letterBackground();
+                    return;
                case 'rand_color':
-                            $this->colorBackground();
-                            return;
+                    $this->colorBackground();
+                    return;
                case 'rand_letter_color':
-                            $this->colorBackground();
-                            $this->letterBackground();
-                            return;
+                    $this->colorBackground();
+                    $this->letterBackground();
+                    return;
             }
         }
         
@@ -331,27 +349,23 @@ class DyCaptcha
             }
 
             switch ($dat[2]) {
-            case 1:  $bgIm = @imagecreatefromgif($background); break;
-            case 2:  $bgIm = @imagecreatefromjpeg($background); break;
-            case 3:  $bgIm = @imagecreatefrompng($background); break;
-            default: return;
+                case 1:  
+                    $bgIm = @imagecreatefromgif($background); 
+                    break;
+                case 2:  
+                    $bgIm = @imagecreatefromjpeg($background); 
+                    break;
+                case 3:  
+                    $bgIm = @imagecreatefrompng($background); 
+                    break;
+                default: 
+                    return;
             }
             if (!$bgIm) {
                 return;
             }
 
-            imagecopyresized(
-                $this->im,
-                $bgIm,
-                0,
-                0,
-                0,
-                0,
-                $this->sWidth,
-                $this->sHeight,
-                imagesx($bgIm),
-                imagesy($bgIm)
-            );
+            imagecopyresized($this->im,$bgIm,0,0,0,0,$this->sWidth,$this->sHeight,imagesx($bgIm),imagesy($bgIm));
         }
     }
      
@@ -419,29 +433,33 @@ class DyCaptcha
                 $left = rand($this->model3Min, $this->model3Max);
                 $right = rand($this->model3Min, $this->model3Max);
                 switch ($sign) {
-                    case 'x': $r = $left *  $right; break;
+                    case 'x': 
+                        $r = $left *  $right; 
+                        break;
                     case '-':
                         $right = rand($this->model3Min, $left);
                         $r = $left - $right;
                         break;
-                    default:  $r = $left + $right; break;
+                    default:  
+                        $r = $left + $right; 
+                        break;
                 }
                 $text = "$left $sign $right =";
                 break;
         }
-        $this->verifyCode = $this->model == 3 ? $r : $text;
-        return $text;
+        $this->verifyCodeResult = $this->model == 3 ? $r : $text;
+        $this->verifyCodeText = $text;
     }
      
     /**
      * 获取资源
-     * @param string $this->resourcesPath下的子目录
+     * @param string resources下的子目录
      * @param string 文件名
      * @return string 完整的文件地址
      **/
     protected function getResources($path, $fileName)
     {
-        return rtrim($this->resourcesPath, '/').'/'.trim($path, '/').'/'.$fileName;
+        return dirname(__FILE__).'/resources/'.trim($path, '/').'/'.$fileName;
     }
      
     /**
@@ -458,18 +476,7 @@ class DyCaptcha
     protected function restoreImage()
     {
         $imRestore = imagecreatetruecolor($this->width, $this->height);
-        imagecopyresampled(
-            $imRestore,
-            $this->im,
-            0,
-            0,
-            0,
-            0,
-            $this->width,
-            $this->height,
-            $this->sWidth,
-            $this->sHeight
-        );
+        imagecopyresampled($imRestore,$this->im,0,0,0,0,$this->width,$this->height,$this->sWidth,$this->sHeight);
         $this->im = $imRestore;
     }
     
