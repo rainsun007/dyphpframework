@@ -25,8 +25,11 @@ class DyPhpView
     public $defaultTheme = 'default';
     //默认使用的layout文件, 支持跨模块调用layout(eg:/admin/Layout/main)
     public $defaultLayout = 'main';
-    //自定义页面title
+
+    /** SEO相关 **/
     public $pageTitle = '';
+    public $pageKeywords = '';
+    public $pageDescription = '';
 
     /**
      * 完整view渲染.
@@ -85,15 +88,43 @@ class DyPhpView
     }
 
     /**
-     * 获取title信息.
+     * 设置、获取title信息.
      **/
-    public function pageTitle()
+    public function pageTitle($title = '')
     {
-        return $this->pageTitle == '' ? DyPhpConfig::item('appName') : $this->pageTitle;
+        if($title){
+            $this->pageTitle = $title;
+        }else{
+            return $this->pageTitle == '' ? DyPhpConfig::item('appName') : $this->pageTitle;
+        }
     }
 
     /**
-     * @brief    设置模板变量
+     * 设置、获取keywords信息.
+     **/
+    public function pageKeywords($keywords = '')
+    {
+        if($keywords){
+            $this->pageKeywords = $keywords;
+        }else{
+            return $this->pageKeywords == '' ? DyPhpConfig::item('appName') : $this->pageKeywords;
+        }
+    }
+
+    /**
+     * 设置、获取description信息.
+     **/
+    public function pageDescription($description = '')
+    {
+        if($description){
+            $this->pageDescription = $description;
+        }else{
+            return $this->pageDescription == '' ? DyPhpConfig::item('appName') : $this->pageDescription;
+        }
+    }
+
+    /**
+     * 设置模板变量
      *
      * @param   mix $key
      * @param   mix $value
@@ -106,7 +137,7 @@ class DyPhpView
     }
 
     /**
-     * @brief    获取模板变量
+     * 获取模板变量
      * 主要使用场景为在renderPartial中调用了setData方法 在layout或其它view中后续执行代码中要使用设置的模板变量
      *
      * @param  string $key
@@ -132,7 +163,7 @@ class DyPhpView
     }
 
     /**
-     * @brief    加载css
+     * 加载css
      *
      * @param  string $css
      * @param  bool   $return
@@ -157,7 +188,7 @@ class DyPhpView
     }
 
     /**
-     * @brief  加载js
+     * 加载js
      *
      * @param  string  $script
      * @param  bool    $return
