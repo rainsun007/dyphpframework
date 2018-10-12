@@ -22,7 +22,7 @@ class DyString
         $key = !empty($key) ? $key : DyPhpConfig::item('secretKey');
         if (extension_loaded('openssl')) {
             $expiry = $expiry > 0 ? time() + $expiry : $expiry;
-            $string = openssl_encrypt($expiry.'|'.$string.'_dysc_'.mt_rand(0, 999), "AES-256-CBC", substr(md5($key), 0, 16), 0, "3081468300170825");
+            $string = openssl_encrypt($expiry.'|'.$string.'_dysc_'.mt_rand(0, 999), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
             $string = base64_encode($string);
         } elseif (extension_loaded('mcrypt') && version_compare(PHP_VERSION, '7.1.0', '<')) {
             $expiry = $expiry > 0 ? time()+$expiry : $expiry;
@@ -51,7 +51,7 @@ class DyString
         $string = str_replace(array('*','_'), array('+','/'), $string);
 
         if (extension_loaded('openssl')) {
-            $decryptStr = openssl_decrypt(base64_decode($string), "AES-256-CBC", substr(md5($key), 0, 16), 0, "3081468300170825");
+            $decryptStr = openssl_decrypt(base64_decode($string), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
             return self::decodeCheck($decryptStr);
         } elseif (extension_loaded('mcrypt') && version_compare(PHP_VERSION, '7.1.0', '<')) {
             $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES, MCRYPT_MODE_ECB), MCRYPT_DEV_URANDOM);
