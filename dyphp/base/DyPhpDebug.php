@@ -38,8 +38,8 @@ class DyPhpDebug
         }
 
         echo '<table cellspacing="1" style="'.self::$styles['table'].'">';
+        echo '<tr><td colspan="3" style="'.self::$styles['tdVal'].'padding:0px 13px 5px 10px;color:#999;"><b>APP INCLUDE PATH</b><br />'.get_include_path().'</td></tr>';
         echo '<tr><td colspan="3" style="'.self::$styles['obj1'].'"><b>INCLUDE FILES</b></td></tr>';
-        echo '<tr><td colspan="3" style="'.self::$styles['tdVal'].'">INCLUDE_PATH: '.get_include_path().'</td></tr>';
         echo '<tr style="'.self::$styles['titleTr'].'"><td style="'.self::$styles['titleTd'].'width:60px;">Index</td><td style="'.self::$styles['titleTd'].'">File</td><td style="'.self::$styles['titleTd'].'">Size</td></tr>';
         $allSize = 0;
         $num = 0;
