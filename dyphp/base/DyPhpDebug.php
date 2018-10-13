@@ -27,7 +27,7 @@ class DyPhpDebug
     );
 
     /**
-     * 获取加载的文件.
+     * 获取加载的文件(web).
      *
      * @param bool 只显示出app加载文件, false为所有加载文件包括框架文件
      **/
@@ -64,6 +64,11 @@ class DyPhpDebug
         echo '</table>';
     }
 
+    /**
+     * 获取加载的文件(console).
+     *
+     * @param bool 只显示出app加载文件, false为所有加载文件包括框架文件
+     **/
     public static function getLoadFilesConsole($onlyApp = true)
     {
         if (!DyPhpBase::$debug) {
@@ -96,7 +101,7 @@ class DyPhpDebug
     }
 
     /**
-     *  获取加载的sql.
+     *  获取加载的sql(web).
      **/
     public static function getLoadQuery()
     {
@@ -119,7 +124,9 @@ class DyPhpDebug
         echo '</table>';
     }
 
-
+    /**
+     *  获取加载的sql(console).
+     **/
     public static function getLoadQueryConsole()
     {
         if (!DyPhpBase::$debug) {
@@ -143,7 +150,7 @@ class DyPhpDebug
     }
 
     /**
-     * @brief    获取全局变量
+     * 获取全局变量(web)
      **/
     public static function getGlobalParams()
     {
@@ -156,6 +163,7 @@ class DyPhpDebug
         $paramsArr = array(
             'RUNTIME' => '<font color="#18c334">'.DyPhpBase::execTime().'Seconds</font> '.' <font color="#0080FF">Memory:'.$usageMemory.'</font> @ '.PHP_OS.', '.$_SERVER['SERVER_SOFTWARE'].', php:'.PHP_VERSION,
             'EXECUTE' => 'Module:<font color="#0080FF">'.DyPhpBase::app()->module.'</font> Controller:<font color="#0080FF">'.DyPhpBase::app()->cid.'</font> Action:<font color="#0080FF">'.DyPhpBase::app()->aid.'</font>',
+            'INCLUDE_PATH' => get_include_path(),
             'SESSION' => isset($_SESSION) ? $_SESSION : array(),
             'COOKIE' => isset($_COOKIE) ? $_COOKIE : array(),
             'POST' => isset($_POST) ? $_POST : array(),
@@ -206,6 +214,9 @@ class DyPhpDebug
         echo '</table>';
     }
 
+    /**
+     * 获取全局变量(console)
+     **/
     public static function getGlobalParamsConsole()
     {
         if (!DyPhpBase::$debug) {
@@ -217,6 +228,7 @@ class DyPhpDebug
         $paramsArr = array(
             'RUNTIME' => DyPhpBase::execTime().'Seconds '.' Memory:'.$usageMemory.' @ '.PHP_OS.', php:'.PHP_VERSION,
             'EXECUTE' => 'Module:'.DyPhpBase::app()->module.' Controller:'.DyPhpBase::app()->cid.' Action:'.DyPhpBase::app()->aid,
+            'INCLUDE_PATH' => get_include_path(),
         );
 
         $line = str_repeat('-', 120).PHP_EOL;
