@@ -39,6 +39,7 @@ class DyPhpDebug
 
         echo '<table cellspacing="1" style="'.self::$styles['table'].'">';
         echo '<tr><td colspan="3" style="'.self::$styles['obj1'].'"><b>INCLUDE FILES</b></td></tr>';
+        echo '<tr><td colspan="3" style="'.self::$styles['tdVal'].'">INCLUDE_PATH: '.get_include_path().'</td></tr>';
         echo '<tr style="'.self::$styles['titleTr'].'"><td style="'.self::$styles['titleTd'].'width:60px;">Index</td><td style="'.self::$styles['titleTd'].'">File</td><td style="'.self::$styles['titleTd'].'">Size</td></tr>';
         $allSize = 0;
         $num = 0;
@@ -77,6 +78,8 @@ class DyPhpDebug
 
         $line = str_repeat('-', 120).PHP_EOL;
         echo PHP_EOL.'[INCLUDE FILES]'.PHP_EOL;
+        echo  $line;
+        echo PHP_EOL.get_include_path().PHP_EOL;
         echo  $line;
         echo '|Index | Size    | File '.PHP_EOL;
         echo  $line;
@@ -161,9 +164,8 @@ class DyPhpDebug
         $usageMemory = (!function_exists('memory_get_usage')) ? '0' : round(memory_get_usage() / 1024 / 1024, 2).'MB';
 
         $paramsArr = array(
-            'RUNTIME' => '<font color="#18c334">'.DyPhpBase::execTime().'Seconds</font> '.' <font color="#0080FF">Memory:'.$usageMemory.'</font> @ '.PHP_OS.', '.$_SERVER['SERVER_SOFTWARE'].', php:'.PHP_VERSION,
-            'EXECUTE' => 'Module:<font color="#0080FF">'.DyPhpBase::app()->module.'</font> Controller:<font color="#0080FF">'.DyPhpBase::app()->cid.'</font> Action:<font color="#0080FF">'.DyPhpBase::app()->aid.'</font>',
-            'INCLUDE_PATH' => get_include_path(),
+            'RUNTIME' => '<font color="#18c334">'.DyPhpBase::execTime().'Seconds</font>; '.' <font color="#0080FF">Memory:'.$usageMemory.'</font>; '.PHP_OS.', '.$_SERVER['SERVER_SOFTWARE'].', php:'.PHP_VERSION,
+            'EXECUTE' => 'Module:<font color="#0080FF">'.DyPhpBase::app()->module.'</font>; Controller:<font color="#0080FF">'.DyPhpBase::app()->cid.'</font>; Action:<font color="#0080FF">'.DyPhpBase::app()->aid.'</font>',
             'SESSION' => isset($_SESSION) ? $_SESSION : array(),
             'COOKIE' => isset($_COOKIE) ? $_COOKIE : array(),
             'POST' => isset($_POST) ? $_POST : array(),
@@ -228,7 +230,6 @@ class DyPhpDebug
         $paramsArr = array(
             'RUNTIME' => DyPhpBase::execTime().'Seconds '.' Memory:'.$usageMemory.' @ '.PHP_OS.', php:'.PHP_VERSION,
             'EXECUTE' => 'Module:'.DyPhpBase::app()->module.' Controller:'.DyPhpBase::app()->cid.' Action:'.DyPhpBase::app()->aid,
-            'INCLUDE_PATH' => get_include_path(),
         );
 
         $line = str_repeat('-', 120).PHP_EOL;
