@@ -68,34 +68,11 @@ class DyPhpConfig
     /**
      * 运行app配制入口
      *
-     * @param string|array app配制文件
+     * @param string|array app配制
      **/
-    public static function runConfig($appConfigFile)
+    public static function runConfig($appConfig)
     {
-        if (is_array($appConfigFile)) {
-            if (!isset($appConfigFile['p']) || !isset($appConfigFile['c'])) {
-                DyPhpBase::throwException('config key is not exists', '"p" or "c"');
-            } elseif (!file_exists($appConfigFile['p']) || !file_exists($appConfigFile['c'])) {
-                DyPhpBase::throwException('config file is not exists', '"p" or "c"');
-            }
-            
-            $parentConfig = require $appConfigFile['p'];
-            $childConfig = require $appConfigFile['c'];
-            $excludeConfig = isset($appConfigFile['e']) ? (array)$appConfigFile['e'] : array();
-            $config = array_merge((array)$parentConfig, (array)$childConfig);
-            foreach ($excludeConfig as $key => $value) {
-                if (isset($parentConfig[$value])) {
-                    $config[$value] = $parentConfig[$value];
-                } elseif (isset($config[$value])) {
-                    unset($config[$value]);
-                }
-            }
-        } else {
-            if (!file_exists($appConfigFile)) {
-                DyPhpBase::throwException('config file is not exists', $appConfigFile);
-            }
-            $config = require $appConfigFile;
-        }
+        $config = self::parseConfig($appConfig);
 
         //language load  异常信息输出语言 现只支持zh_cn
         self::$language = isset($config['language']) ? $config['language'] : 'zh_cn';
@@ -177,6 +154,60 @@ class DyPhpConfig
     }
 
     /**
+     * 配制文件解释
+     *
+     * @param string|array app配制
+     * 
+     * @return array
+     **/
+    private static function parseConfig($appConfig)
+    {
+        $rewriteExcludeKeys = 'rewrite_exclude_keys';
+        if (is_array($appConfig)) {
+            if (!isset($appConfig['p']) || !isset($appConfig['c'])) {
+                DyPhpBase::throwException('config key is not exists', '"p" or "c"');
+            } elseif (!file_exists($appConfig['p']) || !file_exists($appConfig['c'])) {
+                DyPhpBase::throwException('config file is not exists', '"p" or "c"');
+            }
+            
+            $parentConfig = require $appConfig['p'];
+            $childConfig = require $appConfig['c'];
+
+            $excludeConfig = array();
+            if(isset($parentConfig[$rewriteExcludeKeys])){
+                $excludeConfig = (array)$parentConfig[$rewriteExcludeKeys];
+                unset($parentConfig[$rewriteExcludeKeys]);
+            }
+            if(isset($childConfig[$rewriteExcludeKeys])){
+                unset($childConfig[$rewriteExcludeKeys]);
+            }
+
+            //重写排除项处理
+            $config = array_merge((array)$parentConfig, (array)$childConfig);
+            foreach ($excludeConfig as $key => $value) {
+                if (isset($parentConfig[$value])) {
+                    //使父配制中的设置生效
+                    $config[$value] = $parentConfig[$value];
+                } elseif (isset($config[$value])) {
+                    //设置的排除项如父配制中未配制，子配制中配制了也无效
+                    unset($config[$value]);
+                }
+            }
+        } else {
+            if (!file_exists($appConfig)) {
+                DyPhpBase::throwException('config file is not exists', $appConfig);
+            }
+
+            $config = require $appConfig;
+            if(isset($config[$rewriteExcludeKeys])){
+                unset($config[$rewriteExcludeKeys]);
+            }
+        }
+
+        return $config;
+    }
+
+    /**
      * 解析app配制中的包含文件，autoload将调用该配制
      *
      * @param array
@@ -204,13 +235,17 @@ class DyPhpConfig
                 if (!file_exists($file)) {
                     DyPhpBase::throwException('file does not exist', $file);
                 }
+
                 $className = substr($path, strrpos($path, DIRECTORY_SEPARATOR));
-                self::$import[$className] = $file;
+                if(!isset(self::$import[$className])){
+                    self::$import[$className] = $file;
+                }
+
                 continue;
             }
 
             $incPath = rtrim($path, '*');
-            if (is_dir($incPath)) {
+            if (is_dir($incPath) && !in_array($incPath,self::$includePath)) {
                 self::$includePath[] = $incPath;
             }
         }
@@ -221,9 +256,9 @@ class DyPhpConfig
     }
 
     /**
-     * 别名映射,调用方式如：Dy::app()->dbc
+     * 别名映射处理，autoload将调用该配制
      *
-     * @param  array  $aliasArr
+     * @param  array
      * 实例
      * 'aliasMap' => array(
      *       'captcha'=>'dysys.dyphp.lib.DyCaptcha',
@@ -240,11 +275,13 @@ class DyPhpConfig
             'dbc'=>'dysys.dyphp.db.DyDbCriteria',
             'hook'=>'dysys.dyphp.base.DyPhpHooks',
         );
+
+        //仅web类型项目自动加载用户验证组件
         if (DyPhpBase::$appType == 'web') {
             $loadAlias['auth'] = 'app.components.UserIdentity';
         }
-        $aliasArr = array_unique(array_merge($loadAlias, $aliasArr));
 
+        $aliasArr = array_unique(array_merge($loadAlias, $aliasArr));
         foreach ($aliasArr as $key=>$path) {
             $file = self::getRealPath($path).EXT;
             if (!file_exists($file)) {
@@ -286,7 +323,7 @@ class DyPhpConfig
 
     /**
      * 获取import文件路径
-     * @param 类名
+     * @param  string 类名
      * @return array
      **/
     public static function getImport($className)
@@ -296,7 +333,7 @@ class DyPhpConfig
 
     /**
      * 获取映射，autoload将调用该方法
-     * @param    $aliasName
+     * @param    string  别名键值
      * @return   array
      **/
     public static function getAliasMap($aliasName)
@@ -309,7 +346,7 @@ class DyPhpConfig
 
     /**
      * 获取配制项
-     * @param    $itemName
+     * @param    string  配制键值
      * @return   mixed
      **/
     public static function item($itemName)
