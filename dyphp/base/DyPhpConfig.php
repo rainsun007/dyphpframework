@@ -182,7 +182,7 @@ class DyPhpConfig
                 unset($childConfig[$rewriteExcludeKeys]);
             }
 
-            //重写排除项处理
+            //如果配制了重写排除项, 那么只能使用父级配制，即使父级未配制而子级配制了也不会生效
             $config = array_merge((array)$parentConfig, (array)$childConfig);
             foreach ($excludeConfig as $key => $value) {
                 if (isset($parentConfig[$value])) {
