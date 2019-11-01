@@ -29,10 +29,10 @@ class DyDbCriteria
     /**
      * @brief    查询字段
      *
-     * @param   $select
-     * @param   $isDistinct
+     * @param  string  $select       查询字段
+     * @param  bool    $isDistinct   是否使用distinct
      *
-     * @return
+     * @return  object
      **/
     public function select($select = '*', $isDistinct = false)
     {
@@ -60,21 +60,27 @@ class DyDbCriteria
     /**
      * @brief    from条件
      *
-     * @param   $from  多个表时该参数为数组
-     * @param   $alias $from为数组时 该参数无效
+     * @param  mixed  $from 表名，单表进行查询时传入表名即可(string) ; 多表查询时专入表名数组(array)
+     * @param  mixed  $alias 表别名，与$from数据类型相对应, 不需要表名的情况下可以不传此参数
      *
-     * @return
+     * @example
+     *          dy::app()->dbc->from('user')
+     *          dy::app()->dbc->from('user','u')
+     *          dy::app()->dbc->from(array('user','order'),array('u','o'))
+     *
+     * @return  object
      **/
     public function from($from, $alias = null)
     {
         if (is_array($from)) {
             $froms = '';
             foreach ($from as $key => $val) {
-                $froms .= is_int($key) ? $val.',' : $key.' AS '.$val.',';
+                //$froms .= is_int($key) ? $val.',' : $key.' AS '.$val.',';
+                $froms .= isset($alias[$key]) && !empty($alias[$key]) ? $val.' AS '.$alias[$key].',' : $val.',';
             }
             $this->from = substr($froms, 0, -1);
         } elseif (is_string($from)) {
-            $this->from = $alias ? $from.' AS '.$alias : $from;
+            $this->from = !empty($alias) ? $from.' AS '.$alias : $from;
         }
 
         return $this;
@@ -83,13 +89,12 @@ class DyDbCriteria
     /**
      * @brief    查询条件
      *
-     * @param   $key
-     * @param   $val
-     * @param   $condition
-     * @param   $xor
-     * @param   $compatible
+     * @param  string  $key        字段
+     * @param  mixed   $val        值
+     * @param  string  $condition  条件(= > < >= <= <> in notin like llike rlike notlike notllike notrlike null notnull)
+     * @param  string  $xor        条件关系(AND,OR)
      *
-     * @return
+     * @return  object
      **/
     public function where($key, $val, $condition = '=', $xor = 'AND')
     {
@@ -107,9 +112,9 @@ class DyDbCriteria
     /**
      * @brief    group by
      *
-     * @param   $by
+     * @param  mixed  $by 字段名或字段数组
      *
-     * @return
+     * @return  object
      **/
     public function group($by)
     {
@@ -126,13 +131,12 @@ class DyDbCriteria
     /**
      * @brief    having
      *
-     * @param   $key
-     * @param   $val
-     * @param   $condition
-     * @param   $xor
-     * @param   $compatible
+     * @param  string  $key        字段
+     * @param  mixed   $val        值
+     * @param  string  $condition  条件(= > < >= <= <> in notin like llike rlike notlike notllike notrlike null notnull)
+     * @param  string  $xor        条件关系(AND,OR)
      *
-     * @return
+     * @return  object
      **/
     public function having($key, $val, $condition = '=', $xor = 'AND')
     {
@@ -150,10 +154,10 @@ class DyDbCriteria
     /**
      * @brief    order by
      *
-     * @param   $by
-     * @param   $order
+     * @param  string  $by  字段名
+     * @param  string  $order  asc或desc
      *
-     * @return
+     * @return  object
      **/
     public function order($by, $order = 'ASC')
     {
@@ -166,9 +170,9 @@ class DyDbCriteria
     /**
      * @brief    offset
      *
-     * @param   $offset
+     * @param  int $offset  偏移量
      *
-     * @return
+     * @return  object
      **/
     public function offset($offset = 0)
     {
@@ -180,9 +184,9 @@ class DyDbCriteria
     /**
      * @brief    limit
      *
-     * @param   $limit
+     * @param  int $limit
      *
-     * @return
+     * @return  object
      **/
     public function limit($limit = 1)
     {
@@ -194,11 +198,11 @@ class DyDbCriteria
     /**
      * @brief    join条件
      *
-     * @param   $join
-     * @param   $on
-     * @param   $type
+     * @param  string $join  join语句
+     * @param  string $on    on语句
+     * @param  string $type  联接方式, 默认为left
      *
-     * @return
+     * @return  object
      **/
     public function join($join = '', $on = '', $type = 'LEFT')
     {
@@ -214,11 +218,11 @@ class DyDbCriteria
     }
 
     /**
-     * @brief    获取sql项信息
+     * @brief    获取sql语句项信息
      *
      * @param   $item
      *
-     * @return
+     * @return  string
      **/
     public function getSqlItem($item = '')
     {
@@ -230,7 +234,7 @@ class DyDbCriteria
      *
      * @param   $item
      *
-     * @return
+     * @return  object
      **/
     public function clearSqlItem($item = '')
     {
@@ -250,13 +254,13 @@ class DyDbCriteria
     /**
      * @brief    条件处理
      *
-     * @param   $key
-     * @param   $val
-     * @param   $condition  = > < >= <= <> in notin like llike rlike notlike notllike notrlike null notnull
-     * @param   $xor
-     * @param   $compatible 兼容性处理
+     * @param  string  $key        字段
+     * @param  mixed   $val        值
+     * @param  string  $condition  条件(= > < >= <= <> in notin like llike rlike notlike notllike notrlike null notnull)
+     * @param  string  $xor        条件关系(AND,OR)
+     * @param  bool    $compatible 兼容性处理(对字段加`, 对数字不加引号), 默认开启, 当联表时为false,需要在join中自行处理兼容性问题
      *
-     * @return
+     * @return  string
      **/
     private function _where($key, $val, $condition = '=', $xor = 'AND', $compatible = true)
     {
@@ -305,13 +309,13 @@ class DyDbCriteria
     }
 
     /**
-     * @brief    获取mysql sql语句
+     * @brief    获取mysql查询语句
      *
-     * @param   $from table name
+     * @param   string  $from  完整表名
      *
-     * @return
+     * @return  string
      **/
-    public function getMysqlSql($from = '')
+    public function getMysqlQuery($from = '')
     {
         $select = $this->distinct === true ? 'DISTINCT '.$this->select : $this->select;
         $from = $this->from != '' ? $this->from : '`'.$from.'`';

@@ -36,7 +36,8 @@ class DyPhpView
      *
      * @param string 调用的view
      * @param array  view层数据
-     * @param bool   是否执行完此方法后直接退出(执行exit), 默认为不退出, 注意：如设置为true，AFTER_ACTION hook将不会执行
+     * @param bool   是否执行完此方法后直接退出(执行exit), 默认为不退出, 
+     *               注意：action中如调用了render方法且该参数设置为true，AFTER_ACTION hook将不会执行
      **/
     public function render($view, $data = array(), $exit = false)
     {

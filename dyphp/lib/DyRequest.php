@@ -344,7 +344,7 @@ class DyRequest
     }
 
     /**
-     * @brief   获取get提交原始数据 如系统开启了get_magic_quotes_gpc会数据进行stripcslashes操作 此方法要注意数据安全性
+     * @brief   获取get提交原始数据 如系统开启了get_magic_quotes_gpc数据会进行stripcslashes操作 此方法要注意数据安全性
      *
      * @param   $paramKey
      * @param   $default
@@ -357,7 +357,7 @@ class DyRequest
     }
 
     /**
-     * @brief    获取post提交原始数据 如系统开启了get_magic_quotes_gpc会数据进行stripcslashes操作 此方法要注意数据安全性
+     * @brief    获取post提交原始数据 如系统开启了get_magic_quotes_gpc数据会进行stripcslashes操作 此方法要注意数据安全性
      *
      * @param   $paramKey
      * @param   $default
@@ -375,7 +375,7 @@ class DyRequest
      * 
      * @return array
      **/
-    public static function getJosnInput()
+    public static function getStreamInputJosn()
     {
         $val = file_get_contents('php://input');
 
@@ -383,7 +383,7 @@ class DyRequest
     }
 
     /**
-     * 简单的post请求
+     * 发送posty请求
      *
      * @param string  接受请求的url
      * @param array   提交的数据
@@ -392,9 +392,9 @@ class DyRequest
      *
      * @return string 返回请求的结果
      */
-    public static function remotePost($url, $postArray = array(), $timeOut = 5, $userAgent = '')
+    public static function sendPost($url, $postArray = array(), $timeOut = 5, $userAgent = '')
     {
-        $userAgent = $userAgent ? $userAgent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36';
+        $userAgent = $userAgent ? $userAgent : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36';
 
         $postString = http_build_query($postArray, '', '&');
 

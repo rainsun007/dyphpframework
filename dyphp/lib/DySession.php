@@ -8,6 +8,7 @@
 class DySession
 {
     private static $appid = '';
+    
     /**
      * 开启session
      **/

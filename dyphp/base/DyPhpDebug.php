@@ -10,7 +10,10 @@
  **/
 class DyPhpDebug
 {
+    // sql请求分析数组
     public static $queries = array();
+
+    // debug表格样式
     private static $styles = array(
         'table' => 'clear:both;margin:5px 0px;border:1px solid #CCC;font-weight:bold;font-size:14px;font:800 14px/25px simsun;color:#FFF;width:100%;background:#333;',
         'titleTr' => 'background:#666666;',
@@ -23,7 +26,7 @@ class DyPhpDebug
         'obj1' => 'padding-left:10px;color:#18c334', //file
         'obj2' => 'padding-left:10px;color:#0080FF', //sql
         'obj3' => 'padding-left:10px;color:#CD5C5C', //param
-        'total' => 'padding-right:10px;text-align:right;border:1px solid #3D4F52;',
+        'total' => 'padding-right:10px;text-align:right;border:1px solid #3D4F52;', //表格脚
     );
 
     /**
