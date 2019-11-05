@@ -17,7 +17,9 @@ class DyPhpHooks
     //hook文件加载单例
     private $incOnce = array();
 
+    //after_action,hook的开启状态
     private $afterActionEnable = false;
+    //before_view_render,hook是否已被调用
     private $beforeViewRenderInvoke = false;
 
 
@@ -52,7 +54,8 @@ class DyPhpHooks
             return;
         }
 
-        //after_action中可能会操作cookie session,重定向等,所以要在headers already sent之前先开启ob_start
+        //ob_start调用
+        //after_action中可能会操作cookie,session,重定向等,所以要在"headers already sent"之前先开启ob_start
         //如action中不调用render,ob_start不必开启
         if ($hookType == self::BEFORE_VIEW_RENDER && $this->afterActionEnable) {
             $this->beforeViewRenderInvoke = true;
@@ -77,14 +80,15 @@ class DyPhpHooks
                 }
             }
         }
-
+        
+        //after_action开启状态下，before_view_render调用完成后需要执行ob_end_flush(),否则后导致view层输出报错
         if ($hookType == self::AFTER_ACTION && $this->afterActionEnable && $this->beforeViewRenderInvoke) {
             ob_end_flush();
         }
     }
 
     /**
-     * 加载hook文件
+     * hook文件自动加载单例
      * @param    $hookName
      * @return
      **/
