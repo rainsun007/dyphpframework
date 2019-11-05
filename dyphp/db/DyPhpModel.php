@@ -589,7 +589,8 @@ class DyPhpModel
         }
 
         if (DyPhpBase::$debug) {
-            $explain = version_compare($this->getVersion(), '5.6', '>=');
+            //写入与更新操作分析，现只针对mysql5.6及以上版本进行处理
+            $explain = $this->dbType == 'mysql' && version_compare($this->getVersion(), '5.6', '>=') ? true : false;
             $this->logQuery($sql, $start, $explain);
         }
 
@@ -653,7 +654,7 @@ class DyPhpModel
         }
 
         if (is_object($criteria)) {
-            $getDbSql = 'get'.ucfirst($this->dbType).'Sql';
+            $getDbSql = 'get'.ucfirst($this->dbType).'Query';
             if ($isCount) {
                 $countCriteria = clone $criteria;
                 $countCriteria->select('count(1) as `dycount`', false);
@@ -691,26 +692,29 @@ class DyPhpModel
     {
         $time = $this->getTime() - $start;
 
-        $fetch = '';
+        $explainFetchResult = '';
+
+        //mysql查询分析处理
         if ($this->dbType == 'mysql' && $explain) {
             $query = 'EXPLAIN '.$sql;
 
             if ($this->isPdo) {
                 $result = $this->getInstance('slave')->query($query);
                 if ($result) {
-                    $fetch = $result->fetch();
+                    $explainFetchResult = $result->fetch();
                 }
             } else {
                 $this->getInstance('slave')->query($query);
-                $fetch = $this->getInstance('slave')->fetch();
+                $explainFetchResult = $this->getInstance('slave')->fetch();
             }
-            $fetch = (array) $fetch;
+            $explainFetchResult = (array) $explainFetchResult;
         }
 
+        // 查询及分析结果注册到debug处理逻辑
         $query = array(
             'sql' => $sql,
             'time' => $time,
-            'explain' => $fetch,
+            'explain' => $explainFetchResult,
         );
         array_push(DyPhpDebug::$queries, $query);
     }
@@ -738,7 +742,15 @@ final class DyPhpModelManage
 
     /**
      * 单列化数据库.
-     **/
+     *
+     * @param array   $dbConfigArr      数据库配制
+     * @param string  $prefixTableName  表名
+     * @param string  $dbType           数据库类型
+     * @param bool    $isPdo            是否使用pdo
+     * @param string  $dbms             主/从数据库
+     *
+     * @return object 数据库链接实例
+     */
     public static function instance($dbConfigArr, $prefixTableName, $dbType, $isPdo, $dbms)
     {
         $insKey = $dbms.'_'.$dbConfigArr['host'].'_'.$dbConfigArr['dbName'];
@@ -763,7 +775,11 @@ final class DyPhpModelManage
 
     /**
      * 设置instance记录 单列存储器.
-     **/
+     *
+     * @param string $key       单例key
+     * @param object $instance  实例对象
+     * 
+     */
     private static function setInstance($key, $instance)
     {
         self::$instances[$key] = $instance;
@@ -771,6 +787,9 @@ final class DyPhpModelManage
 
     /**
      * 获取instance记录.
+     * 
+     * @param string $key       单例key
+     * 
      **/
     private static function getInstance($key = '')
     {
