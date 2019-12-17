@@ -130,42 +130,30 @@ class DyPhpBase
     public static function autoload($className)
     {
         if (isset(self::$coreClasses[$className])) {
+            //自动加载框架文件
             require DYPHP_PATH.self::$coreClasses[$className];
-        } elseif (DyPhpConfig::getImport($className)) {
-            require DyPhpConfig::getImport($className);
+        } elseif ($importClass = DyPhpConfig::getImport($className)) {
+            //自动加载配制的包含文件
+            require $importClass;
+        }elseif ($alias = DyPhpConfig::getAliasMap($className)) {
+            //别名加载及设置
+            if (!class_exists($alias['name'], false)) {
+                require $alias['file'];
+            }
+            class_alias($alias['name'], $className, false);
+        } elseif (($pos = strrpos($className, '\\')) !== false) {
+            //支持namespace自动加载,必须在app的根目录下且类名与路径必须相同
+            $classFile = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\', '/', $className).EXT;
+            if (file_exists($classFile)) {
+                require $classFile;
+            }
         } else {
-            //5.3 namespace自动加载
-            if (($pos = strrpos($className, '\\')) !== false) {
-                if ($alias = DyPhpConfig::getAliasMap(substr($className, 0, $pos))) {
-                    require $alias['file'];
-                } else {
-                    $classFile = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\', '/', $className).EXT;
-                    if (file_exists($classFile)) {
-                        require $classFile;
-                    } else {
-                        foreach (DyPhpConfig::getIncludePath() as $key => $val) {
-                            $autoClassFile = $val.$className . EXT;
-                            if (is_file($autoClassFile)) {
-                                require $autoClassFile;
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else {
-                if ($alias = DyPhpConfig::getAliasMap($className)) {
-                    if (!class_exists($alias['name'], false)) {
-                        require $alias['file'];
-                    }
-                    class_alias($alias['name'], $className, false);
-                } else {
-                    foreach (DyPhpConfig::getIncludePath() as $key => $val) {
-                        $classFile = $val.$className . EXT;
-                        if (is_file($classFile)) {
-                            require $classFile;
-                            break;
-                        }
-                    }
+            //在项目包含目录中遍历查找文件
+            foreach (DyPhpConfig::getIncludePath() as $key => $val) {
+                $autoClassFile = $val.$className.EXT;
+                if (is_file($autoClassFile)) {
+                    require $autoClassFile;
+                    break;
                 }
             }
         }
@@ -210,8 +198,8 @@ class DyPhpBase
     }
 
     /**
-     * app自定义类实例器
-     * @public 类名
+     * 全局实例器
+     * @return object DyPhpApp实例
      **/
     public static function app()
     {
@@ -230,7 +218,7 @@ class DyPhpBase
      **/
     public static function powerBy($link = true)
     {
-        return $link ? 'Powered By <a href="http://www.dyphp.com" target="_blank">DYPHP-Framework '.DYPHP_VERSION.'</a>' : 'Powered by DYPHP-Framework '.DYPHP_VERSION;
+        return $link ? 'Powered By <a href="http://www.dyphp.com" target="_blank">DYPHP-Framework '.DYPHP_VERSION.'</a>' : 'Powered By DYPHP-Framework '.DYPHP_VERSION;
     }
 
     /**
@@ -335,7 +323,7 @@ class DyPhpBase
     public static function supportCheck()
     {
         //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt openssl'
-        $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br >';
+        $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br>';
         $splitLine = $br.str_repeat('-', 60).$br;
 
         echo $br.'[Framework limit]';
@@ -476,7 +464,7 @@ final class DyPhpApp
     /**
      * 加载vendors
      * @param string vendors 路径及文件名
-     * @param bool dyphp为加载框架自带vendor app为加载app中的vendor
+     * @param bool true为加载app中的vendor,false为加载框架自带vendor
      * @return null
      */
     public function vendors($filePathName, $isSys = false)
@@ -493,6 +481,18 @@ final class DyPhpApp
         require $vendor;
         $this->incOnce[] = $type.'_'.$filePathName;
     }
+
+
+    
+    /**
+     * 引入包含文件
+     * @return   string
+     **/
+    public static function import($path)
+    {
+        DyPhpConfig::loadFile($path);
+    }
+
 
     /**
      * 设置controller实例全局属性的前一次运行属性, 记录来源(前一次运行module,controller,action)

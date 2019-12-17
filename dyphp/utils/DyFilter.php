@@ -69,6 +69,20 @@ class DyFilter
         return filter_var($ip, FILTER_VALIDATE_IP);
     }
 
+
+    /**
+     * @brief   验证手机号
+     *
+     * @param   $ip
+     *
+     * @return
+     **/
+    public static function isMobile($mobile)
+    {
+        return preg_match("/^1[3456789]\d{9}$/", $mobile);
+    }
+    
+
     /**
      * @brief    整数
      *

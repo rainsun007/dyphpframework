@@ -485,17 +485,21 @@ class DyCaptcha
      * 如不在同一些实例验证 需实例本类并注意$saveName属性的值应与获取验证码时相同
      * @param string 用户输入的验证码
      * @param string 生成验证码时指定的saveName
+     * @param bool   验证时是否直接删除记录
      * @return bool
      **/
-    public function sessionCheck($verifyCode, $saveName='')
+    public function sessionCheck($verifyCode, $saveName='',$del=true)
     {
         if (!empty($saveName)) {
             $this->saveName = $saveName;
         }
         
         $sVer = DySession::get($this->saveName);
+
         //删除session
-        DySession::delete($this->saveName);
+        if($del){
+            DySession::delete($this->saveName);
+        }
         
         //验证码不合法
         if (empty($verifyCode) || !$sVer || !is_array($sVer) || count($sVer) != 2) {
@@ -514,23 +518,29 @@ class DyCaptcha
      * 如不在同一些实例验证 需实例本类并注意$saveName的值应与创建验证码时相同
      * @param string 用户输入的验证码
      * @param string 生成验证码时指定的saveName
+     * @param bool   验证时是否直接删除记录
      * @return bool
      **/
-    public function cookieCheck($verifyCode, $saveName='')
+    public function cookieCheck($verifyCode, $saveName='',$del=true)
     {
         if (!empty($saveName)) {
             $this->saveName = $saveName;
         }
         
         $sVer = DyCookie::get($this->saveName);
+
         //过期
         if (!$sVer && DyCookie::is_set($this->saveName)) {
-            DyCookie::delete($this->saveName);
+            if($del){
+                DyCookie::delete($this->saveName);
+            }
             return false;
         }
         
         //删除cookie
-        DyCookie::delete($this->saveName);
+        if($del){
+            DyCookie::delete($this->saveName);
+        }
         
         //验证码不合法
         $sVer = json_decode($sVer, true);

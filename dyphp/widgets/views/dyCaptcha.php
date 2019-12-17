@@ -1,7 +1,7 @@
 <table style="border: 0;">
     <tr>
         <td style="border: 0;padding: 0;">
-            <img border="0" id="captchaShowImg" name="captchaShowImg" src="<?php echo $dycwRequest; ?>" />
+            <img style="border:0" onclick="dyRefreshCaptchaImg();"  id="captchaShowImg" name="captchaShowImg" src="<?php echo $dycwRequest; ?>" />
         </td>
         <td style="border: 0;font-size: 12px; padding-left:5px;" valign="bottom">
             <span onclick="dyRefreshCaptchaImg();" style="border-bottom: 1px solid #0000FF;color: #0000FF;cursor:pointer;">

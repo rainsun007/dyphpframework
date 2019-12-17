@@ -46,7 +46,7 @@ abstract class DyPhpUserIdentity
         }
 
         if ($this->isCookieUserAuth) {
-            DyCookie::set($this->getLoginStateKey('cookie').'_cl', 'cookie_logined');
+            DyCookie::set($this->getLoginStateKey('cookie').'_cl', json_encode(array('cookie_logined',mt_rand(0, 9999))));
         } else {
             DySession::set($this->getLoginStateKey(), true);
         }
@@ -73,7 +73,12 @@ abstract class DyPhpUserIdentity
     final public function isGuest()
     {
         if ($this->isCookieUserAuth) {
-            return DyCookie::get($this->getLoginStateKey('cookie').'_cl') === 'cookie_logined' ? false : true;
+            $logined = DyCookie::get($this->getLoginStateKey('cookie').'_cl');
+            if(!$logined){
+                return true;
+            }
+            $loginedArr = json_decode($logined, true);
+            return $loginedArr && $loginedArr[0] === 'cookie_logined' ? false : true;
         } else {
             return DySession::get($this->getLoginStateKey()) ? false : true;
         }
