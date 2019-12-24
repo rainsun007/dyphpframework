@@ -117,9 +117,9 @@ class DyPhpBase
      **/
     public static function showMsg($params = array())
     {
-        Dy::app()->setPreInsAttr();
-
         $params = is_array($params) ? $params : (array)$params;
+        Dy::app()->setPreInsAttr($params);
+
         $msgHandler = explode('/', trim(DyPhpConfig::item('messageHandler'), '/'));
         DyPhpController::run($msgHandler[0], $msgHandler[1], $params);
     }
@@ -376,24 +376,14 @@ class DyPhpBase
 final class DyPhpApp
 {
     /* controller实例全局属性 */
-    //调用的module名
+    //调用的module
     public $module = '';
-    //调用的module/controller名
+    //调用的module/controller
     public $pcid = '';
-    //调用的controller名
+    //调用的controller
     public $cid = '';
-    //调用的action名
+    //调用的action
     public $aid = '';
-
-    /* 此针对errorHandler，messageHandler信息接管 */
-    //记录前一次运行的module
-    public $preModule = '';
-    //记录前一次运行的module/controller
-    public $prePcid = '';
-    //记录前一次运行的controller
-    public $preCid = '';
-    //记录前一次运行的action
-    public $preAid = '';
 
     //当前运行的controller实例
     public $runingController = null;
@@ -435,7 +425,7 @@ final class DyPhpApp
     }
 
     /**
-     * @brief    实例处理
+     * @brief    实例单例处理
      * param     注册名
      * @return   object
      **/
@@ -452,7 +442,7 @@ final class DyPhpApp
             require $classFile;
         }
 
-        //不做单例处理
+        //不做单例处理, DyDbCriteria不可强制单例，单例会出现数据叠加错误
         if ($name == 'dbc') {
             return new $alias['name'];
         }
@@ -481,29 +471,35 @@ final class DyPhpApp
         require $vendor;
         $this->incOnce[] = $type.'_'.$filePathName;
     }
-
-
     
     /**
      * 引入包含文件
-     * @return   string
+     * @param string $name 要引入文件的路径(与配制文件中的import设置相同格式)
+     * @example Dy::app()->import('app.utils.functions');
      **/
     public static function import($path)
     {
         DyPhpConfig::loadFile($path);
     }
 
-
     /**
-     * 设置controller实例全局属性的前一次运行属性, 记录来源(前一次运行module,controller,action)
+     * 系统跳转前将来源(前一次运行module,controller,action)，写入到跳转参数中
+     *
+     * @return void
      */
-    public function setPreInsAttr()
+    public function setPreInsAttr(&$paramArr)
     {
-        $this->preModule = $this->module;
-        $this->prePcid = $this->pcid;
-        $this->preCid = $this->cid;
-        $this->preAid = $this->aid;
+        $preInsAttr = array(
+            'pre_module'=>$this->module,
+            'pre_pcid'=>$this->pcid,
+            'pre_cid'=>$this->cid,
+            'pre_aid'=>$this->aid,
+        );
+
+        $paramArr['preInstance'] = $preInsAttr;
+        return true;
     }
+
 }
 
 spl_autoload_register(array('DyPhpBase', 'autoload'));

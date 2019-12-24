@@ -55,8 +55,10 @@ class DyPhpWaf
             if (preg_match("#".$value."#isu", $str) == 1 || preg_match("#".$value."#isu", urlencode($str)) == 1) {
                 $this->logs('hit:['.$key.'] '.$str);
 
-                $errorHandlerArr = explode('/', trim(DyPhpConfig::item('errorHandler'), '/'));
                 $exceptionMessage = array('dyExcType' => 'Aborted', 'errType' => 'ERROR', 'msg' => 'Suspend the access');
+                Dy::app()->setPreInsAttr($exceptionMessage);
+
+                $errorHandlerArr = explode('/', trim(DyPhpConfig::item('errorHandler'), '/'));
                 DyPhpController::run($errorHandlerArr[0], $errorHandlerArr[1], $exceptionMessage);
                 exit();
             }

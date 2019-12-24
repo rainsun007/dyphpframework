@@ -136,10 +136,10 @@ class DyPhpException extends Exception
             }
             self::$errorHandlerInvoked = true;
 
-            Dy::app()->setPreInsAttr();
+            $exceptionMessage = array('dyExcType' => $title, 'errType' => $errType, 'msg' => $message);
+            Dy::app()->setPreInsAttr($exceptionMessage);
 
             $errorHandlerArr = explode('/', trim(DyPhpConfig::item('errorHandler'), '/'));
-            $exceptionMessage = array('dyExcType' => $title, 'errType' => $errType, 'msg' => $message);
             DyPhpController::run($errorHandlerArr[0], $errorHandlerArr[1], $exceptionMessage);
             exit();
         }
