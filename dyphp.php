@@ -18,10 +18,10 @@ defined('EXT') or define('EXT', '.php');
 /**
  * 框架版本
  * 版本号规则：
- * 主版本号(较大的变动).子版本号(功能变化或新特性增加).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
+ * 主版本号(较大的变动).子版本号(功能变化或新特性增减).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
  * 上一级版本号变动时下级版本号归零
  **/
-define('DYPHP_VERSION', '2.9.0-release');
+define('DYPHP_VERSION', '2.11.0-release');
 
 //简单别名
 class Dy extends DyPhpBase
@@ -169,7 +169,7 @@ class DyPhpBase
     /**
      * 注册自动加载
      * @param  mixed  $autoload 自动加载函数
-     * @param  bool   $prepend  如果是 true，spl_autoload_register() 会添加函数到队列之首，而不是队列尾部。
+     * @param  bool   $prepend  如果是 true，spl_autoload_register() 会添加函数到队列之首，而不是队列尾部。5.3后支持
      * @param  bool   $replace  是否替换框架的自动加载方法, 替换后要实现框架相关的自动加载逻辑，不建议替换
      **/
     public static function autoloadRegister($callback, $prepend = false, $replace = false)
@@ -358,9 +358,6 @@ class DyPhpBase
         echo extension_loaded('mcrypt') ? "√ mcrypt support" : "× mcrypt unsupport";
         echo $splitLine;
 
-        echo extension_loaded('openssl') ? "√ openssl support" : "× openssl unsupport";
-        echo $splitLine;
-
         if (version_compare(PHP_VERSION, '5.4.0', '<')) {
             //5.4之后magic_quotes_gpc移除, 总是返回false, 5.4以上版本不做此检查
             echo get_magic_quotes_gpc() ? '√ magic_quotes_gpc open' : '× magic_quotes_gpc close';
@@ -373,7 +370,9 @@ class DyPhpBase
 }
 
 /**
- * app
+ * app模式
+ * 
+ * @example  Dy::app()->attribute , Dy::app()->method(params)
  **/
 final class DyPhpApp
 {
@@ -455,9 +454,11 @@ final class DyPhpApp
 
     /**
      * 加载vendors
-     * @param string vendors 路径及文件名
-     * @param bool true为加载app中的vendor,false为加载框架自带vendor
-     * @return null
+     * @param string  vendors 路径及文件名(有些vendor加载时引入的是autoload文件)
+     * @param bool    true为加载框架已集成的vendor,false为加载app中引入的的vendor
+     * 
+     * @example Dy::app()->vendors('PHPMailer/PHPMailerAutoload', true);
+     * 
      */
     public function vendors($filePathName, $isSys = false)
     {
@@ -466,17 +467,20 @@ final class DyPhpApp
         if (in_array($type.'_'.$filePathName, $this->incOnce)) {
             return;
         }
+
         $vendor = $type == 'app' ? DyPhpConfig::item('appPath').'/vendors/'.$filePathName.EXT : DYPHP_PATH.'/dyphp/vendors/'.$filePathName.'.php';
         if (!file_exists($vendor)) {
             DyPhpBase::throwException('vendor does not exist', $filePathName);
         }
+
         require $vendor;
         $this->incOnce[] = $type.'_'.$filePathName;
     }
     
     /**
      * 引入包含文件
-     * @param string $name 要引入文件的路径(与配制文件中的import设置相同格式)
+     * @param string $path 要引入文件的路径(与配制文件中的import设置相同格式)
+     * 
      * @example Dy::app()->import('app.utils.functions');
      **/
     public static function import($path)
@@ -487,7 +491,7 @@ final class DyPhpApp
     /**
      * 系统跳转前将来源(前一次运行module,controller,action)，写入到跳转参数中
      *
-     * @return void
+     * @return bool
      */
     public function setPreInsAttr(&$paramArr)
     {
@@ -504,4 +508,7 @@ final class DyPhpApp
 
 }
 
+/**
+ * 文件引入时注册自动加载
+ */
 spl_autoload_register(array('DyPhpBase', 'autoload'));
