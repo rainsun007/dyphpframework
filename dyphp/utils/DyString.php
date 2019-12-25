@@ -24,7 +24,8 @@ class DyString
             $expiry = $expiry > 0 ? time() + $expiry : $expiry;
             $string = openssl_encrypt($expiry.'|'.$string.'_dysc_'.mt_rand(0, 999), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
             $string = base64_encode($string);
-        } elseif (extension_loaded('mcrypt') && version_compare(PHP_VERSION, '7.1.0', '<')) {
+        } elseif (extension_loaded('mcrypt')) { 
+            //7.1将mcrypt移除，需要能过pecl安装后才可使用
             $expiry = $expiry > 0 ? time()+$expiry : $expiry;
             $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES, MCRYPT_MODE_ECB), MCRYPT_DEV_URANDOM);
             $string = mcrypt_encrypt(MCRYPT_DES, substr(md5($key), 0, 8), $expiry.'|'.$string.'_dysc_'.mt_rand(0, 999), MCRYPT_MODE_ECB, $iv);
@@ -53,7 +54,8 @@ class DyString
         if (extension_loaded('openssl')) {
             $decryptStr = openssl_decrypt(base64_decode($string), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
             return self::decodeCheck($decryptStr);
-        } elseif (extension_loaded('mcrypt') && version_compare(PHP_VERSION, '7.1.0', '<')) {
+        } elseif (extension_loaded('mcrypt')) {
+            //7.1将mcrypt移除，需要能过pecl安装后才可使用
             $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES, MCRYPT_MODE_ECB), MCRYPT_DEV_URANDOM);
             $decryptStr = mcrypt_decrypt(MCRYPT_DES, substr(md5($key), 0, 8), base64_decode($string), MCRYPT_MODE_ECB, $iv);
             return self::decodeCheck($decryptStr);

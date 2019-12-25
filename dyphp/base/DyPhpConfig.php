@@ -64,6 +64,8 @@ class DyPhpConfig
     private static $includePath = array();
     //用户自定义配制
     private static $userConfig = array();
+    //命名空间根目录
+    private static $namespaceRoot = '';
 
     /**
      * 运行app配制入口
@@ -97,6 +99,9 @@ class DyPhpConfig
         self::$appPath = rtrim(realpath($config['appPath']), '/');
         define('APP_PATH', self::$appPath);
         define('APP_PARENT_PATH', dirname(self::$appPath));
+
+        //解析并设置namespaceRoot，默认根目录在appPath下, autoload将会调用
+        self::$namespaceRoot = array_key_exists('namespaceRoot', $config) ? rtrim(realpath($config['namespaceRoot']), '/') : self::$appPath;
 
         //获取url层级地址，以支持将应用部署到web根目录的子目录下，DyRequest::createUrl()、DyPhpRoute::urlCrop()方法中使用
         self::$appHttpPath = isset($_SERVER["SCRIPT_NAME"]) ? trim(str_replace(array('\\','\\\\','//'), '/', dirname($_SERVER["SCRIPT_NAME"])), '/') : trim(str_replace($_SERVER['DOCUMENT_ROOT'], "", dirname($_SERVER['SCRIPT_FILENAME'])), '/');
@@ -303,7 +308,7 @@ class DyPhpConfig
     }
 
     /**
-     * 加载常量配制
+     * 加载常量配制, 必须在config路径下
      * constants 非必须文件 不存在就不加载 不会给出报错信息
      **/
     private static function loadConstants()
@@ -335,9 +340,9 @@ class DyPhpConfig
     }
 
     /**
-     * 设置自定义别名包
+     * 设置自定义别名包, 需注意路径访问权限及安全
      * @param string 别名
-     * @param string 路径(相对、绝对路径均可)
+     * @param string 路径,需要传入绝对路径
      **/
     public static function setPathOfAlias($alias, $path)
     {
@@ -394,7 +399,6 @@ class DyPhpConfig
         if (self::$exceptionLogRootDir == '') {
             $defaultDir = rtrim(self::$appPath, DIRECTORY_SEPARATOR);
             return $defaultDir == '' ? 'logs'.DIRECTORY_SEPARATOR : $defaultDir.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
-            //return rtrim(self::$appPath, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
         } else {
             return rtrim(self::$exceptionLogRootDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
         }
