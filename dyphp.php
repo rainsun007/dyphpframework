@@ -142,8 +142,10 @@ class DyPhpBase
             }
             class_alias($alias['name'], $className, false);
         } elseif (($pos = strrpos($className, '\\')) !== false) {
-            //支持namespace自动加载,必须在app的根目录下且类名与路径必须相同
-            $classFile = APP_PATH.DIRECTORY_SEPARATOR.str_replace('\\', '/', $className).EXT;
+            //支持namespace自动加载, 允许自定义根目录
+            //规则：命名空间名及文件名，必须与路径及类名相同
+            //如不符合规则需要单独实现自己的autoload,并调用autoloadRegister，注册到框架
+            $classFile = DyPhpConfig::item('namespaceRoot').DIRECTORY_SEPARATOR.str_replace('\\', '/', $className).EXT;
             if (file_exists($classFile)) {
                 require $classFile;
             }

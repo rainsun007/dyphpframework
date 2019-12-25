@@ -511,7 +511,8 @@ class DyRequest
      **/
     private static function strAddslashes($requestValue)
     {
-        if (!get_magic_quotes_gpc()) {
+        //5.4之后magic_quotes_gpc移除, 总是返回false, 5.4及以上版本必须进行转义
+        if (version_compare(PHP_VERSION, '5.4.0', '>=') || !get_magic_quotes_gpc()) {
             if (is_array($requestValue)) {
                 foreach ($requestValue as $key => $val) {
                     $requestValue[$key] = self::strAddslashes($val);
