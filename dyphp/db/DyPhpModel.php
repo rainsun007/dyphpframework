@@ -716,7 +716,7 @@ class DyPhpModel
             'time' => $time,
             'explain' => $explainFetchResult,
         );
-        array_push(DyPhpDebug::$queries, $query);
+        array_push(DyDebug::$queries, $query);
     }
 
     private function __clone()

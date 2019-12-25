@@ -23,13 +23,8 @@ defined('EXT') or define('EXT', '.php');
  **/
 define('DYPHP_VERSION', '2.11.0-release');
 
-//简单别名
-class Dy extends DyPhpBase
-{
-}
-
 /**
- * base class
+ * 框架入口
  **/
 class DyPhpBase
 {
@@ -225,8 +220,9 @@ class DyPhpBase
 
     /**
      * 异常,错误捕获
-     * self::$debug为真时给出错误运行跟踪 为假时运行self::$errorHandler指向只给出错误提示信息
      * 详见DyPhpException类
+     * 
+     * @param bool  $debug为true时输出错误运行跟踪 , 为false时运行self::$errorHandler返回错误信息
      **/
     private static function debug($debug = false)
     {
@@ -279,7 +275,7 @@ class DyPhpBase
             'DyPhpWaf'=>'/dyphp/base/DyPhpWaf.php',
             'DyPhpUserIdentity'=>'/dyphp/base/DyPhpUserIdentity.php',
             'DyPhpWidgets'=>'/dyphp/base/DyPhpWidgets.php',
-            'DyPhpDebug'=>'/dyphp/base/DyPhpDebug.php',
+            //'DyPhpDebug'=>'/dyphp/base/DyPhpDebug.php',
             'DyPhpHooks'=>'/dyphp/base/DyPhpHooks.php',
             'DyPhpMessage'=>'/dyphp/i18n/DyPhpMessage.php',
 
@@ -294,6 +290,7 @@ class DyPhpBase
             'DyDbCriteria'=>'/dyphp/db/DyDbCriteria.php',
             'DyPhpPdoMysql'=>'/dyphp/db/drivers/DyPhpPdoMysql.php',
             'DyPhpMysql'=>'/dyphp/db/drivers/DyPhpMysql.php',
+            'DyDebug'=>'/dyphp/lib/DyDebug.php',
 
             //lib
             'DyCookie'=>'/dyphp/lib/DyCookie.php',
@@ -304,7 +301,7 @@ class DyPhpBase
             'DyCaptcha'=>'/dyphp/lib/DyCaptcha.php',
 
             //utils
-            'DyDebug'=>'/dyphp/utils/DyDebug.php',
+            //'DyDebug'=>'/dyphp/utils/DyDebug.php',
             'DyTools'=>'/dyphp/utils/DyTools.php',
             'DyGDImg'=>'/dyphp/utils/DyGDImg.php',
             'DyString'=>'/dyphp/utils/DyString.php',
@@ -508,7 +505,13 @@ final class DyPhpApp
 
 }
 
+
 /**
- * 文件引入时注册自动加载
+ * 初始化
  */
+
+//注册自动加载
 spl_autoload_register(array('DyPhpBase', 'autoload'));
+
+//设置别名
+class_alias('DyPhpBase', 'Dy', false);

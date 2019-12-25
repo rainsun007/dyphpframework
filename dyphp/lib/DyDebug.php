@@ -1,6 +1,6 @@
 <?php
 /**
- * 缓存工具类.
+ * 开发工具类.
  *
  * @author 大宇 Email:dyphp.com@gmail.com
  *
@@ -8,7 +8,7 @@
  *
  * @copyright Copyright dyphp.com
  **/
-class DyPhpDebug
+class DyDebug
 {
     // sql请求分析数组
     public static $queries = array();
@@ -299,5 +299,29 @@ class DyPhpDebug
         $table = '<br /><table cellspacing="1" style="border:0px;color:#000033;"><tr>';
 
         return $table.$keyStr.'</tr><tr>'.$valStr.'</tr></table>';
+    }
+
+    /**
+     * 显示debug信息
+     * 
+     * @param array $showItem 显示项, 按数组键值顺序显示
+     */
+    public static function show($showItem = array('sql','param','file'))
+    {
+        if (!DyPhpBase::$debug || empty($showItem)) {
+            return;
+        }
+
+        $showItemArr = array_unique($showItem);
+        foreach ($showItemArr as $key=>$val) {
+            if ($val == 'sql') {
+                PHP_SAPI == 'cli' ? self::getLoadQueryConsole() : self::getLoadQuery();
+            } elseif ($val == 'param') {
+                PHP_SAPI == 'cli' ? self::getGlobalParamsConsole() : self::getGlobalParams();
+            } elseif ($val == 'file' || $val == 'allfile') {
+                $onlyApp = $val == 'allfile' ? false : true;
+                PHP_SAPI == 'cli' ? self::getLoadFilesConsole() : self::getLoadFiles($onlyApp);
+            }
+        }
     }
 }

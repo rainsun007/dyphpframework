@@ -11,10 +11,8 @@ defined('DYPHP_DEFAULT_CONTROLLER') or define('DYPHP_DEFAULT_CONTROLLER', 'app')
 //默认action配制
 defined('DYPHP_DEFAULT_ACTION') or define('DYPHP_DEFAULT_ACTION', 'index');
 
-//简单别名
-class DyCfg extends DyPhpConfig
-{
-}
+//设置别名
+class_alias('DyPhpConfig', 'DyCfg', false);
 
 class DyPhpConfig
 {
@@ -281,6 +279,7 @@ class DyPhpConfig
             'captcha'=>'dysys.dyphp.lib.DyCaptcha',
             'dbc'=>'dysys.dyphp.db.DyDbCriteria',
             'hook'=>'dysys.dyphp.base.DyPhpHooks',
+            //'hook'=>'dysys.dyphp.base.DyPhpHooks',
         );
 
         //仅web类型项目自动加载用户验证组件
