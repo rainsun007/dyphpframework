@@ -279,7 +279,6 @@ class DyPhpConfig
             'captcha'=>'dysys.dyphp.lib.DyCaptcha',
             'dbc'=>'dysys.dyphp.db.DyDbCriteria',
             'hook'=>'dysys.dyphp.base.DyPhpHooks',
-            //'hook'=>'dysys.dyphp.base.DyPhpHooks',
         );
 
         //仅web类型项目自动加载用户验证组件

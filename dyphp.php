@@ -275,7 +275,6 @@ class DyPhpBase
             'DyPhpWaf'=>'/dyphp/base/DyPhpWaf.php',
             'DyPhpUserIdentity'=>'/dyphp/base/DyPhpUserIdentity.php',
             'DyPhpWidgets'=>'/dyphp/base/DyPhpWidgets.php',
-            //'DyPhpDebug'=>'/dyphp/base/DyPhpDebug.php',
             'DyPhpHooks'=>'/dyphp/base/DyPhpHooks.php',
             'DyPhpMessage'=>'/dyphp/i18n/DyPhpMessage.php',
 
@@ -290,7 +289,6 @@ class DyPhpBase
             'DyDbCriteria'=>'/dyphp/db/DyDbCriteria.php',
             'DyPhpPdoMysql'=>'/dyphp/db/drivers/DyPhpPdoMysql.php',
             'DyPhpMysql'=>'/dyphp/db/drivers/DyPhpMysql.php',
-            'DyDebug'=>'/dyphp/lib/DyDebug.php',
 
             //lib
             'DyCookie'=>'/dyphp/lib/DyCookie.php',
@@ -299,9 +297,9 @@ class DyPhpBase
             'DyCache'=>'/dyphp/lib/DyCache.php',
             'DyStatic'=>'/dyphp/lib/DyStatic.php',
             'DyCaptcha'=>'/dyphp/lib/DyCaptcha.php',
+            'DyDebug'=>'/dyphp/lib/DyDebug.php',
 
             //utils
-            //'DyDebug'=>'/dyphp/utils/DyDebug.php',
             'DyTools'=>'/dyphp/utils/DyTools.php',
             'DyGDImg'=>'/dyphp/utils/DyGDImg.php',
             'DyString'=>'/dyphp/utils/DyString.php',
@@ -321,7 +319,7 @@ class DyPhpBase
      **/
     public static function supportCheck()
     {
-        //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv  mcrypt openssl'
+        //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv openssl'
         $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br>';
         $splitLine = $br.str_repeat('-', 60).$br;
 
@@ -351,15 +349,6 @@ class DyPhpBase
 
         echo extension_loaded('openssl') ? "√ openssl support" : "× openssl unsupport";
         echo $splitLine;
-
-        echo extension_loaded('mcrypt') ? "√ mcrypt support" : "× mcrypt unsupport";
-        echo $splitLine;
-
-        if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-            //5.4之后magic_quotes_gpc移除, 总是返回false, 5.4以上版本不做此检查
-            echo get_magic_quotes_gpc() ? '√ magic_quotes_gpc open' : '× magic_quotes_gpc close';
-            echo $splitLine;
-        }
 
         echo $br.$br;
         exit;

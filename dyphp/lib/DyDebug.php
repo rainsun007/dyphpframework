@@ -324,4 +324,19 @@ class DyDebug
             }
         }
     }
+
+    /**
+     * 格式化打印
+     * 
+     * @param mixed  任意参数
+     **/
+    public static function dump()
+    {
+        $string = '';
+        foreach (func_get_args() as $value) {
+            $string .= '<pre>' . DyFilter::html($value === null ? 'NULL' : (is_scalar($value) ? $value : print_r($value, true))) . "</pre>\n";
+        }
+        echo $string;
+    }
+
 }
