@@ -24,12 +24,6 @@ class DyString
             $expiry = $expiry > 0 ? time() + $expiry : $expiry;
             $string = openssl_encrypt($expiry.'|'.$string.'_dysc_'.mt_rand(0, 999), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
             $string = base64_encode($string);
-        } elseif (extension_loaded('mcrypt')) { 
-            //7.1将mcrypt移除，需要能过pecl安装后才可使用
-            $expiry = $expiry > 0 ? time()+$expiry : $expiry;
-            $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES, MCRYPT_MODE_ECB), MCRYPT_DEV_URANDOM);
-            $string = mcrypt_encrypt(MCRYPT_DES, substr(md5($key), 0, 8), $expiry.'|'.$string.'_dysc_'.mt_rand(0, 999), MCRYPT_MODE_ECB, $iv);
-            $string = base64_encode($string);
         } else {
             $string = self::authCode('ENCODE', $string, $key, $expiry);
         }
@@ -54,11 +48,6 @@ class DyString
         if (extension_loaded('openssl')) {
             $decryptStr = openssl_decrypt(base64_decode($string), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
             return self::decodeCheck($decryptStr);
-        } elseif (extension_loaded('mcrypt')) {
-            //7.1将mcrypt移除，需要能过pecl安装后才可使用
-            $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_DES, MCRYPT_MODE_ECB), MCRYPT_DEV_URANDOM);
-            $decryptStr = mcrypt_decrypt(MCRYPT_DES, substr(md5($key), 0, 8), base64_decode($string), MCRYPT_MODE_ECB, $iv);
-            return self::decodeCheck($decryptStr);
         } else {
             return self::authCode('DECODE', $string, $key);
         }
@@ -82,7 +71,7 @@ class DyString
     }
 
     /**
-     * 中文转为utf8
+     * 中文编码转为utf8
      * @param  string|array   $str 需要转码的字符串
      * @param  string         $inCharset 输入的字符集
      * @return string
@@ -103,12 +92,14 @@ class DyString
 
     /**
      * 字符串切割
-     * @param    $str       需要处理的字符串
-     * @param    $start     切割的起始位置
-     * @param    $length    切割长度
-     * @param    $charset   字附编码
-     * @param    $suffix    长度超出部分时后缀
-     * @return   string
+     * 
+     * @param    string  $str       需要处理的字符串
+     * @param    int     $start     切割的起始位置
+     * @param    int     $length    切割长度
+     * @param    string  $charset   字附编码
+     * @param    bool    $suffix    长度超出部分时后缀
+     * 
+     * @return   mixed
      **/
     public static function cutStr($str, $start=0, $length, $charset="utf-8", $suffix=false)
     {
@@ -123,10 +114,12 @@ class DyString
             $slice = iconv_substr($str, $start, $length, $charset);
             return $suffix ? $slice."…" : $slice;
         }
+
+        $re = array();
         $re['utf-8']  = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
         $re['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
-        $re['gbk']      = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
-        $re['big5']      = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
+        $re['gbk']    = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
+        $re['big5']   = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
         preg_match_all($re[$charset], $str, $match);
         if ($match) {
             $slice = join("", array_slice($match[0], $start, $length));
@@ -158,23 +151,13 @@ class DyString
     }
 
     /**
-     * 格式化打印
-     **/
-    public static function dump()
-    {
-        $string = '';
-        foreach (func_get_args() as $value) {
-            $string .= '<pre>' . DyFilter::html($value === null ? 'NULL' : (is_scalar($value) ? $value : print_r($value, true))) . "</pre>\n";
-        }
-        echo $string;
-    }
-
-    /**
      * 字符长度计算
-     * @param string $str
-     * @param bool  true为两个英文等于一个中文长度
-     * @param string $charset
-     * @return type
+     * 
+     * @param  string  $str
+     * @param  bool    true为两个英文等于一个中文长度
+     * @param  string  $charset
+     * 
+     * @return int
      */
     public static function length($str, $en2=true, $charset='utf-8')
     {
@@ -199,7 +182,7 @@ class DyString
     }
 
     /**
-     * 生成唯一的32位随机字符串
+     * 生成唯一的32位随机字符串(md5值)
      **/
     public static function randomStr()
     {
@@ -208,8 +191,10 @@ class DyString
 
     /**
      * @brief    全角半角互转
+     * 
      * @param    string  $str
      * @param    bool    $flip  翻转
+     * 
      * @return   string
      **/
     public static function transfer($str, $flip=false)
@@ -250,11 +235,14 @@ class DyString
 
     /**
      * @brief  字符串加密、解密(经简单改造)
+     * 
      * @author DZ
-     * @param string   操作类型，ENCODE：加密，DECODE：解密
-     * @param string   加密的对象
-     * @param string   加密附加密钥值
-     * @param int      过期时间，0为不过期
+     * @param  string   操作类型，ENCODE：加密，DECODE：解密
+     * @param  string   加密的对象
+     * @param  string   加密附加密钥值
+     * @param  int      过期时间，0为不过期
+     * 
+     * @return string
      * */
     private static function authCode($operation = 'DECODE', $string, $key = '', $expiry = 0)
     {
@@ -309,6 +297,7 @@ class DyString
      * 解密结果检证
      *
      * @param  string $decryptStr 解码后的原数据
+     * 
      * @return string
      */
     private static function decodeCheck($decryptStr)

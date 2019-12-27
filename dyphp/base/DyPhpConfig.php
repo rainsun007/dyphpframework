@@ -11,10 +11,8 @@ defined('DYPHP_DEFAULT_CONTROLLER') or define('DYPHP_DEFAULT_CONTROLLER', 'app')
 //默认action配制
 defined('DYPHP_DEFAULT_ACTION') or define('DYPHP_DEFAULT_ACTION', 'index');
 
-//简单别名
-class DyCfg extends DyPhpConfig
-{
-}
+//设置别名
+class_alias('DyPhpConfig', 'DyCfg', false);
 
 class DyPhpConfig
 {
