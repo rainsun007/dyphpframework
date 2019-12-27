@@ -18,7 +18,7 @@ defined('EXT') or define('EXT', '.php');
 /**
  * 框架版本
  * 版本号规则：
- * 主版本号(较大的变动).子版本号(功能变化或新特性增减).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
+ * 主版本号(较大的变动).子版本号(功能变化或特性增减).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
  * 上一级版本号变动时下级版本号归零
  **/
 define('DYPHP_VERSION', '2.11.0-release');
@@ -52,6 +52,7 @@ class DyPhpBase
     {
         self::runAppCommon($config, $debug, 'web');
 
+        //加载web防火墙
         if ($waf) {
             require DYPHP_PATH.self::$coreClasses['DyPhpWaf'];
             new DyPhpWaf();
@@ -72,6 +73,7 @@ class DyPhpBase
         if (PHP_SAPI !== 'cli' || !isset($_SERVER['argv'])) {
             die('This script must be run from the command line.');
         }
+
         self::runAppCommon($config, $debug, 'console');
         DyPhpRoute::runConsole();
         exit;
@@ -95,6 +97,8 @@ class DyPhpBase
         require DYPHP_PATH.self::$coreClasses['DyPhpController'];
         require DYPHP_PATH.self::$coreClasses['DyPhpView'];
         require DYPHP_PATH.self::$coreClasses['DyPhpHooks'];
+
+        //web应用加载用户身份认证
         if ($appType == 'web') {
             require DYPHP_PATH.self::$coreClasses['DyPhpUserIdentity'];
         }
@@ -121,6 +125,8 @@ class DyPhpBase
 
     /**
      * 自动加载
+     * 
+     * @param string 类名
      **/
     public static function autoload($className)
     {
