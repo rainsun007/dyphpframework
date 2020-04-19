@@ -375,7 +375,7 @@ class DyRequest
      * 
      * @return array
      **/
-    public static function getStreamInputJosn()
+    public static function getStreamInputJson()
     {
         $val = file_get_contents('php://input');
 
