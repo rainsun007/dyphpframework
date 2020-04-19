@@ -321,9 +321,10 @@ class DyPhpBase
 
     /**
      * @brief   框架支持检查
+     * @param bool 是否执行exit(),默认执行
      * @return  null
      **/
-    public static function supportCheck()
+    public static function supportCheck($exit = true)
     {
         //'$_SERVER $_FILES $_COOKIE $_SESSION  | GD pdo_mysql PDO mbstring iconv openssl'
         $br = PHP_SAPI == 'cli' ? PHP_EOL : '</br>';
@@ -357,7 +358,10 @@ class DyPhpBase
         echo $splitLine;
 
         echo $br.$br;
-        exit;
+
+        if($exit){
+            exit;
+        }
     }
 }
 
