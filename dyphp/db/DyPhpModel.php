@@ -17,16 +17,21 @@ class DyPhpModel
     //要使用的数据库配制
     protected $dbCnf = 'default';
 
-    //是否强制使用master 设置为true之后所有请求将使用master只有显示设置为false才会切换回主从分离
+    //是否强制使用master 设置为true之后所有请求将使用master，只有显示设置为false才会切换回主从分离
     public $forceMaster = false;
+
+    // 是否开启sql分析
+    public $openExplain = true;
 
     //表名
     protected $tableName = '';
 
     //当前时间戳
     protected $time = 0;
+
     //当前完整日期时间（Y-m-d H:i:s）
     protected $datetime = '1970-01-01 08:00:00';
+
     //当前完整日期（Y-m-d）
     protected $date = '1970-01-01';
 
@@ -692,10 +697,9 @@ class DyPhpModel
     {
         $time = $this->getTime() - $start;
 
-        $explainFetchResult = '';
-
         //mysql查询分析处理
-        if ($this->dbType == 'mysql' && $explain) {
+        $explainFetchResult = '';
+        if ($this->dbType == 'mysql' && $explain && $this->openExplain) {
             $query = 'EXPLAIN '.$sql;
 
             if ($this->isPdo) {
