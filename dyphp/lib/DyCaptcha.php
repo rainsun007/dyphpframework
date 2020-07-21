@@ -403,28 +403,28 @@ class DyCaptcha
         $text = $r = '';
         switch ($this->model) {
            case 0:
-                $words  = "bcdfghjklmnpqrstvwxyz";
-                $vocals = "aeiou";
+                $words  = array('b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z');
+                $vocals = array('a','e','i','o','u');
                 $vocal = rand(0, 1);
                 for ($i=0; $i<$wordNum; $i++) {
                     if ($vocal) {
-                        $text .= $vocals{mt_rand(0, 4)};
+                        $text .= $vocals[mt_rand(0, 4)];
                     } else {
-                        $text .= $words{mt_rand(0, 20)};
+                        $text .= $words[mt_rand(0, 20)];
                     }
                     $vocal = !$vocal;
                 }
                 break;
            case 1:
-                $words = '1234567890';
+                $words = array('1','2','3','4','5','6','7','8','9','0');
                 for ($i = 0; $i < $wordNum; $i++) {
-                    $text .= $words{mt_rand(0, 9)};
+                    $text .= $words[mt_rand(0, 9)];
                 }
                 break;
            case 2:
-                $words = 'abcdefghijklmnopqrstuvwxyz1234567890';
+                $words = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0');
                 for ($i = 0; $i < $wordNum; $i++) {
-                    $text .= $words{mt_rand(0, 35)};
+                    $text .= $words[mt_rand(0, 35)];
                 }
                 break;
            case 3:
