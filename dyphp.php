@@ -387,8 +387,9 @@ final class DyPhpApp
 
     //注册实例及别名实例单例存储器
     private $instanceArr = array();
+
     //加载vendors单例存储器
-    private $incOnce = array();
+    private $vendorsIncOnce = array();
 
     public function __construct()
     {
@@ -450,7 +451,7 @@ final class DyPhpApp
 
     /**
      * 加载vendors
-     * @param string  vendors 路径及文件名(有些vendor加载时引入的是autoload文件)
+     * @param string  vendors 路径及文件名(有些vendor加载时引入的是autoload文件),不支持"xx.yy.zz"格式(因为组件有些文件名中有".")
      * @param bool    true为加载框架已集成的vendor,false为加载app中引入的的vendor
      * 
      * @example Dy::app()->vendors('PHPMailer/PHPMailerAutoload', true);
@@ -460,17 +461,18 @@ final class DyPhpApp
     {
         $type = $isSys === true ? 'dyphp' : 'app';
 
-        if (in_array($type.'_'.$filePathName, $this->incOnce)) {
+        $onceName = $type.'_'.$filePathName;
+        if (in_array($onceName, $this->vendorsIncOnce)) {
             return;
         }
 
         $vendor = $type == 'app' ? DyPhpConfig::item('appPath').'/vendors/'.$filePathName.EXT : DYPHP_PATH.'/dyphp/vendors/'.$filePathName.'.php';
         if (!file_exists($vendor)) {
-            DyPhpBase::throwException('vendor does not exist', $filePathName);
+            DyPhpBase::throwException('vendor does not exist', $vendor);
         }
 
+        $this->vendorsIncOnce[] = $onceName;
         require $vendor;
-        $this->incOnce[] = $type.'_'.$filePathName;
     }
     
     /**
