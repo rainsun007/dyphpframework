@@ -182,11 +182,50 @@ class DyString
     }
 
     /**
-     * 生成唯一的32位随机字符串(md5值)
+     * 生成随机字符串
+     * 
+     * @param  int     $wordNum  生成位数
+     * @param  string  $type     mix为字符与数字混合，str为纯字符，num为纯数字，md5为唯一md5值(固定32位，$wordNum失效)
+     * @param  bool    $special  是否包含特殊字符(只对$type为str和mix时有效)
+     * 
+     * @return string
      **/
-    public static function randomStr()
+    public static function randomStr($wordNum = 10,$type = 'mix',$special = false)
     {
-        return md5(str_shuffle(chr(mt_rand(32, 126)) . uniqid() . microtime(true)));
+        $words = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','~','!','@','#','$','%','^','&','*','(',')','_','-','+','=');
+        
+        $randStr = '';
+        switch ($type) {
+            case 'str':
+                $vocal = rand(0, 1);
+                for ($i=0; $i<$wordNum; $i++) {
+                    if ($vocal || !$special) {
+                        $randStr .= $words[mt_rand(0, 25)];
+                    } else {
+                        $randStr .= $words[mt_rand(36, 50)];
+                    }
+                    $vocal = !$vocal;
+                }
+                break;
+            case 'num':
+                for ($i = 0; $i < $wordNum; $i++) {
+                    $randStr .= $words[mt_rand(26, 35)];
+                }
+                break;
+            case 'mix':
+                $end = $special ? 50 : 35;
+                for ($i = 0; $i < $wordNum; $i++) {
+                    $randStr .= $words[mt_rand(0, $end)];
+                }
+                break;
+            case 'md5':
+                $randStr = md5(str_shuffle(chr(mt_rand(32, 126)) . uniqid() . microtime(true)));
+                break;
+            default:
+                break;
+        }
+      
+        return $randStr;
     }
 
     /**

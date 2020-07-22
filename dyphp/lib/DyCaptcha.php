@@ -383,11 +383,11 @@ class DyCaptcha
     **/
     protected function letterBackground()
     {
-        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $chars = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','1','2','3','4','5','6','7','8','9','0');
         for ($i = 0; $i < 10; $i ++) {
             $fColor = imagecolorallocate($this->im, mt_rand(100, 150), mt_rand(100, 255), mt_rand(0, 255));
             for ($j = 1; $j <= 5; $j ++) {
-                imagestring($this->im, $j, mt_rand(-10, $this->sWidth), mt_rand(-10, $this->sHeight), $chars{mt_rand(0, 35)}, $fColor);
+                imagestring($this->im, $j, mt_rand(-10, $this->sWidth), mt_rand(-10, $this->sHeight), $chars[mt_rand(0, 35)], $fColor);
             }
         }
     }
@@ -399,6 +399,7 @@ class DyCaptcha
     {
         //验证码个数
         $wordNum = mt_rand($this->wordLength[0], $this->wordLength[1]);
+        
         //验证码模式 0只字母  1只数字  2字母和数字  3数字运算
         $text = $r = '';
         switch ($this->model) {
@@ -447,6 +448,7 @@ class DyCaptcha
                 $text = "$left $sign $right =";
                 break;
         }
+
         $this->verifyCodeResult = $this->model == 3 ? $r : $text;
         $this->verifyCodeText = $text;
     }
