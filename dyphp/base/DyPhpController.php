@@ -19,6 +19,9 @@ class DyPhpController
     //设置所有action未登陆禁止访问 为true时needLogin方法将无效（loginHandler属性不受限制）
     protected $allNeedLogin = false;
 
+    //action是否使用请求方法与action名做强一致验证
+    protected $actionHttpMethodMode = false;
+
     //当前运行的module,controller,module/controller,action名，首字母为小写
     protected $module = '';
     protected $cid = '';
@@ -102,7 +105,7 @@ class DyPhpController
     }
 
     /**
-     * 请求转发 可以理解为run方法的别名 区别在于必须继承了本类才可使用.
+     * 请求转发 可以理解为run方法的别名 区别在于必须继承了DyPhpController才可使用.
      *
      * @param string controller 以module_controller或module/controller的格式调用
      * @param string action
@@ -129,12 +132,14 @@ class DyPhpController
      **/
     private static function parseAction($controllerRun, $action)
     {
-        //action 解析
+        //action方法名组装与验证
         $actionNameStr = $action ? $action : DYPHP_DEFAULT_ACTION;
-        $actionName = 'action'.ucfirst($actionNameStr);
+        $httpMethod = $controllerRun->actionHttpMethodMode ? ucfirst(strtolower(DyRequest::getMethod())) : '';
+        $actionName = 'action'.$httpMethod.ucfirst($actionNameStr);
         if (!method_exists($controllerRun, $actionName)) {
             DyPhpBase::throwException('action does not exist', $actionName);
         }
+        
         $controllerRun->aid = lcfirst($actionNameStr);
         DyPhpBase::app()->aid = $controllerRun->aid;
 

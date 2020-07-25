@@ -177,6 +177,55 @@ class DyTools
         return file_put_contents($config, $contents);
     }
 
+    //-------------------------api开发-----------------------
+    /**
+     * 简单json返回值格式化
+     *
+     * @param   int     $status       状态
+     * @param   int     $code         代码
+     * @param   string  $message      信息
+     * @param   mixed   $data         数据
+     * @param   bool    $printAndExit 是否直接输出并执行exit()
+     *
+     * @return  string
+     **/
+    public static function apiJson($status = 1, $code = 200, $message = '', $data = '', $printAndExit = false)
+    {
+        $dataArr = array('status' => $status, 'code' => $code, 'message' => $message, 'data' => $data);
+
+        //以字面编码多字节 Unicode 字符(中文不被转码),自 PHP 5.4.0 起生效
+        $result =  version_compare(PHP_VERSION, '5.4.0', '>=') ? json_encode($dataArr, JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
+        
+        if($printAndExit){
+            echo $result;
+            exit();
+        }else{
+            return $result;
+        }
+    }
+
+    /**
+     * 签名获取与验证
+     * @param array   验签数组，建议自行在该数组中加入时间戳或随机数字段
+     * @param string  对等加密秘钥
+     * @param string  需要验证的签名，此参数不为空时为验证签名是否合法
+     * 
+     * @return mixed  $sign为空时返回string, 非空时返回bool 
+     */
+    public static function apiSign($params, $secret, $sign = '')
+    {
+        ksort($params);
+        $paramsStr = '';
+        foreach ($params as $key => $val) {
+            $paramsStr .= $key . $val;
+        }
+
+        $signStr =  md5($paramsStr . $secret);
+
+        return $sign == '' ?  $signStr : $signStr == $sign;
+    }
+
+
     //-------------------------其它-----------------------
     /**
      * 获取生肖.
@@ -213,31 +262,5 @@ class DyTools
         $s = round($s * 10000) / 10000;
 
         return round($s, 1);
-    }
-
-    /**
-     * 简单json返回值格式化
-     *
-     * @param   int     $status       状态
-     * @param   int     $code         代码
-     * @param   string  $message      信息
-     * @param   mixed   $data         数据
-     * @param   bool    $printAndExit 是否直接输出并执行exit()
-     *
-     * @return  string
-     **/
-    public static function apiJson($status = 1, $code = 200, $message = '', $data = '', $printAndExit = false)
-    {
-        $dataArr = array('status' => $status, 'code' => $code, 'message' => $message, 'data' => $data);
-
-        //以字面编码多字节 Unicode 字符(中文不被转码),自 PHP 5.4.0 起生效
-        $result =  version_compare(PHP_VERSION, '5.4.0', '>=') ? json_encode($dataArr, JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
-        
-        if($printAndExit){
-            echo $result;
-            exit();
-        }else{
-            return $result;
-        }
     }
 }

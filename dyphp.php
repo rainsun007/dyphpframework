@@ -67,6 +67,7 @@ class DyPhpBase
     /**
      * 运行console app入口
      * @param array app配制
+     * @param boolean 是否开启debug
      **/
     public static function runConsoleApp($config = null, $debug = false)
     {
@@ -82,6 +83,8 @@ class DyPhpBase
     /**
      * 公共app运行入口
      * @param array app配制
+     * @param boolean 是否开启debug
+     * @param string  app类型
      **/
     private static function runAppCommon($config = null, $debug = false, $appType = 'web')
     {
@@ -161,7 +164,7 @@ class DyPhpBase
             }
         }
 
-        if (!class_exists($className, false) && !interface_exists($className, false)) {
+        if (!class_exists($className, false) && !interface_exists($className, false) && !trait_exists($className, false)) {
             self::throwException('Class does not exist', $className);
         }
     }
@@ -228,7 +231,7 @@ class DyPhpBase
      * 异常,错误捕获
      * 详见DyPhpException类
      * 
-     * @param bool  $debug为true时输出错误运行跟踪 , 为false时运行self::$errorHandler返回错误信息
+     * @param bool  $debug为true时直接输出异常运行跟踪 , 为false时自动调用elf::$errorHandler返回错误信息
      **/
     private static function debug($debug = false)
     {
@@ -424,7 +427,7 @@ final class DyPhpApp
 
     /**
      * @brief    实例单例处理
-     * param     注册名
+     * @param     注册名
      * @return   object
      **/
     private function instance($name)
@@ -451,11 +454,10 @@ final class DyPhpApp
 
     /**
      * 加载vendors
-     * @param string  vendors 路径及文件名(有些vendor加载时引入的是autoload文件),不支持"xx.yy.zz"格式(因为组件有些文件名中有".")
+     * @param string  vendors 相对路径及文件名(无后缀，注意有些vendor加载时引入的是autoload文件),不支持"xx.yy.zz"格式(组件文件名中可能有".")
      * @param bool    true为加载框架已集成的vendor,false为加载app中引入的的vendor
      * 
      * @example Dy::app()->vendors('PHPMailer/PHPMailerAutoload', true);
-     * 
      */
     public function vendors($filePathName, $isSys = false)
     {
