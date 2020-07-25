@@ -296,7 +296,7 @@ class DyDebug
             $val = $val === null ? 'NULL' : $val;
             $valStr .= '<td style="border:1px solid #3D4F52;padding:0px 5px;">'.$val.'</td>';
         }
-        $table = '<br /><table cellspacing="1" style="border:0px;color:#000033;"><tr>';
+        $table = '<br /><table cellspacing="1" style="border:0px;color:#999;"><tr>';
 
         return $table.$keyStr.'</tr><tr>'.$valStr.'</tr></table>';
     }
@@ -312,6 +312,7 @@ class DyDebug
             return;
         }
 
+        echo PHP_SAPI == 'cli' ? '' :'<div style="padding-left:5px; padding-right:5px; margin:1px 2px 1px 1px;background:#ccc;clear: both;border:1px dashed #666"><div style="font-weight: bold;font-size: 14px;color:#333;margin-top:5px;">DyPhpFramework Dev Tools ['.date("Y-m-d H:i:s").']</div>';
         $showItemArr = array_unique($showItem);
         foreach ($showItemArr as $key=>$val) {
             if ($val == 'sql') {
@@ -323,6 +324,7 @@ class DyDebug
                 PHP_SAPI == 'cli' ? self::getLoadFilesConsole() : self::getLoadFiles($onlyApp);
             }
         }
+        echo PHP_SAPI == 'cli' ? '' :'</div>';
     }
 
     /**

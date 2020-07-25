@@ -267,9 +267,9 @@ class DyRequest
      * 获取get请求的浮点数.
      *
      * @param string get请求的变量名
-     * @param int    默认值
+     * @param float  默认值
      *
-     * @return int get变量名对应的值
+     * @return float get变量名对应的值
      */
     public static function getFloat($key, $default = 0.00)
     {
@@ -282,7 +282,7 @@ class DyRequest
      * @param string post请求的变量名
      * @param array  默认值
      *
-     * @return int post变量名对应的值
+     * @return array post变量名对应的值
      **/
     public static function getArr($key, $default = array())
     {
@@ -321,9 +321,9 @@ class DyRequest
      * 获取get请求的浮点数.
      *
      * @param string get请求的变量名
-     * @param int    默认值
+     * @param float  默认值
      *
-     * @return int get变量名对应的值
+     * @return float post变量名对应的值
      */
     public static function postFloat($key, $default = 0.00)
     {
@@ -336,7 +336,7 @@ class DyRequest
      * @param string post请求的变量名
      * @param array  默认值
      *
-     * @return int post变量名对应的值
+     * @return array post变量名对应的值
      **/
     public static function postArr($key, $default = array())
     {
@@ -349,7 +349,7 @@ class DyRequest
      * @param   $paramKey
      * @param   $default
      *
-     * @return  mix
+     * @return  mixed
      **/
     public static function getOriginal($paramKey = '', $default = '')
     {
@@ -362,7 +362,7 @@ class DyRequest
      * @param   $paramKey
      * @param   $default
      *
-     * @return  mix
+     * @return  mixed
      **/
     public static function postOriginal($paramKey = '', $default = '')
     {
@@ -468,6 +468,7 @@ class DyRequest
      * 转义字串.
      *
      * @param string  需要被转义的字串
+     * @param string  默认值
      *
      * @return string 转义的字串
      */
@@ -482,6 +483,8 @@ class DyRequest
      * 处理整型数据.
      *
      * @param int  需要被验证的值
+     * @param int  默认值
+     * @param int  最小值范围
      *
      * @return int 返回验证过的值
      */
@@ -494,6 +497,7 @@ class DyRequest
      * 处理浮点型数据
      *
      * @param float 需要被验证的值
+     * @param float 默认值
      *
      * @return float 返回验证过的值
      **/
