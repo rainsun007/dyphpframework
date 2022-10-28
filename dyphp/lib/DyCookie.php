@@ -1,4 +1,5 @@
 <?php
+
 /**
  * cookie工具类
  * @author 大宇 Email:dyphp.com@gmail.com
@@ -14,18 +15,18 @@ class DyCookie
      *
      * @return string
      **/
-    public static function get($name='')
+    public static function get($name = '')
     {
         if ($name === '') {
             return '';
         }
 
         $prefix = self::cookieConfig('prefix');
-        if (!isset($_COOKIE[$prefix.$name])) {
+        if (!isset($_COOKIE[$prefix . $name])) {
             return '';
         }
 
-        return DyString::decodeStr($_COOKIE[$prefix.$name], self::cookieConfig('cryptStr'));
+        return DyString::decodeStr($_COOKIE[$prefix . $name], self::cookieConfig('cryptStr'));
         //$value = unserialize(base64_decode($value));
         //return $value === false ? '' : $value;
     }
@@ -43,13 +44,13 @@ class DyCookie
      *
      * @return bool
      **/
-    public static function set($name='', $value='', $expire=0, $path='', $domain='', $secure=false, $httponly=true)
+    public static function set($name = '', $value = '', $expire = 0, $path = '', $domain = '', $secure = false, $httponly = true)
     {
         if ($name === '') {
             return false;
         }
 
-        $name = self::cookieConfig('prefix').$name;
+        $name = self::cookieConfig('prefix') . $name;
 
         //$value = base64_encode(serialize($value));
         $value = DyString::encodeStr($value, self::cookieConfig('cryptStr'), $expire);
@@ -60,7 +61,7 @@ class DyCookie
         $domain = empty($domain) ? self::cookieConfig('domain') : $domain;
         $secure = $secure === false ? self::cookieConfig('secure') : $secure;
         $httponly = $httponly === true ? self::cookieConfig('httponly') : $httponly;
-        
+
         $_COOKIE[$name] = $value;
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
@@ -72,17 +73,17 @@ class DyCookie
      *
      * @return string
      **/
-    public static function oget($name='')
+    public static function oget($name = '')
     {
         if ($name === '') {
             return '';
         }
 
         $prefix = self::cookieConfig('prefix');
-        if (!isset($_COOKIE[$prefix.$name])) {
+        if (!isset($_COOKIE[$prefix . $name])) {
             return '';
         }
-        return $_COOKIE[$prefix.$name];
+        return $_COOKIE[$prefix . $name];
     }
 
     /**
@@ -98,21 +99,21 @@ class DyCookie
      *
      * @return bool
      **/
-    public static function oset($name='', $value='', $expire=0, $path='', $domain='', $secure=false, $httponly=false)
+    public static function oset($name = '', $value = '', $expire = 0, $path = '', $domain = '', $secure = false, $httponly = false)
     {
         if ($name === '') {
             return false;
         }
 
-        $name = self::cookieConfig('prefix').$name;
+        $name = self::cookieConfig('prefix') . $name;
 
-        $expire = (int)$expire>0 ? time()+(int)$expire : 0;
+        $expire = (int)$expire > 0 ? time() + (int)$expire : 0;
 
         $path = empty($path) ? self::cookieConfig('path') : $path;
         $domain = empty($domain) ? self::cookieConfig('domain') : $domain;
         $secure = $secure === false ? self::cookieConfig('secure') : $secure;
         $httponly = $httponly === true ? self::cookieConfig('httponly') : $httponly;
-        
+
         $_COOKIE[$name] = $value;
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
@@ -127,7 +128,7 @@ class DyCookie
     public static function is_set($name)
     {
         $prefix = self::cookieConfig('prefix');
-        return isset($_COOKIE[$prefix.$name]);
+        return isset($_COOKIE[$prefix . $name]);
     }
 
     /**
@@ -136,13 +137,13 @@ class DyCookie
      **/
     public static function delete($name)
     {
-        $expire = time()-86400;
+        $expire = time() - 86400;
         $prefix = self::cookieConfig('prefix');
         $path = self::cookieConfig('path');
         $domain = self::cookieConfig('domain');
 
-        setcookie($prefix.$name, '', $expire, $path, $domain);
-        unset($_COOKIE[$prefix.$name]);
+        setcookie($prefix . $name, '', $expire, $path, $domain);
+        unset($_COOKIE[$prefix . $name]);
     }
 
     /**
@@ -151,7 +152,7 @@ class DyCookie
     public static function clear()
     {
         $prefix = self::cookieConfig('prefix');
-        foreach ($_COOKIE as $key=>$val) {
+        foreach ($_COOKIE as $key => $val) {
             self::delete(str_replace($prefix, '', $key));
         }
         unset($_COOKIE);
@@ -167,21 +168,30 @@ class DyCookie
     private static function cookieConfig($key)
     {
         $cookieArr = DyPhpConfig::item('cookie');
-        if ($key == 'prefix') {
-            $value = isset($cookieArr['prefix']) ? $cookieArr['prefix'] : '';
-        } elseif ($key == 'path') {
-            $value = isset($cookieArr['path']) ? $cookieArr['path'] : '/';
-        } elseif ($key == 'domain') {
-            $value = isset($cookieArr['domain']) ? $cookieArr['domain'] : '';
-        } elseif ($key == 'secure') {
-            $value = isset($cookieArr['secure']) ? $cookieArr['secure'] : false;
-        } elseif ($key == 'httponly') {
-            $value = isset($cookieArr['httponly']) ? $cookieArr['httponly'] : true;
-        } elseif ($key == 'cryptStr') {
-            $cookieSecretKey = isset($cookieArr['secretKey']) ? $cookieArr['secretKey'] : '';
-            $secretKey = DyPhpConfig::item('secretKey') ? DyPhpConfig::item('secretKey') : '';
-            $value = $cookieSecretKey ? $cookieSecretKey : $secretKey;
-            $value = md5($value);
+
+        $value = '';
+        switch ($key) {
+            case 'prefix':
+                $value = isset($cookieArr['prefix']) ? $cookieArr['prefix'] : '';
+                break;
+            case 'path':
+                $value = isset($cookieArr['path']) ? $cookieArr['path'] : '/';
+                break;
+            case 'domain':
+                $value = isset($cookieArr['domain']) ? $cookieArr['domain'] : '';
+                break;
+            case 'secure':
+                $value = isset($cookieArr['secure']) ? $cookieArr['secure'] : false;
+                break;
+            case 'httponly':
+                $value = isset($cookieArr['httponly']) ? $cookieArr['httponly'] : true;
+                break;
+            case 'cryptStr':
+                $cookieSecretKey = isset($cookieArr['secretKey']) ? trim($cookieArr['secretKey']) : '';
+                $value = $cookieSecretKey ? md5($cookieSecretKey) : md5(DyPhpConfig::item('secretKey'));
+                break;
+            default:
+                break;
         }
 
         return $value;

@@ -178,11 +178,10 @@ class DyDownload
         "zip"   => "application/zip",
     );
 
-    //允许下载类型
+    //默认允许下载类型
     private $allowArr = array(
         "jpg",
         "png",
-        "gif",
         "rar",
         "zip",
         "tar",

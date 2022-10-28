@@ -18,7 +18,7 @@ class DyPagerWidget extends DyPhpWidgets
     private $count;
     //当前翻页数
     private $thisPage;
-    //分页参数的名称
+    //分页参数的名称, 此参数非强制，默认值为page, 可在调用时自定义
     private $paramName;
     //分页偏移量
     private $offset;
@@ -55,7 +55,7 @@ class DyPagerWidget extends DyPhpWidgets
         $this->next = !empty($options['next']) ? $options['next'] : 'Next';
 
         $dyPhpPagerStyle = !empty($options['style']) ? $options['style'] : '/static/widgets/dypager/default.css';
-        $dyPhpPagerStyle = (DyCfg::item('appHttpPath') != '' ? '/'.DyCfg::item('appHttpPath') : '').$dyPhpPagerStyle;
+        $dyPhpPagerStyle = (DyPhpConfig::item('appHttpPath') != '' ? '/'.DyPhpConfig::item('appHttpPath') : '').$dyPhpPagerStyle;
         $dyPhpPagerStyle = !empty($options['cdnStyle']) ? $options['cdnStyle'] : $dyPhpPagerStyle;
 
         //当前翻页数

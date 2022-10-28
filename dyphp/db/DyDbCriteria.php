@@ -64,9 +64,9 @@ class DyDbCriteria
      * @param  mixed  $alias 表别名，与$from数据类型相对应, 不需要表名的情况下可以不传此参数
      *
      * @example
-     *          dy::app()->dbc->from('user')
-     *          dy::app()->dbc->from('user','u')
-     *          dy::app()->dbc->from(array('user','order'),array('u','o'))
+     *          DyPhpBase::app()->dbc->from('user')
+     *          DyPhpBase::app()->dbc->from('user','u')
+     *          DyPhpBase::app()->dbc->from(array('user','order'),array('u','o'))
      *
      * @return  object
      **/

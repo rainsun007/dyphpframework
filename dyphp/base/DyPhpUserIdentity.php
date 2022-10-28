@@ -34,7 +34,7 @@ abstract class DyPhpUserIdentity
      *
      * @param string [必须]用户身份索引值,如：id,email,电话,用户名,昵称等
      * @param string [必须]用户验证加密串，如加密后的密码（如md5('password')等,保持加密一至即可）
-     *               基于安全考虑此处不要使用明文（相关校验逻辑需在实现中完成）
+     *               基于安全考虑此处不要使用明文（相关校验逻辑需在authenticate方法中完成）
      * @param int    自动登陆有效期，单位：秒，0为不使用自动登陆
      *
      * @return bool
@@ -77,6 +77,7 @@ abstract class DyPhpUserIdentity
             if(!$logined){
                 return true;
             }
+
             $loginedArr = json_decode($logined, true);
             return $loginedArr && $loginedArr[0] === 'cookie_logined' ? false : true;
         } else {
@@ -143,19 +144,19 @@ abstract class DyPhpUserIdentity
     }
 
     /**
-     * 防止多应用在同一服务器运行时冲突，生成登陆状态key.
+     * 支持多应用在同域名下同时运行，保持各自的状态
      *
-     * @param  string 类型
+     * @param  string  类型: session, cookie
      *
-     * @return string
+     * @return string  8位状态key标识
      **/
     private function getLoginStateKey($type = 'session')
     {
-        $loginStateKey = $this->getCookieCryptKey();
+        $cookieCryptKey = $this->getCookieCryptKey();
         if ($type == 'session') {
-            return substr(md5($loginStateKey), 0, 8);
+            return substr(md5($cookieCryptKey), 0, 8);
         } elseif ($type == 'cookie') {
-            return substr(md5($loginStateKey), -8);
+            return substr(md5($cookieCryptKey), -8);
         }
     }
 
@@ -167,9 +168,10 @@ abstract class DyPhpUserIdentity
     private function getCookieCryptKey()
     {
         $cookieArr = DyPhpConfig::item('cookie');
-        $cookieSecretKey = isset($cookieArr['secretKey']) ? $cookieArr['secretKey'] : '@Dyphp0~User9_login1-8status2&key7#3String6%+^4!=*/5';
+        $secretKey = DyPhpConfig::item('secretKey');
+        $cookieSecretKey = isset($cookieArr['secretKey']) ? trim($cookieArr['secretKey']) : md5($secretKey);
         
-        return DyPhpConfig::item('secretKey').$cookieSecretKey;
+        return $secretKey.$cookieSecretKey;
     }
 
     /**
@@ -184,12 +186,13 @@ abstract class DyPhpUserIdentity
      **/
     private function getAutoLoginToken($userIndexValue = '', $encryptPassword = '', $time = 0, $expire = 0, $token = '')
     {
-        $value = md5($userIndexValue.$encryptPassword.$time.$expire).md5($this->getCookieCryptKey());
+        $cookieCryptKey = md5($this->getCookieCryptKey());
+        $value = md5($userIndexValue.$encryptPassword.$time.$expire.$cookieCryptKey);
 
         if ($token) {
-            return DyString::decodeStr($token, $this->getCookieCryptKey()) == $value;
+            return DyString::decodeStr($token, $cookieCryptKey) === $value;
         }
 
-        return DyString::encodeStr($value, $this->getCookieCryptKey(), $expire);
+        return DyString::encodeStr($value, $cookieCryptKey, $expire);
     }
 }

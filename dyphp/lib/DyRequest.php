@@ -1,4 +1,5 @@
 <?php
+
 /**
  * http请求处理库.
  *
@@ -20,9 +21,9 @@ class DyRequest
      **/
     public static function redirect($url = '', $param = array(), $code = 302, $method = 'location')
     {
-        if(in_array(strtolower(parse_url($url,PHP_URL_SCHEME)),array('http','https','ftp'))){
+        if (in_array(strtolower(parse_url($url, PHP_URL_SCHEME)), array('http', 'https', 'ftp'))) {
             $jumpUrl = $url;
-        }else{
+        } else {
             $jumpUrl = self::createUrl($url, $param);
         }
 
@@ -46,7 +47,7 @@ class DyRequest
      *
      * @param string controller或controller/action
      * @param array  get参数
-     * @param bool 强制以url正常get参数格式处理传入的参数
+     * @param bool   强制以url正常get参数格式处理传入的参数
      *
      * @return string 完整的http访问地址
      **/
@@ -54,27 +55,30 @@ class DyRequest
     {
         $isRest = DyPhpConfig::getRestCa();
         $hideIndex = DyPhpConfig::getHideIndex();
-        $index = $hideIndex ? '' : 'index'.EXT.($isRest ? '/' : '?');
+        $index = $hideIndex ? '' : 'index' . EXT . ($isRest ? '/' : '?');
 
         $ca = trim($ca, '/');
-        $ca = $index.($isRest ? $ca : ($hideIndex ? '?' : '').'ca='.($ca == '' ? DYPHP_DEFAULT_CONTROLLER.'.'.DYPHP_DEFAULT_ACTION : str_replace('/', '.', $ca)));
+        $ca = $index . ($isRest ? $ca : ($hideIndex ? '?' : '') . 'ca=' . ($ca == '' ? DYPHP_DEFAULT_CONTROLLER . '.' . DYPHP_DEFAULT_ACTION : str_replace('/', '.', $ca)));
         $getParam = $isRest ? '/' : '&';
+
         if (is_array($param)) {
             foreach ($param as $key => $val) {
-                if (empty($key) || empty($val)) {
+                if (empty($key) || $val === '') {
                     continue;
                 }
+
                 if ($isRest && $forceGet) {
-                    $getParam .= $key.'='.$val.'&';
+                    $getParam .= $key . '=' . $val . '&';
                 } else {
-                    $getParam .= $isRest ? $key.'/'.$val.'/' : $key.'='.$val.'&';
+                    $getParam .= $isRest ? $key . '/' . $val . '/' : $key . '=' . $val . '&';
                 }
             }
         }
-        $getParam = $isRest && $forceGet ? '?'.trim(substr($getParam, 0, -1), '/') : substr($getParam, 0, -1);
+        
+        $getParam = $isRest && $forceGet ? '?' . trim(substr($getParam, 0, -1), '/') : substr($getParam, 0, -1);
 
-        $appHttpPath = DyPhpConfig::item('appHttpPath') != '' ? DyPhpConfig::item('appHttpPath').'/' : '';
-        return self::getServerName().'/'.$appHttpPath.$ca.$getParam;
+        $appHttpPath = DyPhpConfig::item('appHttpPath') != '' ? DyPhpConfig::item('appHttpPath') . '/' : '';
+        return self::getServerName() . '/' . $appHttpPath . $ca . $getParam;
     }
 
     /**
@@ -93,20 +97,20 @@ class DyRequest
         } else {
             $port = '';
             if (isset($_SERVER['SERVER_PORT'])) {
-                $port = ':'.$_SERVER['SERVER_PORT'];
+                $port = ':' . $_SERVER['SERVER_PORT'];
                 if ((':80' == $port && 'http://' == $protocol) || (':443' == $port && 'https://' == $protocol)) {
                     $port = '';
                 }
             }
 
             if (isset($_SERVER['SERVER_NAME'])) {
-                $host = $_SERVER['SERVER_NAME'].$port;
+                $host = $_SERVER['SERVER_NAME'] . $port;
             } elseif (isset($_SERVER['SERVER_ADDR'])) {
-                $host = $_SERVER['SERVER_ADDR'].$port;
+                $host = $_SERVER['SERVER_ADDR'] . $port;
             }
         }
 
-        return $protocol.$host;
+        return $protocol . $host;
     }
 
     /**
@@ -416,19 +420,19 @@ class DyRequest
                     'method' => 'POST',
                     'timeout' => $timeOut,
                     'user_agent' => $userAgent,
-                    'header' => 'Content-Type: application/x-www-form-urlencoded'."\r\n".
-                    'Content-Length: '.strlen($postString)."\r\n",
+                    'header' => 'Content-Type: application/x-www-form-urlencoded' . "\r\n" .
+                        'Content-Length: ' . strlen($postString) . "\r\n",
                     'content' => $postString,
                 ),
             );
             $contextID = stream_context_create($context);
-    
-            $postResult = file_get_contents($postUrl, false, $contextID);
+
+            $postResult = file_get_contents($url, false, $contextID);
             if ($postResult !== false) {
                 return $postResult;
             }
-    
-            $sock = fopen($postUrl, 'r', false, $contextID);
+
+            $sock = fopen($url, 'r', false, $contextID);
             $postResult = '';
             if ($sock) {
                 while (!feof($sock)) {
@@ -457,7 +461,7 @@ class DyRequest
         }
 
         $value = $methodArr[$paramKey];
-        if (get_magic_quotes_gpc()) {
+        if (function_exists("get_magic_quotes_gpc") && get_magic_quotes_gpc()) {
             $value = stripcslashes($value);
         }
 

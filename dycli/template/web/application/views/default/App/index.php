@@ -1,0 +1,3 @@
+
+
+<?php DyPhpBase::supportCheck(false); ?>

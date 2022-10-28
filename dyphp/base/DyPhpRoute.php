@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 路由类.
  *
@@ -15,9 +16,10 @@ class DyPhpRoute
 
     /**
      * web路由入口
+     * 
      * 优先处理urlManager配制
-     * $_GET保留key : ca(controller和acton格式 如user.profile或admin.user.profile),,page(用于分页widget)
-     * 支持get请求以ca=module.controller.action的方式访问.
+     * 
+     * $_GET保留key: ca(controller和acton格式 如user.profile或admin.user.profile), 此参数不可被占用
      **/
     public static function runWeb()
     {
@@ -28,28 +30,29 @@ class DyPhpRoute
             }
             $action = isset($matchArr['action']) ? $matchArr['action'] : '';
             self::runToController(array('c' => $matchArr['controller'], 'a' => $action));
-        } else {
-            if (!isset($_GET['ca'])) {
-                self::runToController();
-                return;
-            }
-
-            $ca = $_GET['ca'];
-            if (preg_match('|([.]){2,}|', $ca) || !preg_match('#^[a-zA-Z0-9.]{1,}[a-zA-Z0-9]{1,}$#', $ca)) {
-                DyPhpBase::throwException('ca format error');
-            }
-
-            $caArr = explode('.', $ca);
-            if (count($caArr) > 2) {
-                $action = end($caArr);
-                array_pop($caArr);
-                $controller = implode('_', $caArr);
-            } else {
-                $controller = isset($caArr[0]) ? $caArr[0] : DYPHP_DEFAULT_CONTROLLER;
-                $action = isset($caArr[1]) ? $caArr[1] : '';
-            }
-            self::runToController(array('c' => $controller, 'a' => $action));
+            return true;
         }
+
+        if (!isset($_GET['ca'])) {
+            self::runToController();
+            return true;
+        }
+
+        $ca = $_GET['ca'];
+        if (preg_match('|([.]){2,}|', $ca) || !preg_match('#^[a-zA-Z0-9.]{1,}[a-zA-Z0-9]{1,}$#', $ca)) {
+            DyPhpBase::throwException('ca format error');
+        }
+
+        $caArr = explode('.', $ca);
+        if (count($caArr) > 2) {
+            $action = end($caArr);
+            array_pop($caArr);
+            $controller = implode('_', $caArr);
+        } else {
+            $controller = isset($caArr[0]) ? $caArr[0] : DYPHP_DEFAULT_CONTROLLER;
+            $action = isset($caArr[1]) ? $caArr[1] : '';
+        }
+        self::runToController(array('c' => $controller, 'a' => $action));
     }
 
     /**
@@ -62,7 +65,7 @@ class DyPhpRoute
         array_shift($_SERVER['argv']);
         if (empty($_SERVER['argv'])) {
             $message = "Welcome to use \n";
-            $message .= 'DyFramework Console The default execution : '.ucfirst(DYPHP_DEFAULT_CONTROLLER).'Controller->action'.ucfirst(DYPHP_DEFAULT_ACTION)."\n";
+            $message .= 'DyFramework Console The default execution : ' . ucfirst(DYPHP_DEFAULT_CONTROLLER) . 'Controller->action' . ucfirst(DYPHP_DEFAULT_ACTION) . "\n";
             $message .= "Invocation Method : [controller] [<action>] [<param1> <param2> ...<paramN>] \n";
             echo $message;
         }
@@ -143,7 +146,7 @@ class DyPhpRoute
                         $_GET[$val] = isset($controllerArgsArr[($key + 1)]) ? $controllerArgsArr[($key + 1)] : '';
                     }
                 }
-                $controller = $controllerArgsArr[0].'/'.$controllerArgsArr[1];
+                $controller = $controllerArgsArr[0] . '/' . $controllerArgsArr[1];
                 $action = $controllerArgsArr[2];
             }
         }
@@ -153,14 +156,15 @@ class DyPhpRoute
     /**
      * URL重写处理
      *
-     * eg
+     * @example 
      * 'urlManager'=>array(
-     *   'urlStyle'=>array('hideIndex'=>'yes','restCa'=>'yes',),
+     *   //'hideIndex'=>'yes'为不需要显示调用index.php; 'restCa'=>'yes'为参数使用restfull风格;
+     *   'urlStyle'=>array('hideIndex'=>'yes','restCa'=>'yes'),
      *
-     *   //固定controller 固定action
-     *   '/error'=>array("controller"=>"home","action"=>"error",),
+     *   //重定向到固定controller,固定action
+     *   '/error'=>array("controller"=>"home","action"=>"error"),
      *
-     *   //固定controller 动态action
+     *   //重定向到固定controller,动态action
      *   '/admin/global/:action'=>array(
      *       "controller"=>"admin_base", //支持指定到module下的controller,使用下"_"或"/"指明
      *       "param"=>array(
@@ -168,7 +172,7 @@ class DyPhpRoute
      *       ),
      *   ),
      *
-     *   //动态controller 动态action
+     *   //重定向到动态controller,动态action
      *   '/user/:controller/:action'=>array(
      *       "param"=>array(
      *           ":controller"=>"[a-zA-Z0-9]{1,20}",
@@ -176,7 +180,7 @@ class DyPhpRoute
      *       ),
      *   ),
      *
-     *   //解析特定url参数
+     *   //解析特定url参数,并重定向到固定controller,固定action
      *   '/ping/aaa/:user/ccc/ddd/:id'=>array(
      *       "controller"=>"test",
      *       "action"=>"index",
@@ -186,7 +190,7 @@ class DyPhpRoute
      *       ),
      *   ),
      *
-     *   //为module下controller指定默认的action
+     *   //为指定module下的指定controller设置默认的action
      *   '/blog/:controller'=>array(
      *       "pathController"=>true, //此参数设置为true,否则不生效
      *       "action"=>"index",
@@ -210,7 +214,7 @@ class DyPhpRoute
         $cropPathUrl = self::urlCrop();
         //完全匹处理配
         if ($cropPathUrl) {
-            $pathUrlArr = array($cropPathUrl, '/'.$cropPathUrl, '/'.$cropPathUrl.'/');
+            $pathUrlArr = array($cropPathUrl, '/' . $cropPathUrl, '/' . $cropPathUrl . '/');
             foreach ($pathUrlArr as $key => $val) {
                 if (isset($urlManager[$val])) {
                     return $urlManager[$val];
@@ -225,7 +229,7 @@ class DyPhpRoute
                 continue; //未设置param项 不做正则处理
             }
             $pmatch = str_replace('/', '\/', strtr(trim($urlKey, '/'), $urlVal['param']));
-            if (preg_match('#^'.$pmatch.'$#i', $cropPathUrl)) {
+            if (preg_match('#^' . $pmatch . '$#i', $cropPathUrl)) {
                 //pathController为true并设置controller需正则匹配 controller匹配值及其之前的所有项都将做为controller
                 $isPathCtr = isset($urlVal['pathController']) && $urlVal['pathController'] == true ? true : false;
                 $urlKeyArr = explode('/', trim($urlKey, '/'));
@@ -234,7 +238,7 @@ class DyPhpRoute
                     if ($pkey !== false && isset($uriStrArr[$pkey])) {
                         //controller,action需正则匹配 会对配制的controller,action重写或设置
                         if ($key == ':controller') {
-                            $urlVal['controller'] = $isPathCtr ? implode('_', array_slice($uriStrArr, 0, $pkey)).'_'.$uriStrArr[$pkey] : $uriStrArr[$pkey];
+                            $urlVal['controller'] = $isPathCtr ? implode('_', array_slice($uriStrArr, 0, $pkey)) . '_' . $uriStrArr[$pkey] : $uriStrArr[$pkey];
                         } elseif ($key == ':action') {
                             $urlVal['action'] = $uriStrArr[$pkey];
                         } else {
@@ -261,9 +265,9 @@ class DyPhpRoute
         $pathStr = '';
         $parse = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         if ($parse !== false && $parse !== null) {
-            $pathStr = trim(str_replace(array(DyPhpConfig::item('appHttpPath'),'index'.EXT,'//'), '', $parse), '/');
+            $pathStr = trim(str_replace(array(DyPhpConfig::item('appHttpPath'), 'index' . EXT, '//'), '', $parse), '/');
         } else {
-            $requestUriStr = str_replace('index'.EXT, '', trim($_SERVER['REQUEST_URI'], '/'));
+            $requestUriStr = str_replace('index' . EXT, '', trim($_SERVER['REQUEST_URI'], '/'));
             $search = array(DyPhpConfig::item('appHttpPath'));
             isset($_SERVER['QUERY_STRING']) ? array_push($search, $_SERVER['QUERY_STRING']) : '';
             $uriPath = str_replace($search, '', $requestUriStr);
@@ -274,6 +278,6 @@ class DyPhpRoute
         //$_GET['ext_name'] = $ext;
         self::$regularGetParams['ext_name'] = $ext;
 
-        return $ext ? substr($pathStr, 0, -(strlen($ext)+1)) : $pathStr;
+        return $ext ? substr($pathStr, 0, - (strlen($ext) + 1)) : $pathStr;
     }
 }

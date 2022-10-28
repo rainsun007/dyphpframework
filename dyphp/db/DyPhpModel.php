@@ -102,6 +102,8 @@ class DyPhpModel
      *                  array('12345','rain sun 2'),
      *                  array('1234','rain sun 1'),
      *              )
+     * 
+     * @return int
      **/
     public function insertBatch($column, $values)
     {

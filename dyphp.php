@@ -21,7 +21,7 @@ defined('EXT') or define('EXT', '.php');
  * 主版本号(较大的变动).子版本号(功能变化或特性增减).构建版本号(Bug修复或优化)-版本阶段(base、alpha、beta、RC、release)
  * 上一级版本号变动时下级版本号归零
  **/
-define('DYPHP_VERSION', '2.11.0-release');
+define('DYPHP_VERSION', '2.12.0-release');
 
 /**
  * 框架入口
@@ -66,6 +66,7 @@ class DyPhpBase
 
     /**
      * 运行console app入口
+     * 
      * @param array app配制
      * @param boolean 是否开启debug
      **/
@@ -82,6 +83,7 @@ class DyPhpBase
 
     /**
      * 公共app运行入口
+     * 
      * @param array app配制
      * @param boolean 是否开启debug
      * @param string  app类型
@@ -114,13 +116,14 @@ class DyPhpBase
     }
 
     /**
-     * 使用自定义错误处理句柄 显示信息
+     * 调用自定义信息提示句柄
+     * 
      * @param array  按提示需要随意传值
      **/
     public static function showMsg($params = array())
     {
         $params = is_array($params) ? $params : (array)$params;
-        Dy::app()->setPreInsAttr($params);
+        self::app()->setPreInsAttr($params);
 
         $msgHandler = explode('/', trim(DyPhpConfig::item('messageHandler'), '/'));
         DyPhpController::run($msgHandler[0], $msgHandler[1], $params);
@@ -145,13 +148,13 @@ class DyPhpBase
                 require $alias['file'];
             }
             class_alias($alias['name'], $className, false);
-        } elseif (($pos = strrpos($className, '\\')) !== false) {
-            //支持namespace自动加载, 允许自定义根目录
-            //规则：命名空间名及文件名，必须与路径及类名相同
-            //如不符合规则需要单独实现自己的autoload,并调用autoloadRegister，注册到框架
-            $classFile = DyPhpConfig::item('namespaceRoot').DIRECTORY_SEPARATOR.str_replace('\\', '/', $className).EXT;
-            if (file_exists($classFile)) {
-                require $classFile;
+        } elseif (($lastNsPos = strrpos($className, '\\')) !== false) {
+            //namespace自动加载, 允许自定义根目录(在配制文件中设置namespaceRoot，默认在DyPhpConfig::item('appPath'))
+            //规则：命名空间名及文件名，必须与路径及类名相同，否则无法加载，抛出“类不存在”异常
+            //注意：如不符合规则，则需要实现自己的autoload,并调用autoloadRegister注册到框架,常见于集成第三方组件
+            $classPathFile = DyPhpConfig::item('namespaceRoot').DIRECTORY_SEPARATOR.str_replace('\\',DIRECTORY_SEPARATOR, $className).EXT;
+            if (file_exists($classPathFile)) {
+                require $classPathFile;
             }
         } else {
             //在项目包含目录中遍历查找文件
@@ -169,26 +172,21 @@ class DyPhpBase
         }
     }
 
-
     /**
      * 注册自动加载
+     * 主要用于引入需要自实现自动加载的第三方组件
+     * 
      * @param  mixed  $autoload 自动加载函数
-     * @param  bool   $prepend  如果是 true，spl_autoload_register() 会添加函数到队列之首，而不是队列尾部。5.3后支持
-     * @param  bool   $replace  是否替换框架的自动加载方法, 替换后要实现框架相关的自动加载逻辑，不建议替换
+     * @param  bool   $prepend  如果是 true，spl_autoload_register() 会添加函数到队列之首，而不是队列尾部。php5.3后支持
      **/
-    public static function autoloadRegister($callback, $prepend = false, $replace = false)
+    public static function autoloadRegister($callback, $prepend = true)
     {
-        if ($replace) {
-            spl_autoload_unregister(array('DyPhpBase', 'autoload'));
-            spl_autoload_register($callback);
-        } else {
-            spl_autoload_register($callback, true, $prepend);
-        }
+        spl_autoload_register($callback, true, $prepend);
     }
-
 
     /**
      * 运行时间
+     * 
      * @return float   seconds
      **/
     public static function execTime()
@@ -205,6 +203,7 @@ class DyPhpBase
 
     /**
      * 全局实例器
+     * 
      * @return object DyPhpApp实例
      **/
     public static function app()
@@ -219,6 +218,7 @@ class DyPhpBase
 
     /**
      * 获取Powered by
+     * 
      * @param bool false时将返回不带连接的powered by
      * @return string
      **/
@@ -243,10 +243,11 @@ class DyPhpBase
 
     /**
      * 异常抛出
+     * 
      * @param string  自定义出错信息
-     * @param string  系统异常，自定义异常自信等
+     * @param string  系统异常，自定义异常信息
      * @param string  异常类型
-     * @param bool    是否退出程序
+     * @param object  前一个异常，现行版本只有数据库操作抛出异常，给应用一次catch的机会，方便进行业务处理
      **/
     public static function throwException($errorMessage, $prefix = '', $code = 0, $previous = null)
     {
@@ -256,20 +257,23 @@ class DyPhpBase
                 $prefix = iconv("gbk", "UTF-8", $prefix);
             }
         }
+
         $message = DyPhpMessage::getLanguagePackage(DyPhpConfig::item('language'));
         $excMessage = isset($message[$errorMessage]) ? $message[$errorMessage] : $errorMessage;
+        
         if ($previous) {
-            //现行版本只对数据库异常给应用一次可catch的机会
             throw new Exception($prefix.' '.$excMessage, (int)$code, $previous);
         } else {
             $dyExce = new DyPhpException($prefix.' '.$excMessage, $code, $previous);
-            $dyExce->appTrace();
+            $dyExce->appErrorHandler();
         }
+
         exit;
     }
 
     /**
-     * @brief    加载框架类
+     * 加载框架类
+     * 
      * @return array
      **/
     private static function loadCoreClass()
@@ -323,7 +327,8 @@ class DyPhpBase
     }
 
     /**
-     * @brief   框架支持检查
+     * 框架支持检查
+     * 
      * @param bool 是否执行exit(),默认执行
      * @return  null
      **/
@@ -371,7 +376,7 @@ class DyPhpBase
 /**
  * app模式
  * 
- * @example  Dy::app()->attribute , Dy::app()->method(params)
+ * @example  DyPhpBase::app()->attribute , DyPhpBase::app()->method(params)
  **/
 final class DyPhpApp
 {
@@ -409,7 +414,8 @@ final class DyPhpApp
     }
 
     /**
-     * @brief    实例注册
+     * 实例注册
+     * 
      * @param    $name   注册名
      * @param    $value  注册实例
      * @return   null
@@ -426,7 +432,8 @@ final class DyPhpApp
     }
 
     /**
-     * @brief    实例单例处理
+     * 实例单例处理
+     * 
      * @param     注册名
      * @return   object
      **/
@@ -454,10 +461,11 @@ final class DyPhpApp
 
     /**
      * 加载vendors
+     * 
      * @param string  vendors 相对路径及文件名(无后缀，注意有些vendor加载时引入的是autoload文件),不支持"xx.yy.zz"格式(组件文件名中可能有".")
      * @param bool    true为加载框架已集成的vendor,false为加载app中引入的的vendor
      * 
-     * @example Dy::app()->vendors('PHPMailer/PHPMailerAutoload', true);
+     * @example DyPhpBase::app()->vendors('PHPMailer/PHPMailerAutoload', true);
      */
     public function vendors($filePathName, $isSys = false)
     {
@@ -479,6 +487,7 @@ final class DyPhpApp
     
     /**
      * 引入包含文件
+     * 
      * @param string $path 要引入文件的路径(与配制文件中的import设置相同格式)
      * 
      * @example Dy::app()->import('app.utils.functions');
@@ -489,8 +498,11 @@ final class DyPhpApp
     }
 
     /**
-     * 系统跳转前将来源(前一次运行module,controller,action)，写入到跳转参数中
+     * 对调用方参数追加preInstance
+     * 用于DyPhpException重定向到errorHandler之前追加调用堆栈上一级来源
      *
+     * @param array $paramArr
+     * 
      * @return bool
      */
     public function setPreInsAttr(&$paramArr)

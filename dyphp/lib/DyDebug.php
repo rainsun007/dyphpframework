@@ -284,9 +284,9 @@ class DyDebug
      *
      * @param array explain返回的数组类型数据
      **/
-    private static function mysqlExplain($explain = '')
+    private static function mysqlExplain($explain)
     {
-        if (empty($explain)) {
+        if (empty($explain) || !is_array($explain)) {
             return '';
         }
 

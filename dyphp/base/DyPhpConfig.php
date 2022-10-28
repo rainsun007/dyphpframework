@@ -86,7 +86,7 @@ class DyPhpConfig
         }
 
         //运行环境dev(开发)、test(测试)、pre(预发布)、pro(发布)，用于加载不同环境的constants文件;为secretKey加环境后缀（当前版本只有这两个用途）
-        if (array_key_exists('env', $config) && !in_array($config['env'], array('dev','test','pre','pro'))) {
+        if (!array_key_exists('env', $config) || !in_array($config['env'], array('dev','test','pre','pro'))) {
             DyPhpBase::throwException('run environment defined invalid');
         }
 
@@ -434,7 +434,7 @@ class DyPhpConfig
 
     /**
      * 获取自定义包含路径，autoload将调用该方法，路径在import中设置
-     * @return   string
+     * @return   array
      **/
     public static function getIncludePath()
     {

@@ -56,7 +56,7 @@ class DyPhpWaf
                 $this->logs('hit:['.$key.'] '.$str);
 
                 $exceptionMessage = array('dyExcType' => 'Aborted', 'errType' => 'ERROR', 'msg' => 'Suspend the access');
-                Dy::app()->setPreInsAttr($exceptionMessage);
+                DyPhpBase::app()->setPreInsAttr($exceptionMessage);
 
                 $errorHandlerArr = explode('/', trim(DyPhpConfig::item('errorHandler'), '/'));
                 DyPhpController::run($errorHandlerArr[0], $errorHandlerArr[1], $exceptionMessage);

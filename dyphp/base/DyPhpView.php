@@ -233,7 +233,10 @@ class DyPhpView
  
         $contentObStart = ob_start();
         include $this->viewFile;
+
+        //$content变量用于实现在layout中输出view内容
         $content = ob_get_contents();
+
         if ($contentObStart) {
             ob_end_clean();
         }

@@ -66,16 +66,16 @@ class DyPhpController
 
     /**
      * 运行controller入口
-     * 支持直接调用本方法 但不建议直接使用如有转发需求可使用forward方法.
+     * 支持直接调用本方法 但不建议直接使用如有重定向需求可使用forward方法.
      *
-     * @param string controller  以module_controller或module/controller的格式调用
-     * @param string action
+     * @param string controller类名,支持module_controller或module/controller的格式调用
+     * @param string action的方法名
      * @param array  当前运行controller中可公用的参数（异常信息，提示信息等）
      **/
-    final public static function run($controllerPname, $action = '', $params = array())
+    final public static function run($controllerPathName, $action = '', $params = array())
     {
         //controller分析及实例化
-        $controllerRun = self::parseController($controllerPname);
+        $controllerRun = self::parseController($controllerPathName);
 
         //时间属性只为开发使用方便
         $controllerRun->time = time();
@@ -107,25 +107,25 @@ class DyPhpController
     /**
      * 请求转发 可以理解为run方法的别名 区别在于必须继承了DyPhpController才可使用.
      *
-     * @param string controller 以module_controller或module/controller的格式调用
-     * @param string action
+     * @param string controller类名,支持module_controller或module/controller的格式调用
+     * @param string action的方法名
      * @param array  当前运行controller中可公用的参数
      **/
-    final protected function forward($controllerPname = '', $action = '', $params = array())
+    final protected function forward($controllerPathName = '', $action = '', $params = array())
     {
-        if (empty($controllerPname)) {
+        if (empty($controllerPathName)) {
             DyPhpBase::throwException('controller does not exist');
         }
         if (empty($action)) {
             DyPhpBase::throwException('action does not exist');
         }
-        self::run($controllerPname, $action, $params);
+        self::run($controllerPathName, $action, $params);
     }
 
     /**
      * 解析action
      *
-     * @param   string $controllerRun controller实例
+     * @param   object $controllerRun controller实例
      * @param   string $action
      *
      * @return  string
@@ -167,17 +167,17 @@ class DyPhpController
     /**
      * 解析controller
      *
-     * @param   string $controllerPname
+     * @param   string $controllerPathName
      *
-     * @return  string
+     * @return  object
      **/
-    private static function parseController($controllerPname)
+    private static function parseController($controllerPathName)
     {
         //controller 解析
-        $controllerPname = trim(str_replace('_', '/', $controllerPname), '/');
-        $pos = strrpos($controllerPname, '/');
-        $controllerName = $pos === false ? ucfirst($controllerPname) : ucfirst(substr($controllerPname, $pos + 1));
-        $controllerPath = $pos === false ? '' : substr($controllerPname, 0, $pos + 1);
+        $controllerPathName = trim(str_replace('_', '/', $controllerPathName), '/');
+        $pos = strrpos($controllerPathName, '/');
+        $controllerName = $pos === false ? ucfirst($controllerPathName) : ucfirst(substr($controllerPathName, $pos + 1));
+        $controllerPath = $pos === false ? '' : substr($controllerPathName, 0, $pos + 1);
         $controller = $controllerName.'Controller';
         $controllerFile = DyPhpConfig::item('appPath').DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controllerPath.$controller.EXT;
         if (!file_exists($controllerFile)) {
@@ -193,7 +193,7 @@ class DyPhpController
 
         //设置全局公共属性
         $controllerRun->cid = lcfirst($controllerName);
-        $controllerRun->pcid = lcfirst($controllerPname);
+        $controllerRun->pcid = lcfirst($controllerPathName);
         $controllerRun->module = rtrim(lcfirst($controllerPath), '/');
         DyPhpBase::app()->cid = $controllerRun->cid;
         DyPhpBase::app()->pcid = $controllerRun->pcid;

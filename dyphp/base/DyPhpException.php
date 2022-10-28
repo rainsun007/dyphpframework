@@ -1,6 +1,6 @@
 <?php
 /**
- * 异常类.
+ * 异常统一拦截处理.
  *
  * @author 大宇 Email:dyphp.com@gmail.com
  *
@@ -8,9 +8,9 @@
  *
  * @copyright Copyright dyphp.com
  **/
-class DyException extends DyPhpException
-{
-}
+
+//设置别名
+class_alias('DyPhpException', 'DyException', false);
 
 class DyPhpException extends Exception
 {
@@ -36,10 +36,10 @@ class DyPhpException extends Exception
     /**
      * dyphp提示信息.
      **/
-    public function appTrace()
+    public function appErrorHandler()
     {
         self::$eReport = E_USER_ERROR;
-        self::centralizeHandler('DyException', $this->message, $this->getTraceAsString());
+        self::centralizeHandler('AppError', $this->message, $this->getTraceAsString());
     }
 
     /**
@@ -57,7 +57,7 @@ class DyPhpException extends Exception
     }
 
     /**
-     * 错误处理器.
+     * 异常处理器.
      *
      * @param   该参数是一个抛出的异常对象
      **/
@@ -80,13 +80,14 @@ class DyPhpException extends Exception
 
     /**
      * 设置是否把异常向外层抛出
-     * 此方法可在运行中动态开启和关闭，若开启在处理逻辑结束后关闭
-     *
-     * @param  bool 设置为true框架将会把异常向外层抛出,应用中可自行catch,如未处理异常最终还会被框架接管
+     * 此方法可在运行中动态开启和关闭，若开启在处理逻辑结束后注意关闭
+     * 应用中可自行catch, 如未处理异常最终还会被框架接管
+     * 
+     * @param  bool 设置为true框架将会把异常向外层抛出
      **/
     public static function setAppCatch($isCatch = false)
     {
-        self::$appCatch = $isCatch;
+        self::$appCatch = is_bool($isCatch) ? $isCatch : false;
     }
 
     /**
@@ -116,7 +117,7 @@ class DyPhpException extends Exception
             throw new Exception($message, 0, self::$dyPrevious);
         }
 
-        //进入此逻辑如设置满足error_reporting(0) && DyPhpBase::$debug == false时，页面空白（不会调用errorHandler）
+        //进入此逻辑如设置满足error_reporting(0) && DyPhpBase::$debug == false，页面空白（不会调用errorHandler）
         if (!(error_reporting() & self::$eReport) && DyPhpBase::$debug == false) {
             return;
         }
@@ -137,7 +138,7 @@ class DyPhpException extends Exception
             self::$errorHandlerInvoked = true;
 
             $exceptionMessage = array('dyExcType' => $title, 'errType' => $errType, 'msg' => $message);
-            Dy::app()->setPreInsAttr($exceptionMessage);
+            DyPhpBase::app()->setPreInsAttr($exceptionMessage);
 
             $errorHandlerArr = explode('/', trim(DyPhpConfig::item('errorHandler'), '/'));
             DyPhpController::run($errorHandlerArr[0], $errorHandlerArr[1], $exceptionMessage);

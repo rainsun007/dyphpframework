@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 字符串加密，解密工具类
  * @author 大宇 Email:dyphp.com@gmail.com
@@ -12,38 +13,42 @@ class DyString
      * @param string 要加密的字符串
      * @param string 加密密钥
      * @param int    加密过期时间,单位：秒， 0为不过期 -1为加密作废
+     * 
+     * @return string
      **/
-    public static function encodeStr($string, $key='', $expiry=0)
+    public static function encodeStr($string, $key = '', $expiry = 0)
     {
-        if (empty($string) || $expiry<-1) {
+        if (empty($string) || $expiry < -1) {
             return '';
         }
 
         $key = !empty($key) ? $key : DyPhpConfig::item('secretKey');
         if (extension_loaded('openssl')) {
             $expiry = $expiry > 0 ? time() + $expiry : $expiry;
-            $string = openssl_encrypt($expiry.'|'.$string.'_dysc_'.mt_rand(0, 999), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
+            $string = openssl_encrypt($expiry . '|' . $string . '_dysc_' . mt_rand(0, 999), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
             $string = base64_encode($string);
         } else {
             $string = self::authCode('ENCODE', $string, $key, $expiry);
         }
 
-        return  str_replace(array('+','/'), array('*','_'), $string);
+        return  str_replace(array('+', '/'), array('*', '_'), $string);
     }
 
     /**
      * 解密字符串
      * @param string 要解密的字符串
      * @param string 解密密钥
+     * 
+     * @return string
      **/
-    public static function decodeStr($string, $key='')
+    public static function decodeStr($string, $key = '')
     {
         if (empty($string)) {
             return '';
         }
 
         $key = !empty($key) ? $key : DyPhpConfig::item('secretKey');
-        $string = str_replace(array('*','_'), array('+','/'), $string);
+        $string = str_replace(array('*', '_'), array('+', '/'), $string);
 
         if (extension_loaded('openssl')) {
             $decryptStr = openssl_decrypt(base64_decode($string), "AES-256-CBC", substr(md5($key), 0, 20), 0, substr(md5($key), 8, -8));
@@ -56,6 +61,8 @@ class DyString
     /**
      * 判断字符串是否为utf8
      * @param string 需要验证的字符串
+     * 
+     * @return bool
      **/
     public static function isUtf8($word)
     {
@@ -63,7 +70,7 @@ class DyString
             return mb_detect_encoding($word, 'UTF-8, ISO-8859-1, GBK') == 'UTF-8' ? true : false;
         }
 
-        if (preg_match("/^([".chr(228)."-".chr(233)."]{1}[".chr(128)."-".chr(191)."]{1}[".chr(128)."-".chr(191)."]{1}){1}/", $word) == true || preg_match("/([".chr(228)."-".chr(233)."]{1}[".chr(128)."-".chr(191)."]{1}[".chr(128)."-".chr(191)."]{1}){1}$/", $word) == true || preg_match("/([".chr(228)."-".chr(233)."]{1}[".chr(128)."-".chr(191)."]{1}[".chr(128)."-".chr(191)."]{1}){2,}/", $word) == true) {
+        if (preg_match("/^([" . chr(228) . "-" . chr(233) . "]{1}[" . chr(128) . "-" . chr(191) . "]{1}[" . chr(128) . "-" . chr(191) . "]{1}){1}/", $word) == true || preg_match("/([" . chr(228) . "-" . chr(233) . "]{1}[" . chr(128) . "-" . chr(191) . "]{1}[" . chr(128) . "-" . chr(191) . "]{1}){1}$/", $word) == true || preg_match("/([" . chr(228) . "-" . chr(233) . "]{1}[" . chr(128) . "-" . chr(191) . "]{1}[" . chr(128) . "-" . chr(191) . "]{1}){2,}/", $word) == true) {
             return true;
         } else {
             return false;
@@ -74,9 +81,10 @@ class DyString
      * 中文编码转为utf8
      * @param  string|array   $str 需要转码的字符串
      * @param  string         $inCharset 输入的字符集
+     * 
      * @return string
      **/
-    public static function zhcnToUtf8($str='', $inCharset='gb2312')
+    public static function zhcnToUtf8($str = '', $inCharset = 'gb2312')
     {
         if (is_array($str)) {
             foreach ($str as $key => $value) {
@@ -97,11 +105,11 @@ class DyString
      * @param    int     $start     切割的起始位置
      * @param    int     $length    切割长度
      * @param    string  $charset   字附编码
-     * @param    bool    $suffix    长度超出部分时后缀
+     * @param    bool    $suffix    长度超出部分时是否使用后缀"…"
      * 
      * @return   mixed
      **/
-    public static function cutStr($str, $start=0, $length, $charset="utf-8", $suffix=false)
+    public static function cutStr($str, $start = 0, $length = 0, $charset = "utf-8", $suffix = false)
     {
         if ($start == 0 && self::length($str) <= $length) {
             return $str;
@@ -109,10 +117,10 @@ class DyString
 
         if (function_exists("mb_substr")) {
             $slice = mb_substr($str, $start, $length, $charset);
-            return $suffix ? $slice."…" : $slice;
+            return $suffix ? $slice . "…" : $slice;
         } elseif (function_exists('iconv_substr')) {
             $slice = iconv_substr($str, $start, $length, $charset);
-            return $suffix ? $slice."…" : $slice;
+            return $suffix ? $slice . "…" : $slice;
         }
 
         $re = array();
@@ -123,21 +131,23 @@ class DyString
         preg_match_all($re[$charset], $str, $match);
         if ($match) {
             $slice = join("", array_slice($match[0], $start, $length));
-            return $suffix ? $slice."…" : $slice;
+            return $suffix ? $slice . "…" : $slice;
         }
         return false;
     }
 
     /**
      * 字符串转义
+     * 
      * @param string  需要转义的字符串
      * @param bool    是否做强行转义
      * @param bool    是否使用stripcslashes反转义
+     * 
      * @return string 转义后的字符串
      **/
     public static function slashes($string, $force = false, $strip = false)
     {
-        if (!get_magic_quotes_gpc() || $force) {
+        if ((function_exists("get_magic_quotes_gpc") && !get_magic_quotes_gpc()) || $force) {
             if (is_array($string)) {
                 foreach ($string as $key => $val) {
                     $string[$key] = self::slashes($val, $force);
@@ -147,6 +157,7 @@ class DyString
                 $string = $strip ? stripcslashes($string) : addslashes($string);
             }
         }
+
         return $string;
     }
 
@@ -159,25 +170,32 @@ class DyString
      * 
      * @return int
      */
-    public static function length($str, $en2=true, $charset='utf-8')
+    public static function length($str, $en2 = true, $charset = 'utf-8')
     {
+        if (trim($str) === '') {
+            return 0;
+        }
+
         if (function_exists("mb_strlen")) {
             return mb_strlen($str, $charset);
         }
 
-        if ($charset=='utf-8') {
+        if ($charset == 'utf-8') {
             $str = iconv('utf-8', 'gbk//ignore', $str);
         }
+
         $num = strlen($str);
         $cnNum = 0;
-        for ($i=0;$i<$num;$i++) {
-            if (ord(substr($str, $i+1, 1))>127) {
+        for ($i = 0; $i < $num; $i++) {
+            if (ord(substr($str, $i + 1, 1)) > 127) {
                 $cnNum++;
                 $i++;
             }
         }
-        $enNum = $num-($cnNum*2);
-        $number = $en2 ? ($enNum/2)+$cnNum : $enNum+$cnNum;
+
+        $enNum = $num - ($cnNum * 2);
+        $number = $en2 ? ($enNum / 2) + $cnNum : $enNum + $cnNum;
+
         return ceil($number);
     }
 
@@ -190,15 +208,15 @@ class DyString
      * 
      * @return string
      **/
-    public static function randomStr($wordNum = 10,$type = 'mix',$special = false)
+    public static function randomStr($wordNum = 10, $type = 'mix', $special = false)
     {
-        $words = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','~','!','@','#','$','%','^','&','*','(',')','_','-','+','=');
-        
+        $words = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '-', '+', '=');
+
         $randStr = '';
         switch ($type) {
             case 'str':
                 $vocal = rand(0, 1);
-                for ($i=0; $i<$wordNum; $i++) {
+                for ($i = 0; $i < $wordNum; $i++) {
                     if ($vocal || !$special) {
                         $randStr .= $words[mt_rand(0, 25)];
                     } else {
@@ -224,7 +242,7 @@ class DyString
             default:
                 break;
         }
-      
+
         return $randStr;
     }
 
@@ -236,11 +254,12 @@ class DyString
      * 
      * @return   string
      **/
-    public static function transfer($str, $flip=false)
+    public static function transfer($str, $flip = false)
     {
         if (empty($str) || !is_string($str)) {
             return '';
         }
+
         $arr = array(
             '０' => '0', '１' => '1', '２' => '2', '３' => '3', '４' => '4',
             '５' => '5', '６' => '6', '７' => '7', '８' => '8', '９' => '9',
@@ -261,10 +280,11 @@ class DyString
             '》' => '>',
             '％' => '%', '＋' => '+', '—' => '-', '－' => '-', '～' => '-',
             '：' => ':', '。' => '.', '、' => ',', '，' => ',',
-            '；' => ';', '？' => '?', '！' => '!',  '“' => '"','”' => '"',
+            '；' => ';', '？' => '?', '！' => '!',  '“' => '"', '”' => '"',
             '＂' => '"', '＇' => '`', '｀' => '`', '｜' => '|', '〃' => '"',
             '　' => ' '
         );
+
         if ($flip) {
             $arr = array_flip($arr);
         }
@@ -283,18 +303,18 @@ class DyString
      * 
      * @return string
      * */
-    private static function authCode($operation = 'DECODE', $string, $key = '', $expiry = 0)
+    private static function authCode($operation = 'DECODE', $string = '', $key = '', $expiry = 0)
     {
         $ckey_length = 4;
         $key = md5(!empty($key) ? $key : DyPhpConfig::item('secretKey'));
         $keya = md5(substr($key, 0, 16));
         $keyb = md5(substr($key, 16, 16));
-        $keyc = $ckey_length ? ($operation == 'DECODE' ? substr($string, 0, $ckey_length): substr(md5(microtime()), -$ckey_length)) : '';
+        $keyc = $ckey_length ? ($operation == 'DECODE' ? substr($string, 0, $ckey_length) : substr(md5(microtime()), -$ckey_length)) : '';
 
-        $cryptkey = $keya.md5($keya.$keyc);
+        $cryptkey = $keya . md5($keya . $keyc);
         $key_length = strlen($cryptkey);
 
-        $string = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0).substr(md5($string.$keyb), 0, 16).$string;
+        $string = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0) . substr(md5($string . $keyb), 0, 16) . $string;
         $string_length = strlen($string);
 
         $result = '';
@@ -322,13 +342,13 @@ class DyString
         }
 
         if ($operation == 'DECODE') {
-            if ((substr($result, 0, 10) == 0 || substr($result, 0, 10) - time() > 0) && substr($result, 10, 16) == substr(md5(substr($result, 26).$keyb), 0, 16)) {
+            if ((substr($result, 0, 10) == 0 || substr($result, 0, 10) - time() > 0) && substr($result, 10, 16) == substr(md5(substr($result, 26) . $keyb), 0, 16)) {
                 return substr($result, 26);
             } else {
                 return '';
             }
         } else {
-            return $keyc.str_replace('=', '', base64_encode($result));
+            return $keyc . str_replace('=', '', base64_encode($result));
         }
     }
 

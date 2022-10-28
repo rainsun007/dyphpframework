@@ -40,7 +40,7 @@ final class DyPhpPdoMysql extends PDO
         $this->dbName = $dbConfigArr['dbName'];
 
         //连接模式
-        $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName}";
+        $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName};charset={$this->charset}";
         $arrOptions = array(PDO::ATTR_PERSISTENT=>$this->pconn,PDO::MYSQL_ATTR_USE_BUFFERED_QUERY=>true);
 
         try {

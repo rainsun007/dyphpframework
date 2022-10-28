@@ -1,0 +1,13 @@
+<IfModule rewrite_module>
+	Options +FollowSymLinks
+	IndexIgnore */*
+	RewriteEngine on
+
+	# if a directory or a file exists, use it directly
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+
+	# otherwise forward it to index.php
+	#RewriteRule . index.php
+	RewriteRule !\.(js|css|ico|gif|jpg|jpeg|png|bmp)$ index.php
+</IfModule>
