@@ -24,9 +24,6 @@ class DyPhpRoute
     public static function runWeb()
     {
         $matchArr = self::urlManager();
-        var_dump($matchArr);
-        var_dump(self::$regularGetParams);
-        exit;
 
         //路由规则命中判断
         if ($matchArr) {
