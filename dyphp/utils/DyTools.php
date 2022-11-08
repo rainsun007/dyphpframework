@@ -181,15 +181,15 @@ class DyTools
     /**
      * 简单json返回值格式化
      *
-     * @param   int     $status       状态
-     * @param   int     $code         代码
-     * @param   string  $message      信息
-     * @param   mixed   $data         数据
-     * @param   bool    $printAndExit 是否直接输出并执行exit()
+     * @param   int     $status         状态, 服务状态
+     * @param   int     $code           服务代码, 同时为http状态码,$printAndExit为true时生效
+     * @param   string  $message        服务说明信息
+     * @param   mixed   $data           主体数据, 默认为空数组
+     * @param   bool    $printAndExit   是否直接输出并执行exit(), 默认为不执行
      *
      * @return  string
      **/
-    public static function apiJson($status = 1, $code = 200, $message = '', $data = '', $printAndExit = false)
+    public static function apiJson($status = 1, $code = 200, $message = '', $data = array(), $printAndExit = false)
     {
         $dataArr = array('status' => $status, 'code' => $code, 'message' => $message, 'data' => $data);
 
@@ -197,6 +197,7 @@ class DyTools
         $result =  version_compare(PHP_VERSION, '5.4.0', '>=') ? json_encode($dataArr, JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
         
         if($printAndExit){
+            http_response_code($code);
             echo $result;
             exit();
         }else{

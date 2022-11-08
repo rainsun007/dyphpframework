@@ -68,7 +68,8 @@ class DyPhpController
      * 运行controller入口
      * 支持直接调用本方法 但不建议直接使用如有重定向需求可使用forward方法.
      *
-     * @param string controller类名,支持module_controller或module/controller的格式调用
+     * @param string controller类名(注意：module,controller命名不可使用下划线"_"),
+     *               支持module_controller或module/controller的格式调用
      * @param string action的方法名
      * @param array  当前运行controller中可公用的参数（异常信息，提示信息等）
      **/
