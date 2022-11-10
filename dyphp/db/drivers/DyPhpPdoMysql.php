@@ -46,7 +46,7 @@ final class DyPhpPdoMysql extends PDO
         try {
             parent::__construct($dsn, $this->user, $this->pass, $arrOptions);
             //设置列名变成一种格式：强制大写(CASE_UPPER)，强制小写(CASE_LOWER)，原始方式(CASE_NATURAL)
-            parent::setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+            parent::setAttribute(PDO::ATTR_CASE, PDO::CASE_NATURAL);
             //错误提示：只显示错误码(ERRMODE_SILENT)，显示警告错误(ERRMODE_WARNING)，抛出异常(ERRMODE_EXCEPTION)
             parent::setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             //设置默认返回数组模式：关联数组(FETCH_ASSOC)，数字索引数组(FETCH_NUM)，默认两者(FETCH_BOTH)，对象形式(FETCH_OBJ)
@@ -69,8 +69,8 @@ final class DyPhpPdoMysql extends PDO
         $dbCount = 0;
         if ($size) {
             foreach ($size as $val) {
-                $data = $val->data_length;
-                $index = $val->index_length;
+                $data = $val->Data_length;
+                $index = $val->Index_length;
                 $dbCount += $data+$index;
             }
         }

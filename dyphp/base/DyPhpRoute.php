@@ -187,7 +187,7 @@ class DyPhpRoute
      *
      *   //重定向到固定controller,动态action
      *   '/admin/global/:action'=>array(
-     *       "controller"=>"admin_base", //支持指定到module下的controller,使用下"_"或"/"指明
+     *       "controller"=>"admin_base",  //支持指定到module下的controller,使用下"_"或"/"指明
      *       "param"=>array(
      *           ":action"=>"[a-zA-Z0-9]{1,10}",
      *       ),
@@ -195,8 +195,8 @@ class DyPhpRoute
      * 
      *   //将动态action重定向到固定controller,固定action
      *   '/admin/global/:action'=>array(
-     *       "controller"=>"admin_base", //支持指定到module下的controller,使用下"_"或"/"指明
-     *       "action"=>"index",  //已设置固定action时,使用固定action,正则匹配生效单不用被使用
+     *       "controller"=>"admin_base",  //支持指定到module下的controller,使用下"_"或"/"指明
+     *       "action"=>"index",           //已设置固定action时,使用固定action,正则匹配生效但不会被使用
      *       "param"=>array(
      *           ":action"=>"[a-zA-Z0-9]{1,10}",
      *       ),

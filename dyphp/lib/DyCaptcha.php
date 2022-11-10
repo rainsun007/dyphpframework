@@ -261,8 +261,8 @@ class DyCaptcha
             $y0 = $y - 0.5 * $len * sin($theta);
             
             for ($i = 0; $i < $n; ++ $i) {
-                $x = $x0 + $i * $dx + $amp * $dy * sin($k * $i * $step + $phi);
-                $y = $y0 + $i * $dy - $amp * $dx * sin($k * $i * $step + $phi);
+                $x = (int)($x0 + $i * $dx + $amp * $dy * sin($k * $i * $step + $phi));
+                $y = (int)($y0 + $i * $dy - $amp * $dx * sin($k * $i * $step + $phi));
                 imagefilledrectangle($this->im, $x, $y, $x + $lwid, $y + $lwid, $this->gdFgColor);
             }
         }
