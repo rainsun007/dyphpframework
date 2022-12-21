@@ -1,6 +1,7 @@
 <?php
 /**
  * mysql驱动类
+ * 注意：为兼容老项目保留此驱动类，已弃用，新项目使用DyPhpPdoMysql
  * @author 大宇 Email:dyphp.com@gmail.com
  * @link http://www.dyphp.com/
  * @copyright Copyright dyphp.com
@@ -13,7 +14,6 @@ final class DyPhpMysql
     private $dbName = '';
     private $port = '3306';
     private $charset = 'UTF8';
-    public $tableName = '';
     public $dbConfigArr = array();
 
     private $conn = "pconn";

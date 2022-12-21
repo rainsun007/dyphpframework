@@ -2,7 +2,7 @@
 
 /**
  * @file DyPhpModel.php
- * 数据库操作
+ * @brief  数据库操作
  *
  * @author QingYu.Sun Email:dyphp.com@gmail.com
  *
@@ -15,78 +15,66 @@
  **/
 class DyPhpModel
 {
-    //默认使用的数据库配制,切换配制需要在使用中自行显示重写该值
+    //要使用的数据库配制
     protected $dbCnf = 'default';
 
-    //是否强制使用master,设置为true之后所有请求将使用master，只有显示设置为false才会切换回主从分离
+    //是否强制使用master 设置为true之后所有请求将使用master，只有显示设置为false才会切换回主从分离
     public $forceMaster = false;
 
-    // 是否开启mysql explain分析
+    // 是否开启sql分析
     public $openExplain = true;
 
-    //model对应的表, 支持在使用中动态修改该值
+    //表名
     protected $tableName = '';
 
-    //是否强制以字符串方式处理所有的值
+    //是否强制以字符串方式对待所有的值
     protected $stringifyValues = true;
 
     //当前时间戳
     protected $time = 0;
 
-    //当前完整日期和时间（Y-m-d H:i:s）
+    //当前完整日期时间（Y-m-d H:i:s）
     protected $datetime = '1970-01-01 08:00:00';
 
     //当前完整日期（Y-m-d）
     protected $date = '1970-01-01';
 
-    //配制中设置的数据库类型, dbDriver不设置时, 默认使用mysql
+    //支持类型
     private $dbType = 'mysql';
-
-    //已支持的数据库类型
     private $supportType = array(
         'mysql',
     );
 
-    //配置中是否设置为使用PDO, dbDriver不设置时, 默认使用PDO
-    private $isPdo = true;
+    //是否使用pdo
+    private $isPdo = false;
 
-    //lbs权重处理类单例
+    //lbs权重处理类实例
     private $weightRound = false;
-
-    //数据库连接实例
-    private $instance = null;
 
     protected function __construct()
     {
-        //时间初始化
         $this->time = time();
         $this->datetime = date('Y-m-d H:i:s', $this->time);
         $this->date = date('Y-m-d', $this->time);
-
-        //数据库存连接初始化
-        $this->instance = $this->getInstance();
-
-        //执行用户自定义业务逻辑
         $this->init();
+
+        print_r($this->getInstance());exit;
     }
 
     /**
-     * 在实例化时自动执行此方法,可以重写此方法实现自己的业务逻辑
-     * 注意: 每次实例化时都会被执行, 如整个周期内只允许执行一次, 需要自己实现业务逻辑
+     * @brief   在实例化时执行,可以重写此方法实现自己的业务逻辑
+     *
+     * @return
      **/
     protected function init()
     {
     }
 
     /**
-     * Load Balancing Strategy
-     * 重写此方法，实现自定义负载均衡
-     * 按自定规则每次返回某个slave配制即可
+     * Load Balancing Strategy重写此方法，实现自定义负载均衡
+     * 在该方法中实现返回config中db配制项中按自定规则每次返回某个slave配制即可
      * 返回值必须是数组类型
-     * 
-     * 例如:
-     * $dbConfig = DyPhpConfig::item('db');
-     * return $dbConfig['default']['slaves'][0];
+     * 例如:db[default][slaves][0]
      * 
      * @return array
      **/
@@ -116,7 +104,7 @@ class DyPhpModel
      */
     public function insert($arrayArgs, $compatible = false)
     {
-        $table = $this->tableName;
+        $table = $this->getInstance()->tableName;
         if (count($arrayArgs) <= 0) {
             return false;
         }
@@ -139,7 +127,7 @@ class DyPhpModel
      **/
     public function insertBatch($column, $values)
     {
-        $table = $this->tableName;
+        $table = $this->getInstance()->tableName;
         if (count($column) == 0 || count($values) == 0) {
             return false;
         }
@@ -175,7 +163,7 @@ class DyPhpModel
         if (count($setArr) <= 0) {
             return false;
         }
-        $sql = 'UPDATE `' . $this->tableName . '` SET ' . $this->sqlImplode($setArr, 'up', $columnOperationArr) . ' WHERE ' . $criteria;
+        $sql = 'UPDATE `' . $this->getInstance()->tableName . '` SET ' . $this->sqlImplode($setArr, 'up', $columnOperationArr) . ' WHERE ' . $criteria;
 
         return $this->dbExec($sql);
     }
@@ -226,7 +214,7 @@ class DyPhpModel
     public function delete($criteria = '')
     {
         $criteria = $criteria != '' ? $criteria : '1 = 1';
-        $sql = 'DELETE FROM `' . $this->tableName . '` WHERE ' . $criteria;
+        $sql = 'DELETE FROM `' . $this->getInstance()->tableName . '` WHERE ' . $criteria;
 
         return $this->dbExec($sql);
     }
@@ -369,7 +357,7 @@ class DyPhpModel
      */
     public function getInsertId()
     {
-        return $this->instance->lastInsertId();
+        return $this->getInstance()->lastInsertId();
     }
 
     /**
@@ -437,7 +425,7 @@ class DyPhpModel
      */
     public function beginTransaction()
     {
-        $this->instance->beginTransaction();
+        $this->getInstance()->beginTransaction();
 
         return $this;
     }
@@ -449,7 +437,7 @@ class DyPhpModel
      */
     public function commitTransaction()
     {
-        $this->instance->commit();
+        $this->getInstance()->commit();
     }
 
     /**
@@ -459,7 +447,7 @@ class DyPhpModel
      */
     public function rollBackTransaction()
     {
-        $this->instance->rollBack();
+        $this->getInstance()->rollBack();
     }
 
     /**
@@ -472,33 +460,25 @@ class DyPhpModel
     private function getInstance($dbms = 'master')
     {
         $dbConfigArr = $this->getDbConfigArr($dbms);
-
-        //已实例化的数据库连接直接返回
-        if($this->instance){
-            $instanceInfo = $this->instance->dbConfigArr['dbName'].$this->instance->dbConfigArr['host'].$this->instance->dbConfigArr['port'];
-            $dbmsInfo = $dbConfigArr['dbName'].$dbConfigArr['host'].$dbConfigArr['port'];
-            if($instanceInfo == $dbmsInfo){
-                return $this->instance;
-            }
-        }
-
-        //数据库类型及PDO使用处理
-        if (isset($dbConfigArr['dbDriver']) && !empty($dbConfigArr['dbDriver'])) {
-            $this->isPdo = strpos(trim($dbConfigArr['dbDriver']), 'pdo_') === 0 ? true : false;
+        if (isset($dbConfigArr['dbDriver'])) {
+            $this->isPdo = strpos($dbConfigArr['dbDriver'], 'pdo_') === 0 ? true : false;
             $this->dbType = $this->isPdo ? substr($dbConfigArr['dbDriver'], 4) : $dbConfigArr['dbDriver'];
             if (!in_array($this->dbType, $this->supportType)) {
                 DyPhpBase::throwException('support databases', $this->dbType, 0);
             }
         }
 
-        //自动拼接表前缀
-        $tablePrefix = isset($dbConfigArr['tablePrefix']) ? $dbConfigArr['tablePrefix'] : '';
-        if (empty($this->tableName)) {
-            $this->tableName = !function_exists('get_called_class') ? $tablePrefix . get_class($this) : $tablePrefix . get_called_class();
-        } else {
-            $this->tableName = $tablePrefix . $this->tableName;
+        if (!isset($dbConfigArr['tablePrefix'])) {
+            $dbConfigArr['tablePrefix'] = '';
         }
 
+        if (empty($this->tableName)) {
+            $this->tableName = !function_exists('get_called_class') ? $dbConfigArr['tablePrefix'] . get_class($this) : $dbConfigArr['tablePrefix'] . get_called_class();
+        } else {
+            $this->tableName = $dbConfigArr['tablePrefix'] . $this->tableName;
+        }
+
+        // return DyPhpModelManage::instance($dbConfigArr, $this->tableName, $this->dbType, $this->isPdo, $dbms);
         return DyPhpModelManage::instance($dbConfigArr, $this);
     }
 
@@ -516,7 +496,7 @@ class DyPhpModel
             DyPhpBase::throwException('database config undefined', $this->dbCnf, 0);
         }
 
-        //不使用主从只使用一个数据库时直接返回
+        //不使用主从只使用一个数据库
         if (!isset($dbConfig[$this->dbCnf]['master']) && !isset($dbConfig[$this->dbCnf]['slaves'])) {
             return $dbConfig[$this->dbCnf];
         }
@@ -638,7 +618,7 @@ class DyPhpModel
         }
 
         try {
-            $result = $this->instance->exec($sql);
+            $result = $this->getInstance()->exec($sql);
         } catch (Exception $e) {
             DyPhpBase::throwException('sql criteria error', $sql . '--' . $e->getMessage(), $e->getCode(), $e);
         }
@@ -694,7 +674,7 @@ class DyPhpModel
             DyPhpBase::throwException('sql criteria error', 'querySql error', 0);
         }
 
-        $table = $this->tableName;
+        $table = $this->getInstance('slave')->tableName;
         if (is_string($criteria)) {
             $criteria = trim($criteria);
             $select = $isCount ? 'count(1) as `dycount`' : $select;
@@ -779,7 +759,7 @@ class DyPhpModel
 }
 
 /**
- * model操作管理器
+ * @brief  model操作管理器
  *
  * @author QingYu.Sun Email:dyphp.com@gmail.com
  *
@@ -797,20 +777,45 @@ final class DyPhpModelManage
     /**
      * 单列化数据库.
      *
-     * @param array   $dbConfigArr   数据库配制
-     * @param object  $DyPhpModel    DyPhpModel类实例
+     * @param array   $dbConfigArr      数据库配制
+     * @param string  $prefixTableName  表名
+     * @param string  $dbType           数据库类型
+     * @param bool    $isPdo            是否使用pdo
+     * @param string  $dbms             主/从数据库
      *
      * @return object 数据库链接实例
      */
+    // public static function instance($dbConfigArr, $prefixTableName, $dbType, $isPdo, $dbms)
+    // {
+    //     $insKey = $dbms . '_' . $dbConfigArr['host'] . '_' . $dbConfigArr['dbName'];
+    //     $mins = self::getInstance($insKey);
+    //     if ($mins) {
+    //         $mins->tableName = $prefixTableName;
+    //         return $mins;
+    //     }
+
+    //     self::checkPdo($isPdo, $dbType);
+    //     $className = $isPdo ? 'DyPhpPdo' . ucfirst($dbType) : 'DyPhp' . ucfirst($dbType);
+    //     $driver = new $className();
+    //     $driver->tableName = $prefixTableName;
+    //     $driver->dbConfigArr = $dbConfigArr;
+    //     $driver->run();
+
+    //     self::setInstance($insKey, $driver);
+    //     return $driver;
+    // }
+
+
     public static function instance($dbConfigArr, $DyPhpModel)
     {
-        $stringifyValues = $DyPhpModel->getItem('stringifyValues');
+        $prefixTableName = $DyPhpModel->getItem('tableName');
         $dbType = $DyPhpModel->getItem('dbType');
         $isPdo = $DyPhpModel->getItem('isPdo');
 
         $insKey = md5($dbConfigArr['dbName'] . '_' . $dbConfigArr['host'] . '_' . $dbConfigArr['port']);
         $mins = self::getInstance($insKey);
         if ($mins) {
+            $mins->tableName = $prefixTableName;
             return $mins;
         }
 
@@ -818,13 +823,8 @@ final class DyPhpModelManage
 
         $className = $isPdo ? 'DyPhpPdo' . ucfirst($dbType) : 'DyPhp' . ucfirst($dbType);
         $driver = new $className();
-
+        $driver->tableName = $prefixTableName;
         $driver->dbConfigArr = $dbConfigArr;
-
-        if($isPdo){
-            $driver->stringifyValues = $stringifyValues;
-        }
-
         $driver->run();
 
         self::setInstance($insKey, $driver);

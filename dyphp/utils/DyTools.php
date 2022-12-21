@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 公用方法工具类.
  *
@@ -56,9 +57,9 @@ class DyTools
             if ($time < $just) {
                 return '刚刚';
             } elseif ($time < $minute) {
-                return  ceil($time / 60).'分钟前';
+                return  ceil($time / 60) . '分钟前';
             } elseif ($time < $hour) {
-                return  ceil($time / 3600).'小时前';
+                return  ceil($time / 3600) . '小时前';
             } else {
                 return self::formatTime($time);
             }
@@ -128,26 +129,26 @@ class DyTools
     public static function logs($message, $type = 'info', $logRootDir = '', $typeAlone = false, $logCut = true)
     {
         $formatTime = date('Y-m-d H:i:s', time());
-        $source = DyPhpBase::$appType == 'web' ? DyRequest::getClientIp().' '.DyRequest::getMethod().' '.$_SERVER['REQUEST_URI'] : php_uname('n');
-        $data = $formatTime.' ['.$type.'] '.$source.' '.$message.PHP_EOL;
+        $source = DyPhpBase::$appType == 'web' ? DyRequest::getClientIp() . ' ' . DyRequest::getMethod() . ' ' . $_SERVER['REQUEST_URI'] : php_uname('n');
+        $data = $formatTime . ' [' . $type . '] ' . $source . ' ' . $message . PHP_EOL;
 
-        $logRootDir = empty($logRootDir) ? rtrim(DyPhpConfig::item('appPath'), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'app_log' : $logRootDir;
-        $logDir = rtrim($logRootDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.date('Y-m', time()).DIRECTORY_SEPARATOR;
+        $logRootDir = empty($logRootDir) ? rtrim(DyPhpConfig::item('appPath'), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'app_log' : $logRootDir;
+        $logDir = rtrim($logRootDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . date('Y-m', time()) . DIRECTORY_SEPARATOR;
         if (!is_dir($logDir)) {
             self::dirWrite($logDir, 0777);
         }
 
         //处理文件切分与是否按类型生成单独文件
-        $filePrefix = $typeAlone ? $type.'_' : '';
+        $filePrefix = $typeAlone ? $type . '_' : '';
         $fileCut = $logCut ? date('Y-m-d', time()) : '';
-        $fileName = $filePrefix.$fileCut;
+        $fileName = $filePrefix . $fileCut;
         if ($fileName == '') {
             $fileName = 'app';
-        } elseif ($fileName == $type.'_') {
+        } elseif ($fileName == $type . '_') {
             $fileName = $type;
         }
 
-        $file = $logDir.$fileName.'.log';
+        $file = $logDir . $fileName . '.log';
         $fp = fopen($file, 'a');
         if ($fp) {
             fwrite($fp, $data);
@@ -181,28 +182,32 @@ class DyTools
     /**
      * 简单json返回值格式化
      *
-     * @param   int     $status         状态, 服务状态
-     * @param   int     $code           服务代码, 同时为http状态码,$printAndExit为true时生效
-     * @param   string  $message        服务说明信息
-     * @param   mixed   $data           主体数据, 默认为空数组
-     * @param   bool    $printAndExit   是否直接输出并执行exit(), 默认为不执行
+     * @param   int     $status             状态, 服务状态
+     * @param   int     $code               服务代码,
+     * @param   string  $message            服务说明信息
+     * @param   mixed   $data               主体数据, 默认为空数组
+     * @param   bool    $printAndExit       是否直接输出并执行exit(), 默认为不执行
+     * @param   bool    $httpResponseCode   是否设置$code同时为http状态码,$printAndExit为true时生效
      *
      * @return  string
      **/
-    public static function apiJson($status = 1, $code = 200, $message = '', $data = array(), $printAndExit = false)
+    public static function apiJson($status = 1, $code = 200, $message = '', $data = array(), $printAndExit = false, $httpResponseCode = false)
     {
         $dataArr = array('status' => $status, 'code' => $code, 'message' => $message, 'data' => $data);
 
         //以字面编码多字节 Unicode 字符(中文不被转码),自 PHP 5.4.0 起生效
         $result =  version_compare(PHP_VERSION, '5.4.0', '>=') ? json_encode($dataArr, JSON_UNESCAPED_UNICODE) : json_encode($dataArr);
-        
-        if($printAndExit){
-            http_response_code($code);
-            echo $result;
-            exit();
-        }else{
+
+        if (!$printAndExit) {
             return $result;
         }
+
+        if ($httpResponseCode) {
+            http_response_code($code);
+        }
+
+        echo $result;
+        exit();
     }
 
     /**
